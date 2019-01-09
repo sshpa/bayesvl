@@ -20,18 +20,42 @@ Here is the [CHANGELOG](https://github.com/sshpa/baysvl/blob/master/CHANGELOG.md
 To get started abd install the latest snapshot type in R console:
 
 ```sh
-install.packages("https://github.com/sshpa/baysvl/archive/master.zip")
+> install.packages("https://github.com/sshpa/baysvl/archive/master.zip")
 ```
 
 ## Create bayesian network structures
 
-Create network node for each variable in data
+Create network node for each variable in the survey
 
 ```r
-dag <- bayesvl.network_init()
-dag <- bayesvl.network_addNode(dag, "B")
-dag <- bayesvl.network_addNode(dag, "C")
-dag <- bayesvl.network_addNode(dag, "T")
-dag <- bayesvl.network_addNode(dag, "DC")
-dag <- bayesvl.network_addNode(dag, "MD")
+dag <- network_init()
+dag <- network_addNode(dag, "B")
+dag <- network_addNode(dag, "C")
+dag <- network_addNode(dag, "T")
+dag <- network_addNode(dag, "DC")
+dag <- network_addNode(dag, "MD")
+```
+
+Start adding arc between variables in the survey
+
+```r
+dag <- network_addArc(dag, "B", "DC")
+dag <- network_addArc(dag, "C", "DC")
+dag <- network_addArc(dag, "T", "DC")
+```
+
+## Generating STAN code
+
+Generating STAN code for structures of Bayesian networks for sampling and parameter learning
+
+```r
+stan_code <- stan_buildCode(dag, data)
+stan_code
+```
+
+Get model's parameters
+
+```r
+params <- stan_params(dag, data)
+params
 ```
