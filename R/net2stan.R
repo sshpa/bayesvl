@@ -3,7 +3,7 @@
 # various utility functions for generate stan code from network graph
 #
 
-buildStan <- function(net, data)
+stan_buildCode <- function(net, data)
 {
 	data_string <- "data{\n"
 	data_string <- paste(data_string, "    int<lower=1> N;\n")	
@@ -112,7 +112,7 @@ buildStan <- function(net, data)
 	stan_string <- paste(data_string, param_string, model_string)
 }
 
-buildParams <- function(net, data)
+stan_params <- function(net, data)
 {
 	params <- c()
 	
