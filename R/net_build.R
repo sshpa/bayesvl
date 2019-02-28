@@ -45,7 +45,7 @@ network_addNode <- function(dag, name, dist = "norm", prior = NULL) {
 	return(dag)
 } 
 
-network_addArc <- function(dag, from, to) {
+network_addArc <- function(dag, from, to, type = "linear") {
 	if (!network_nodeExists(dag, from))
 		message(paste0("Error checking node.\n Invalid node '", from, "'."))
 	
@@ -58,6 +58,9 @@ network_addArc <- function(dag, from, to) {
 	dag$nodes[[from]]$children = c(dag$nodes[[from]]$children, to)
 	dag$nodes[[to]]$parents = c(dag$nodes[[to]]$parents, from)
 	
+	arc = list(name=paste0(from,"_",to), type = type, from = from, to = to)
+	dag$arcs[[arc$name]] = arc
+
 	return(dag)
 } 
 
