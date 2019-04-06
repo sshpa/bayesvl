@@ -1,4 +1,4 @@
-bayesvl
+BayesVL
 ==========
 
 The R package for visually learning the graphical structures of Bayesian networks.
@@ -44,7 +44,7 @@ dag <- network_addArc(dag, "C", "DC")
 dag <- network_addArc(dag, "T", "DC")
 ```
 
-## Generating STAN code
+## Generate STAN code
 
 Generating the STAN code required for building structures of Bayesian networks for sampling and parameter learning
 
