@@ -1,7 +1,7 @@
 bayesvl
 ==========
 
-A R package for visually learning the graphical structure of Bayesian networks.
+The R package for visually learning the graphical structures of Bayesian networks.
 
 Features:
 
