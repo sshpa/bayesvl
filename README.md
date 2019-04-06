@@ -36,7 +36,7 @@ dag <- network_addNode(dag, "DC")
 dag <- network_addNode(dag, "MD")
 ```
 
-Start adding arc between variables in the survey
+Start adding arcs between variables in the survey
 
 ```r
 dag <- network_addArc(dag, "B", "DC")
@@ -46,7 +46,7 @@ dag <- network_addArc(dag, "T", "DC")
 
 ## Generating STAN code
 
-Generating STAN code for structures of Bayesian networks for sampling and parameter learning
+Generating the STAN code required for building structures of Bayesian networks for sampling and parameter learning
 
 ```r
 stan_code <- stan_buildCode(dag, data)
