@@ -1,7 +1,7 @@
 bayesvl ChangeLog
 -------------------------
 
-0.8.0
+0.6.0
  * generate Stan code from network graph
  * update readme.md
 
