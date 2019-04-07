@@ -28,20 +28,20 @@ To get started abd install the latest snapshot type in R console:
 Create network node for each variable in the survey
 
 ```r
-dag <- network_init()
-dag <- network_addNode(dag, "B")
-dag <- network_addNode(dag, "C")
-dag <- network_addNode(dag, "T")
-dag <- network_addNode(dag, "DC")
-dag <- network_addNode(dag, "MD")
+dag <- bayesvl()
+dag <- bvl_addNode(dag, "B")
+dag <- bvl_addNode(dag, "C")
+dag <- bvl_addNode(dag, "T")
+dag <- bvl_addNode(dag, "DC")
+dag <- bvl_addNode(dag, "MD")
 ```
 
 Start adding arcs between variables in the survey
 
 ```r
-dag <- network_addArc(dag, "B", "DC")
-dag <- network_addArc(dag, "C", "DC")
-dag <- network_addArc(dag, "T", "DC")
+dag <- bvl_addArc(dag, "B", "DC")
+dag <- bvl_addArc(dag, "C", "DC")
+dag <- bvl_addArc(dag, "T", "DC")
 ```
 
 ## Generate STAN code
@@ -49,13 +49,13 @@ dag <- network_addArc(dag, "T", "DC")
 Generating the STAN code required for building structures of Bayesian networks for sampling and parameter learning
 
 ```r
-stan_code <- stan_buildCode(dag, data)
+stan_code <- bvl_stanCode(dag, data)
 stan_code
 ```
 
 Get model's parameters
 
 ```r
-params <- stan_params(dag, data)
+params <- bvl_stanParams(dag, data)
 params
 ```
