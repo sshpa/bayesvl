@@ -1,9 +1,9 @@
 Package: bayesvl
 Type: Package
-Title: R package for visual learning the graphical structure of Bayesian networks.
+Title: The R package for visually learning the graphical structures of Bayesian networks.
 Version: 0.8.1
 Date: 2018-12-15
-Author: La-Viet Phuong, Vuong-Quan Hoang
+Authors: Viet-Phuong La, Quan-Hoang Vuong
 Maintainer: La-Viet Phuong <phuong.laviet@phenikaa-uni.edu.vn>
 Imports: coda, bnlearn
 Depends: rstan (>= 2.10.0), parallel, methods, stats, graphics
