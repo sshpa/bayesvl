@@ -59,3 +59,12 @@ Get model's parameters
 params <- bvl_stanParams(dag, data)
 params
 ```
+## Sample and fit the STAN model
+
+Sampling the STAN model
+
+```r
+stan_fit <- bvl_stanRun(dag, data, iter=20000 , warmup=2000 , chains=4 , cores=4)
+stan_fit
+```
+
