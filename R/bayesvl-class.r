@@ -175,7 +175,7 @@ setMethod("bvl_vl2bn", "bayesvl", function(dag) {
 	}
 
 	return(bnDag)
-} 
+})
 
 if (!isGeneric("bvl_bn2vl"))
       setGeneric("bvl_bn2vl", function(dag, ...) standardGeneric("bvl_bn2vl"))
