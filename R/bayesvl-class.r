@@ -110,9 +110,9 @@ setMethod("bvl_addNode", "bayesvl", function(dag, name, dist = "norm", prior = N
 
 
 if (!isGeneric("bvl_addArc"))
-      setGeneric("bvl_addArc", function(dag, from, to, type = "linear", ...) standardGeneric("bvl_addArc"))
+      setGeneric("bvl_addArc", function(dag, from, to, type = "slope", ...) standardGeneric("bvl_addArc"))
 
-setMethod("bvl_addArc", "bayesvl", function(dag, from, to, type = "linear") {
+setMethod("bvl_addArc", "bayesvl", function(dag, from, to, type = "slope") {
 	if (!bvl_nodeExists(dag, from))
 		message(paste0("Error checking node.\n Invalid node '", from, "'."))
 	

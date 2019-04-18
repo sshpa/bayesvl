@@ -1,70 +1,53 @@
 bvl2stan.templates <- list(
     Bern = list(
         name = "bern",
-        stan_likelihood = "bernoulli",
-        par_prefixes = c("theta"),
-        par_bounds = c("<lower=0,upper=1>"),
-        par_types = c("real"),
+        dist = "binomial",
+        stan_prior = "beta(1, 1)",
+        stan_likelihood = "bernoulli(theta_{0})",
+        par_names = c("theta_{0}"),
+        par_types = c("real<lower=0,upper=1>"),
+        par_reg = "theta_{0}",
         out_type = "int<lower=0,upper=1>",
-        par_map = function(k,e,...) {
-            # get constraints and add <lower=0> for sigma vector
-            constr_list <- get( "constraints" , envir=e )
-            sigma_name <- as.character( k[[2]] )
-            if ( is.null(constr_list[[sigma_name]]) ) {
-                constr_list[[sigma_name]] <- "lower=0"
-                assign( "constraints" , constr_list , envir=e )
-            }
-            return(k);
-        },
         vectorized = TRUE
     ),
 		Binomial = list(
         name = "binorm",
-        par_prefixes = c("mu","sigma"),
-        par_bounds = c("","<lower=0>"),
-        par_types = c("real","real"),
+        dist = "binomial",
+        stan_likelihood = "bernoulli(theta_{0})",
+        par_names = c("mu_{0}","sigma_{0}"),
+        par_types = c("real","real<lower=0>"),
         out_type = "int<lower=0,upper=1>",
-        par_map = function(k,e,...) {
-            # get constraints and add <lower=0> for sigma vector
-            constr_list <- get( "constraints" , envir=e )
-            sigma_name <- as.character( k[[2]] )
-            if ( is.null(constr_list[[sigma_name]]) ) {
-                constr_list[[sigma_name]] <- "lower=0"
-                assign( "constraints" , constr_list , envir=e )
-            }
-            return(k);
-        },
         vectorized = TRUE
     ),
     Normal = list(
         name = "norm",
-        par_prefixes = c("mu","sigma"),
-        par_bounds = c("","<lower=0>"),
-        par_types = c("real","real"),
-        out_type = "int<lower=0,upper=1>",
-        par_map = function(k,e,...) {
-            # get constraints and add <lower=0> for sigma vector
-            constr_list <- get( "constraints" , envir=e )
-            sigma_name <- as.character( k[[2]] )
-            if ( is.null(constr_list[[sigma_name]]) ) {
-                constr_list[[sigma_name]] <- "lower=0"
-                assign( "constraints" , constr_list , envir=e )
-            }
-            return(k);
-        },
+        dist = "normal",
+        stan_likelihood = "normal(mu_{0}, sigma_{0})",
+        par_names = c("mu_{0}","sigma_{0}"),
+        par_types = c("real","real<lower=0>"),
+        out_type = "real",
         vectorized = TRUE
     )
 )
 
 
 bvl_loadTemplate <- function( fname ) {
-    tmpname <- bvl_templateExists(fname)
-    if ( is.na(tmpname) ) stop(concat("Distribution ",fname," not recognized."))
-    return(templates[[ tmpname ]])
+	if (is.null(fname))
+	{
+		fname <- "norm"
+	}
+		
+  tmpname <- bvl_templateExists(fname)
+  
+  templates <- bvl2stan.templates
+  if ( is.na(tmpname) ) stop(concat("Distribution ",fname," not recognized."))
+  return(templates[[ tmpname ]])
 }
 
 bvl_templateExists <- function( fname ) {
     the_match <- NA
+    
+    templates <- bvl2stan.templates
     for ( i in 1:length(templates) ) {
         R_name <- templates[[i]][['name']]
         if ( fname %in% c(R_name) ) {
