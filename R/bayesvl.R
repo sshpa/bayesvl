@@ -9,7 +9,65 @@ bayesvl <- function(data = NULL, nodes = list(), arcs = list()) {
 					)
   if (!missing(data)) attr(bvl,"nobs") = length(data[1])
   bvl
+}
+
+bvl_getLeaves <- function(dag) {
+	if (is.null(dag))
+		return (NULL)
+		
+	if (is.null(dag@nodes))
+		return (NULL)
+	
+	nodes <- c()
+	for(n in 1:length(dag@nodes))
+	{
+		if (length(dag@nodes[[n]]$children) == 0)
+		{
+			nodes <- c(nodes, dag@nodes[[n]])
+		}
+	}
+	
+	return(nodes)
 } 
+
+bvl_isLeaf <- function(dag, node) {
+	if (is.null(dag))
+		return (FALSE)
+		
+	if (is.null(dag@nodes))
+		return (FALSE)
+	
+	if (length(node$children) == 0)
+		return (TRUE)
+	
+	return(FALSE)
+} 
+
+bvl_isRoot <- function(dag, node) {
+	if (is.null(dag))
+		return (FALSE)
+		
+	if (is.null(dag@nodes))
+		return (FALSE)
+	
+	if (length(node$parents) == 0)
+		return (TRUE)
+	
+	return(FALSE)
+} 
+
+bvl_isBranch <- function(dag, node) {
+	if (is.null(dag))
+		return (FALSE)
+		
+	if (is.null(dag@nodes))
+		return (FALSE)
+	
+	if (length(node$parents) > 0 && length(node$children) > 0)
+		return (TRUE)
+	
+	return(FALSE)
+}
 
 #network_nodeExists <- function(dag, name) {
 #	if (is.null(dag))
