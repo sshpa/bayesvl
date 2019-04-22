@@ -16,6 +16,7 @@ bvl2stan.templates <- list(
         stan_likelihood = "bernoulli(theta_{0})",
         par_names = c("mu_{0}","sigma_{0}"),
         par_types = c("real","real<lower=0>"),
+        par_reg = "mu_{0}",
         out_type = "int<lower=0,upper=1>",
         vectorized = TRUE
     ),
@@ -25,6 +26,7 @@ bvl2stan.templates <- list(
         stan_likelihood = "normal(mu_{0}, sigma_{0})",
         par_names = c("mu_{0}","sigma_{0}"),
         par_types = c("real","real<lower=0>"),
+        par_reg = "mu_{0}",
         out_type = "real",
         vectorized = TRUE
     )

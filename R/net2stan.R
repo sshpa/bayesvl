@@ -70,8 +70,10 @@ stan_regression <- function(dag, node)
 	
 	#message(paste("Parameter transform for...", nodeName))
 
-	if (bvl_isLeaf(dag, node) && length(node$parents) > 0)
+	# is leaf??
+	if (bvl_isLeaf(node) && length(node$parents) > 0)
 	{
+		
 		loopForI = ""
 		if (!template$vectorized)
 		{
@@ -81,13 +83,27 @@ stan_regression <- function(dag, node)
 
 		reg_string = paste0(reg_string, "    ", stan_replaceParam(template$par_reg, nodeName), loopForI, " = ")
 
-		# loop for each arc
-		for(p in 1:length(node$parents))
+		arcs <- bvl_getArcs(dag, to = nodeName)
+		
+		hasVarint <- bvl_getArcs(dag, to = nodeName, type = "varint")
+		hasSlope <- bvl_getArcs(dag, to = nodeName, type = "slope")
+		
+		if (length(hasVarint) == 0 && length(hasSlope) > 0)
 		{
-			parentName = node$parents[p]
-			arcName = paste0(parentName,"_",nodeName)
+			reg_string = paste0(reg_string, "a_", nodeName, " + ")
+		}
+		
+		# loop for each arc
+		for(p in 1:length(arcs))
+		{
+			arc = arcs[[p]]
+			#print(arc)
+
+			parentName = arc$from
+			arcName = arc$name
+			
+			print(parentName)
 			parent = dag@nodes[[parentName]]
-			arc = dag@arcs[[arcName]]
 
 			if (p > 1)
 			{
@@ -96,11 +112,11 @@ stan_regression <- function(dag, node)
 			
 			if (arc$type == "varint")
 			{
-				reg_string = paste0(reg_string, "alpha_", parentName, "[", parentName, loopForI, "]")
+				reg_string = paste0(reg_string, "a_", arc$name, "[", parentName, loopForI, "]")
 			}
 			else if (arc$type == "slope")
 			{
-				reg_string = paste0(reg_string, "beta_", parentName, " * ", parentName, loopForI)
+				reg_string = paste0(reg_string, "b_", arc$name, " * ", parentName, loopForI)
 			}
 			
 		}
@@ -220,30 +236,12 @@ bvl_model2Stan <- function(net)
 
 	# Likelihoods
 	model_string <- paste0(model_string, "    // Likelihoods\n");
-	for(n in 1:length(net@nodes))
+	
+	leaves <- bvl_getLeaves(net)
+	for(n in 1:length(leaves))
 	{
-		nodeName <- names(net@nodes)[n]
-		
-		if (length(net@nodes[[n]]$parents) > 0)
-		{
-			for(p in 1:length(net@nodes[[n]]$parents))
-			{	
-				parentName <- net@nodes[[n]]$parents[p]
-				
-				model_string <- paste0(model_string, "\n")
-				model_string <- paste(model_string, "    for ( i in 1:N ) {\n", sep="")
-				model_string <- paste(model_string, "       mu_", nodeName, "[i] = a_", nodeName, " + b_", nodeName, "_", parentName, " * ",parentName,"[i];\n", sep="")
-				model_string <- paste(model_string, "    }\n", sep="")
-				model_string <- paste0(model_string, "    ", nodeName, " ~ ", stan_likelihood(net@nodes[[n]]), ";\n")
-			}
-		}
-		else
-		{
-				model_string <- paste0(model_string, "    ", nodeName, " ~ ", stan_likelihood(net@nodes[[n]]), ";\n")
-		}
-	}
-	model_string <- paste0(model_string, "\n")
-			
+		model_string <- paste0(model_string, "    ", leaves[[n]]$name, " ~ ", stan_likelihood(leaves[[n]]),"\n")
+	}			
 	model_string <- paste0(model_string, "}\n")
 	
 	# Build the model
@@ -251,7 +249,9 @@ bvl_model2Stan <- function(net)
 
 	message(stan_string)
 	
-	return(stan_string)
+	net@stancode = stan_string;
+	
+	return(net)
 }
 
 stan_params <- function(net, data)
