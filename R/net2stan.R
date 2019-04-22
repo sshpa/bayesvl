@@ -10,6 +10,11 @@ stan_replaceParam <- function(in_string, nodeName)
 	return(out_string)
 }
 
+stan_indent <- function(n)
+{
+	return(strrep(" ",n))
+}
+
 stan_data <- function(node)
 {
   dist_string = ""
@@ -49,9 +54,9 @@ stan_likparams <- function(node)
 	  loopNobs <- ""
 	  if (pars[p] == template$par_reg)
 	  {
-	  	loopNobs = "[Nobs]"
+	  	loopNobs = paste0("[Nobs","]")
 	  }
-  	param_mu = list(name=paste0(stan_replaceParam(pars[p], nodeName), loopNobs), type=types[p])
+  	param_mu = list(name=stan_replaceParam(pars[p], nodeName), type=types[p], length=loopNobs)
   	param_string[[param_mu$name]] = param_mu
 	}
 
@@ -106,7 +111,7 @@ stan_regparams <- function(dag, node)
 	return(param_string)
 }
 
-stan_regression <- function(dag, node)
+stan_regression <- function(dag, node, vectorized = F)
 {
 	reg_string = ""
 	nodeName <- node$name
@@ -119,13 +124,13 @@ stan_regression <- function(dag, node)
 	{
 
 		loopForI = ""
-		if (!template$vectorized)
+		if (!vectorized)
 		{
 			loopForI = "[i]"
-			reg_string = paste0(reg_string, "for (i in 1:Nobs) {\n")
+			reg_string = paste0(reg_string, stan_indent(5), "for (i in 1:Nobs) {\n")
 		}
 
-		reg_string = paste0(reg_string, "    ", stan_replaceParam(template$par_reg, nodeName), loopForI, " = ")
+		reg_string = paste0(reg_string, stan_indent(8), stan_replaceParam(template$par_reg, nodeName), loopForI, " = ")
 
 		arcs <- bvl_getArcs(dag, to = nodeName)
 
@@ -167,9 +172,9 @@ stan_regression <- function(dag, node)
 
 		reg_string = paste0(reg_string, ";\n")
 
-		if (!template$vectorized)
+		if (!vectorized)
 		{
-			reg_string = paste0(reg_string, "}\n")
+			reg_string = paste0(reg_string, stan_indent(5), "}\n")
 		}
 	}
 
@@ -209,94 +214,133 @@ stan_prior <- function(node)
 bvl_model2Stan <- function(net)
 {
 	leaves <- bvl_getLeaves(net)
+	nextNodes <- leaves
+	
+	level = 1
 
-  message("Generating data...")
 	data_string <- "data{\n"
-	data_string <- paste0(data_string, "    // Define variables in data\n");
-	data_string <- paste(data_string, "   int<lower=1> Nobs;  // Number of observations (an integer)\n")
-	for(n in 1:length(net@nodes))
+	data_string <- paste0(data_string, stan_indent(5), "// Define variables in data\n");
+
+	param_string <- "parameters{\n"
+	param_string <- paste0(param_string, stan_indent(5), "// Define parameters to estimate\n");
+
+	transformedparam_string <- "transformed parameters{\n"
+	
+	model_string <- "model{\n"
+
+	prior_string <- paste0(stan_indent(5), "// Priors\n");
+
+	likelihood_string <- paste0(stan_indent(5), "// Likelihoods\n");
+
+	while (!is.null(nextNodes) && length(nextNodes) > 0)
 	{
-		data_string <- paste0(data_string, "    ", stan_data(net@nodes[[n]]), ";\n")
+		print(paste0("Generating level ", level,"..."))
+		
+		for(n in 1:length(nextNodes))
+		{
+			nodeName <- nextNodes[[n]]$name
+			template <- bvl_loadTemplate( nextNodes[[n]]$dist )
+			
+			print("Generating data ...")
+			# Generating data ...
+			if (level == 1)
+			{
+				data_string <- paste0(data_string, stan_indent(5), "int<lower=1> Nobs",";  // Number of observations (an integer)\n")
+			}			
+			data_string <- paste0(data_string, stan_indent(5), stan_data(nextNodes[[n]]), ";\n")
+
+			print("Generating parameters ...")
+			# Generating parameters ...
+			if (level == 1)
+			{
+				distParams = stan_likparams(leaves[[n]])
+		
+				for(p in 1:length(distParams))
+				{
+					if (distParams[[p]]$name != stan_replaceParam(template$par_reg, nodeName))
+						param_string <- paste0(param_string, stan_indent(5), distParams[[p]]$type, " ", distParams[[p]]$name, ";\n")
+				}
+			}			
+
+			if (length(nextNodes[[n]]$parents) > 0)
+			{
+				linearParams = stan_regparams(net, nextNodes[[n]])
+	
+				for(p in 1:length(linearParams))
+				{
+					param_string <- paste0(param_string, stan_indent(5), linearParams[[p]]$type, " ", linearParams[[p]]$name, ";\n")
+				}
+				param_string <- paste0(param_string, "\n")
+			}
+			
+			print("Generating transformed parameters ...")
+			# Generating transformed parameters ...
+			if (level == 1)
+			{
+				distParams = stan_likparams(leaves[[n]])
+		
+				for(p in 1:length(distParams))
+				{
+					if (distParams[[p]]$name == stan_replaceParam(template$par_reg, nodeName))
+						transformedparam_string <- paste0(transformedparam_string, stan_indent(5), distParams[[p]]$type, " ", distParams[[p]]$name, distParams[[p]]$length, ";\n")
+				}
+			}			
+			transformedparam_string <- paste0(transformedparam_string, stan_regression(net, nextNodes[[n]]))
+			
+			print("Generating priors ...")
+			# Generating priors ...
+			if (length(nextNodes[[n]]$parents) > 0)
+			{
+				linearParams = stan_regparams(net, nextNodes[[n]])
+					
+				for(p in 1:length(linearParams))
+				{
+					prior_string <- paste0(prior_string, stan_indent(5), linearParams[[p]]$name, " ~ normal(0,100);\n")
+				}
+			}
+
+			print("Generating Likelihoods ...")
+			# Generating Likelihoods ...
+			if (level == 1)
+			{
+				likelihood_string <- paste0(likelihood_string, stan_indent(5), nextNodes[[n]]$name, " ~ ", stan_likelihood(nextNodes[[n]]),";\n")
+			}
+		}
+
+		#param_string <- paste0(param_string, "\n")
+		#prior_string <- paste0(prior_string, "\n")
+		
+		nextNodes <- bvl_getNext(net, nextNodes)
+		level = level + 1
 	}
+	
+  message("Generating data...")
 	data_string <- paste0(data_string, "}\n")
 
 	message("Generating parameters...")
-	param_string <- "parameters{\n"
-	param_string <- paste0(param_string, "    // Define parameters to estimate\n");
-	
-	for(n in 1:length(leaves))
-	{
-		nodeName <- leaves[[n]]
-
-		distParams = stan_likparams(leaves[[n]])
-
-		for(p in 1:length(distParams))
-		{
-			param_string <- paste0(param_string, "    ", distParams[[p]]$type, " ", distParams[[p]]$name, ";\n")
-		}
-	}
-	param_string <- paste0(param_string, "\n")
-
-	param_string <- paste0(param_string, "    // Define regression parameters\n");
-	for(n in 1:length(net@nodes))
-	{
-		#nodeName <- names(net@nodes)[n]
-		nodeName <- net@nodes[[n]]$name
-
-		if (length(net@nodes[[n]]$parents) > 0)
-		{
-			linearParams = stan_regparams(net, net@nodes[[n]])
-
-			for(p in 1:length(linearParams))
-			{
-				param_string <- paste0(param_string, "    ", linearParams[[p]]$type, " ", linearParams[[p]]$name, ";\n")
-			}
-			param_string <- paste0(param_string, "\n")
-		}
-	}
+	#param_string <- paste0(param_string, stan_indent(5), "// Define regression parameters\n");	
 	param_string <- paste0(param_string, "}\n")
 
 	message("Generating transformed parameters...")
-	transformedparam_string <- "transformed parameters{\n"
-	for(n in 1:length(net@nodes))
-	{
-		transformedparam_string <- paste0(transformedparam_string, stan_regression(net, net@nodes[[n]]))
-	}
 	transformedparam_string <- paste0(transformedparam_string, "}\n")
 
-	model_string <- "model{\n"
-	message("Generating local variables...")
+	#message("Generating local variables...")
 
 	# Priors
 	message("Generating priors...")
-	prior_string <- "    // Priors\n";
-	for(n in 1:length(net@nodes))
-	{
-		if (length(net@nodes[[n]]$parents) > 0)
-		{
-			linearParams = stan_regparams(net, net@nodes[[n]])
-
-			for(p in 1:length(linearParams))
-			{
-				prior_string <- paste0(prior_string, "    ", linearParams[[p]]$name, " ~ normal(0,100);\n")
-			}
-		}
-	}
-	model_string <- paste0(model_string, prior_string, "\n")
+	prior_string <- paste0(prior_string, "\n")
 
 	# Likelihoods
-	model_string <- paste0(model_string, "    // Likelihoods\n");
+	#likelihood_string <- paste0(likelihood_string, "\n")
 
-	for(n in 1:length(leaves))
-	{
-		model_string <- paste0(model_string, "    ", leaves[[n]]$name, " ~ ", stan_likelihood(leaves[[n]]),";\n")
-	}
+	# Model
+	model_string <- paste0(model_string, prior_string, likelihood_string)
 	model_string <- paste0(model_string, "}\n")
 
 	# Build the model
 	stan_string <- paste0(data_string, param_string, transformedparam_string, model_string)
 
-	#message(stan_string)
+	message(stan_string)
 
 	return(stan_string)
 }

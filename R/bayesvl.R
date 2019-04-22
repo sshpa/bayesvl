@@ -47,6 +47,31 @@ bvl_getLeaves <- function(dag) {
 	return(nodes)
 } 
 
+bvl_getNext <- function(dag, nextNodes) {
+	if (is.null(dag))
+		return (NULL)
+		
+	if (is.null(dag@nodes))
+		return (NULL)
+	
+	if (is.null(nextNodes))
+		return (NULL)
+
+	nodes = list()
+	for(n in 1:length(dag@arcs))
+	{
+		for(p in 1:length(nextNodes))
+		{
+			if (dag@arcs[[n]]$to == nextNodes[[p]]$name)
+			{
+				nodes[[dag@arcs[[n]]$from]] = dag@nodes[[dag@arcs[[n]]$from]]
+			}
+		}
+	}
+	
+	return(nodes)
+} 
+
 bvl_isLeaf <- function(node) {
 	if (is.null(node))
 		return (FALSE)
