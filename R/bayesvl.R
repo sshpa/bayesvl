@@ -11,6 +11,23 @@ bayesvl <- function(data = NULL, nodes = list(), arcs = list()) {
   bvl
 }
 
+bvl_getArcs <- function(dag, from = NULL, to = NULL, type = NULL) {
+	if (is.null(from) && is.null(to))
+		return (NULL)
+			
+	arcs = list()
+		
+	for(n in 1:length(dag@arcs))
+	{
+		if ((dag@arcs[[n]]$from == from || is.null(from)) && (dag@arcs[[n]]$to == to || is.null(to)) && (dag@arcs[[n]]$type == type || is.null(type)))
+		{
+			arcs[[dag@arcs[[n]]$name]] = dag@arcs[[n]]
+		}
+	}
+	
+	return(arcs)
+} 
+
 bvl_getLeaves <- function(dag) {
 	if (is.null(dag))
 		return (NULL)
@@ -18,23 +35,20 @@ bvl_getLeaves <- function(dag) {
 	if (is.null(dag@nodes))
 		return (NULL)
 	
-	nodes <- c()
+	nodes = list()
 	for(n in 1:length(dag@nodes))
 	{
 		if (length(dag@nodes[[n]]$children) == 0)
 		{
-			nodes <- c(nodes, dag@nodes[[n]])
+			nodes[[dag@nodes[[n]]$name]] = dag@nodes[[n]]
 		}
 	}
 	
 	return(nodes)
 } 
 
-bvl_isLeaf <- function(dag, node) {
-	if (is.null(dag))
-		return (FALSE)
-		
-	if (is.null(dag@nodes))
+bvl_isLeaf <- function(node) {
+	if (is.null(node))
 		return (FALSE)
 	
 	if (length(node$children) == 0)
@@ -43,26 +57,20 @@ bvl_isLeaf <- function(dag, node) {
 	return(FALSE)
 } 
 
-bvl_isRoot <- function(dag, node) {
-	if (is.null(dag))
+bvl_isRoot <- function(node) {
+	if (is.null(node))
 		return (FALSE)
-		
-	if (is.null(dag@nodes))
-		return (FALSE)
-	
+			
 	if (length(node$parents) == 0)
 		return (TRUE)
 	
 	return(FALSE)
 } 
 
-bvl_isBranch <- function(dag, node) {
-	if (is.null(dag))
+bvl_isBranch <- function(node) {
+	if (is.null(node))
 		return (FALSE)
-		
-	if (is.null(dag@nodes))
-		return (FALSE)
-	
+			
 	if (length(node$parents) > 0 && length(node$children) > 0)
 		return (TRUE)
 	
