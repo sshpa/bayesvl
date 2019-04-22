@@ -3,8 +3,7 @@ setClass("bayesvl", representation( call = "language",
                                 arcs = "list",
                                 stanfit = "stanfit",
                                 data = "list",
-                                pars = "character",
-                                stancode = "character"
+                                pars = "character"
                                  ))
 
 setMethod("show", "bayesvl", function(object){
@@ -245,19 +244,10 @@ bvl_load <- function(nodefile, graphfile) {
 if (!isGeneric("bvl_estModel"))
       setGeneric("bvl_estModel", function(net, dataList, ...) standardGeneric("bvl_estModel"))
 
-setMethod("bvl_estModel", "bayesvl", function(net, dataList, ...) {		
-	if (is.null(object@nodes))
-		return (NULL)
-	
+setMethod("bvl_estModel", "bayesvl", function(net, dataList, ...) {			
 	if(length(object@nodes)==0)
 		return (NULL)
 	
-	stancode <- object@stancode
-	if(length(stancode)==0)
-	{
-		stancode <- bvl_model2Stan(net)	
-	}
-
 	fit <- bvl_modelFit(net, dataList, ...)
 	
 	return(fit)
