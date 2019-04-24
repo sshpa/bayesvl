@@ -111,7 +111,7 @@ setMethod("bvl_addNode", "bayesvl", function(dag, name, dist = "norm", prior = N
 if (!isGeneric("bvl_addArc"))
       setGeneric("bvl_addArc", function(dag, from, to, type = "slope", ...) standardGeneric("bvl_addArc"))
 
-setMethod("bvl_addArc", "bayesvl", function(dag, from, to, type = "slope") {
+setMethod("bvl_addArc", "bayesvl", function(dag, from, to, type = "slope", prior = "normal(0,100)") {
 	if (!bvl_nodeExists(dag, from))
 		message(paste0("Error checking node.\n Invalid node '", from, "'."))
 	
@@ -124,7 +124,7 @@ setMethod("bvl_addArc", "bayesvl", function(dag, from, to, type = "slope") {
 	dag@nodes[[from]]$children = c(dag@nodes[[from]]$children, to)
 	dag@nodes[[to]]$parents = c(dag@nodes[[to]]$parents, from)
 	
-	arc = list(name=paste0(from,"_",to), type = type, from = from, to = to)
+	arc = list(name=paste0(from,"_",to), type = type, from = from, to = to, prior = prior)
 	dag@arcs[[arc$name]] = arc
 	
 	return(dag)

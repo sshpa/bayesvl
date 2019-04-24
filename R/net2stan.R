@@ -81,7 +81,7 @@ stan_regparams <- function(dag, node)
 
 		if (length(hasVarint) == 0 && length(hasSlope) > 0)
 		{
-			param = list(name=paste0("a_", nodeName), type = "real")
+			param = list(name=paste0("a_", nodeName), type = "real", prior = "normal(0,100)")
 			param_string[[param$name]] = param
 		}
 
@@ -96,12 +96,12 @@ stan_regparams <- function(dag, node)
 
 			if (arc$type == "varint")
 			{
-				param = list(name=paste0("a_", arc$name), type = paste0("real[N",parentName,"]"))
+				param = list(name=paste0("a_", arc$name), type = paste0("real[N",parentName,"]"), prior = "normal(0,100)")
 				param_string[[param$name]] = param
 			}
 			else if (arc$type == "slope")
 			{
-				param = list(name=paste0("b_", arc$name), type = "real")
+				param = list(name=paste0("b_", arc$name), type = "real", prior = "normal(0,100)")
 				param_string[[param$name]] = param
 			}
 
@@ -151,7 +151,7 @@ stan_regression <- function(dag, node, vectorized = F)
 			parentName = arc$from
 			arcName = arc$name
 
-			print(parentName)
+			#print(parentName)
 			parent = dag@nodes[[parentName]]
 
 			if (p > 1)
@@ -181,7 +181,7 @@ stan_regression <- function(dag, node, vectorized = F)
 	return(reg_string)
 }
 
-stan_prior <- function(node)
+stan_prior <- function(net, node)
 {
 	prior_string = ""
 	nodeName <- node$name
@@ -190,31 +190,45 @@ stan_prior <- function(node)
 
 	if (length(node$parents) == 0)
 	{
-	  if (is.null(node$prior))
-	  {
-		  if (is.null(node$dist) || node$dist == "norm")
-		  {
-				prior_string <- paste0("mu_", nodeName, " ~ normal( 0, 1 )")
-				prior_string <- paste0("sigma_", nodeName, " ~ normal( 0.6, 10 )")
-			}
-			else if (node$dist == "bern")
-			{
-			  prior_string <- paste0(stan_replaceParam(template$par_reg, nodeName), " ~ beta(1, 1)")
-			}
-		}
-		else
+		if (length(bvl_getArcs(net, from = nodeName, type = "varint"))==0 &&
+				length(bvl_getArcs(net, from = nodeName, type = "slope"))==0)
 		{
-		  prior_string <- paste0(stan_replaceParam(template$par_reg, nodeName), " ~ ", node$prior)
+		  if (is.null(node$prior))
+		  {
+			  if (is.null(node$dist) || node$dist == "norm")
+			  {
+					prior_string <- paste0(stan_indent(5), "mu_", nodeName, " ~ normal( 0, 1 )")
+					prior_string <- paste0(stan_indent(5), "sigma_", nodeName, " ~ normal( 0.6, 10 )")
+				}
+				else if (node$dist == "bern")
+				{
+				  prior_string <- paste0(stan_indent(5), stan_replaceParam(template$par_reg, nodeName), " ~ beta(1, 1)")
+				}
+			}
+			else
+			{
+			  prior_string <- paste0(stan_indent(5), stan_replaceParam(template$par_reg, nodeName), " ~ ", node$prior)
+			}
 		}
 	}
+	else
+	{
+		linearParams = stan_regparams(net, node)
+		
+		for(p in 1:length(linearParams))
+		{
+			prior_string <- paste0(prior_string, stan_indent(5), linearParams[[p]]$name, " ~ ", linearParams[[p]]$prior, ";\n")
+		}
+	}
+
 
 	return(prior_string)
 }
 
 bvl_model2Stan <- function(net)
 {
-	leaves <- bvl_getLeaves(net)
-	nextNodes <- leaves
+	print("Generating stan model ...")
+	nextNodes <- bvl_getLeaves(net)
 	
 	level = 1
 
@@ -225,6 +239,7 @@ bvl_model2Stan <- function(net)
 	param_string <- paste0(param_string, stan_indent(5), "// Define parameters to estimate\n");
 
 	transformedparam_string <- "transformed parameters{\n"
+	transformedparam_string <- paste0(transformedparam_string, stan_indent(5), "// Transform parameters\n");
 	
 	model_string <- "model{\n"
 
@@ -234,33 +249,35 @@ bvl_model2Stan <- function(net)
 
 	while (!is.null(nextNodes) && length(nextNodes) > 0)
 	{
-		print(paste0("Generating level ", level,"..."))
+		#print(paste0("Generating level ", level,"..."))
 		
 		for(n in 1:length(nextNodes))
 		{
 			nodeName <- nextNodes[[n]]$name
 			template <- bvl_loadTemplate( nextNodes[[n]]$dist )
 			
-			print("Generating data ...")
+			#print("Generating data ...")
 			# Generating data ...
 			if (level == 1)
 			{
 				data_string <- paste0(data_string, stan_indent(5), "int<lower=1> Nobs",";  // Number of observations (an integer)\n")
-			}			
-			data_string <- paste0(data_string, stan_indent(5), stan_data(nextNodes[[n]]), ";\n")
+				data_string <- paste0(data_string, stan_indent(5), stan_data(nextNodes[[n]]), ";   // outcome variable\n")
+			}
+			else
+				data_string <- paste0(data_string, stan_indent(5), stan_data(nextNodes[[n]]), ";\n")
 
-			print("Generating parameters ...")
+			#print("Generating parameters ...")
 			# Generating parameters ...
 			if (level == 1)
 			{
-				distParams = stan_likparams(leaves[[n]])
+				distParams = stan_likparams(nextNodes[[n]])
 		
 				for(p in 1:length(distParams))
 				{
-					if (distParams[[p]]$name != stan_replaceParam(template$par_reg, nodeName))
+					if (distParams[[p]]$name != stan_replaceParam(template$par_reg, nodeName) || length(nextNodes[[n]]$parents) == 0)
 						param_string <- paste0(param_string, stan_indent(5), distParams[[p]]$type, " ", distParams[[p]]$name, ";\n")
 				}
-			}			
+			}
 
 			if (length(nextNodes[[n]]$parents) > 0)
 			{
@@ -273,42 +290,31 @@ bvl_model2Stan <- function(net)
 				param_string <- paste0(param_string, "\n")
 			}
 			
-			print("Generating transformed parameters ...")
+			#print("Generating transformed parameters ...")
 			# Generating transformed parameters ...
 			if (level == 1)
 			{
-				distParams = stan_likparams(leaves[[n]])
+				distParams = stan_likparams(nextNodes[[n]])
 		
 				for(p in 1:length(distParams))
 				{
-					if (distParams[[p]]$name == stan_replaceParam(template$par_reg, nodeName))
+					if (distParams[[p]]$name == stan_replaceParam(template$par_reg, nodeName) && length(nextNodes[[n]]$parents) > 0)
 						transformedparam_string <- paste0(transformedparam_string, stan_indent(5), distParams[[p]]$type, " ", distParams[[p]]$name, distParams[[p]]$length, ";\n")
 				}
 			}			
 			transformedparam_string <- paste0(transformedparam_string, stan_regression(net, nextNodes[[n]]))
 			
-			print("Generating priors ...")
+			#print("Generating priors ...")
 			# Generating priors ...
-			if (length(nextNodes[[n]]$parents) > 0)
-			{
-				linearParams = stan_regparams(net, nextNodes[[n]])
-					
-				for(p in 1:length(linearParams))
-				{
-					prior_string <- paste0(prior_string, stan_indent(5), linearParams[[p]]$name, " ~ normal(0,100);\n")
-				}
-			}
+			prior_string <- paste0(prior_string, stan_prior(net, nextNodes[[n]]))
 
-			print("Generating Likelihoods ...")
+			#print("Generating Likelihoods ...")
 			# Generating Likelihoods ...
 			if (level == 1)
 			{
 				likelihood_string <- paste0(likelihood_string, stan_indent(5), nextNodes[[n]]$name, " ~ ", stan_likelihood(nextNodes[[n]]),";\n")
 			}
 		}
-
-		#param_string <- paste0(param_string, "\n")
-		#prior_string <- paste0(prior_string, "\n")
 		
 		nextNodes <- bvl_getNext(net, nextNodes)
 		level = level + 1
@@ -329,6 +335,7 @@ bvl_model2Stan <- function(net)
 	# Priors
 	message("Generating priors...")
 	prior_string <- paste0(prior_string, "\n")
+	prior_string <- paste0(prior_string, "\n")
 
 	# Likelihoods
 	#likelihood_string <- paste0(likelihood_string, "\n")
@@ -345,7 +352,7 @@ bvl_model2Stan <- function(net)
 	return(stan_string)
 }
 
-stan_params <- function(net, data)
+stan_params <- function(net)
 {
 	params <- c()
 
@@ -362,12 +369,6 @@ stan_params <- function(net, data)
 				params <- c(params,linearParams[[p]]$name)
 			}
 		}
-
-		#if (length(net@nodes[[n]]$parents) == 0 && length(net@nodes[[n]]$children) > 0)
-		#{
-		#	params <- c(params,paste0("mu_",nodeName))
-		#	params <- c(params,paste0("sigma_",nodeName))
-		#}
 	}
 
 	return(params)

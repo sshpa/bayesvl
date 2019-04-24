@@ -13,6 +13,7 @@ bvl2stan.templates <- list(
 		Binomial = list(
         name = "binorm",
         dist = "binomial",
+        stan_prior = "beta(1, 1)",
         stan_likelihood = "bernoulli(theta_{0})",
         par_names = c("mu_{0}","sigma_{0}"),
         par_types = c("real","real<lower=0>"),
@@ -23,6 +24,7 @@ bvl2stan.templates <- list(
     Normal = list(
         name = "norm",
         dist = "normal",
+        stan_prior = "beta(1, 1)",
         stan_likelihood = "normal(mu_{0}, sigma_{0})",
         par_names = c("mu_{0}","sigma_{0}"),
         par_types = c("real","real<lower=0>"),
