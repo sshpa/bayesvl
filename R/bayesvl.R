@@ -15,6 +15,9 @@ bvl_getArcs <- function(dag, from = NULL, to = NULL, type = NULL) {
 	if (is.null(from) && is.null(to))
 		return (NULL)
 			
+	if (length(dag@arcs) == 0)
+		return (NULL)
+
 	arcs = list()
 		
 	for(n in 1:length(dag@arcs))
@@ -55,6 +58,9 @@ bvl_getNext <- function(dag, nextNodes) {
 		return (NULL)
 	
 	if (is.null(nextNodes))
+		return (NULL)
+
+	if (is.null(dag@arcs) || length(dag@arcs) == 0)
 		return (NULL)
 
 	nodes = list()
