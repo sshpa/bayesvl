@@ -126,7 +126,7 @@ bvl_bnStrength <- function(dag, data, criterion = "x2", ...) {
 
 bvl_bnBarchart <- function(dag, data, method = "bayes", iss = 10, ...) {
 
-	bn.bayes <- bvl_bnBayes(bnDag, data = data, method = method, iss = iss)
+	bn.bayes <- bvl_bnBayes(dag, data = data, method = method, iss = iss)
 	
 	leaves <- bvl_getLeaves(dag)
 	
@@ -144,6 +144,11 @@ bvl_bnBarchart <- function(dag, data, method = "bayes", iss = 10, ...) {
 	}
 }
 
+bvl_bnPlot <- function(dag, ...) {
+	bnDag <- bvl_vl2bn(dag)
+	
+	plot(bnDag, ...)
+}
 
 #network_nodeExists <- function(dag, name) {
 #	if (is.null(dag))
