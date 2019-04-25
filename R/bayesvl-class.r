@@ -136,10 +136,10 @@ if (!isGeneric("bvl_getNodeNames"))
 setMethod("bvl_getNodeNames", "bayesvl", function(dag) {
 	nodes = c()
 	
-	if (is.null(object@nodes))
+	if (is.null(dag@nodes))
 		return (nodes)
 	
-	if(length(object@nodes)==0)
+	if(length(dag@nodes)==0)
 		return (nodes)
 		
 	if (is.null(dag@nodes))
@@ -147,7 +147,7 @@ setMethod("bvl_getNodeNames", "bayesvl", function(dag) {
 	
 	for(n in 1:length(dag@nodes))
 	{
-		nodes = c(nodes, dag@nodes[[n]]@name)
+		nodes = c(nodes, dag@nodes[[n]]$name)
 	}
 
 	return(nodes)
@@ -164,11 +164,11 @@ setMethod("bvl_vl2bn", "bayesvl", function(dag) {
 	for(n in 1:length(dag@nodes))
 	{
 		#cat(dag@nodes[[n]]@name)
-		if (length(dag@nodes[[n]]@children) > 0)
+		if (length(dag@nodes[[n]]$children) > 0)
 		{
-			for(i in 1:length(dag@nodes[[n]]@children))
+			for(i in 1:length(dag@nodes[[n]]$children))
 			{
-				bnDag = set.arc(bnDag, from = dag@nodes[[n]]@name, to = dag@nodes[[n]]@children[[i]])
+				bnDag = set.arc(bnDag, from = dag@nodes[[n]]$name, to = dag@nodes[[n]]$children[[i]])
 			}
 		}
 	}
@@ -194,12 +194,12 @@ setMethod("bvl_bn2vl", "bayesvl", function(dag) {
 
 	for(n in 1:length(dag@nodes))
 	{
-		if (length(dag@nodes[[n]]@children) > 0)
+		if (length(dag@nodes[[n]]$children) > 0)
 		{
 			nodeName <- names(dag@nodes)[n]
-			for(i in 1:length(dag@nodes[[n]]@children))
+			for(i in 1:length(dag@nodes[[n]]$children))
 			{
-				vlDag = bvl_addArc(vlDag, from = nodeName, to = dag@nodes[[n]]@children[[i]])
+				vlDag = bvl_addArc(vlDag, from = nodeName, to = dag@nodes[[n]]$children[[i]])
 			}
 		}
 	}

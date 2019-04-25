@@ -108,6 +108,43 @@ bvl_isBranch <- function(node) {
 	return(FALSE)
 }
 
+bvl_bnBayes <- function(dag, data, method = "bayes", iss = 10, ...) {
+	bnDag <- bvl_vl2bn(dag)
+	
+	bn.bayes <- bn.fit(bnDag, data = data, method = method, iss = iss)
+	
+	return(bn.bayes)
+}
+
+bvl_bnStrength <- function(dag, data, criterion = "x2", ...) {
+	bnDag <- bvl_vl2bn(dag)
+	
+	strength = arc.strength(bnDag, data = data, criterion = criterion)
+	
+	return(strength)
+}
+
+bvl_bnBarchart <- function(dag, data, method = "bayes", iss = 10, ...) {
+
+	bn.bayes <- bvl_bnBayes(bnDag, data = data, method = method, iss = iss)
+	
+	leaves <- bvl_getLeaves(dag)
+	
+	for(n in 1:length(leaves))
+	{
+		xlab <- paste0("Pr(",leaves[[n]]$name, " | ")
+		for(c in 1:length(leaves[[n]]$parents))
+		{
+			if (c > 1)
+				xlab <- paste0(xlab, ", ")
+			xlab <- paste0(xlab, leaves[[n]]$parents[[c]])
+		}
+		xlab <- paste0(xlab,")")
+		bn.fit.barchart(bn.bayes[[leaves[[n]]$name]], ylab=leaves[[n]]$name, xlab, ...)
+	}
+}
+
+
 #network_nodeExists <- function(dag, name) {
 #	if (is.null(dag))
 #		return (FALSE)
