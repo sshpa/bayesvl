@@ -31,6 +31,17 @@ bvl2stan.templates <- list(
         par_reg = "mu_{0}",
         out_type = "real",
         vectorized = TRUE
+    ),
+    Categorical = list(
+        name = "cat",
+        dist = "cat",
+        stan_prior = "normal(0, 100)",
+        stan_likelihood = "normal(mu_{0}, sigma_{0})",
+        par_names = c("mu_{0}","sigma_{0}"),
+        par_types = c("real","real<lower=0>"),
+        par_reg = "mu_{0}",
+        out_type = "int",
+        vectorized = TRUE
     )
 )
 
@@ -44,7 +55,7 @@ bvl_loadTemplate <- function( fname ) {
   tmpname <- bvl_templateExists(fname)
   
   templates <- bvl2stan.templates
-  if ( is.na(tmpname) ) stop(concat("Distribution ",fname," not recognized."))
+  if ( is.na(tmpname) ) stop(paste0("Distribution ",fname," not recognized."))
   return(templates[[ tmpname ]])
 }
 
