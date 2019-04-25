@@ -179,7 +179,7 @@ stan_regression <- function(dag, node, getparams = F)
 			arc = arcsTo[[p]]
 			#print(arc)
 
-			parentName = arc$to
+			parentName = arc$from
 			arcName = arc$name
 
 			#print(parentName)
@@ -187,10 +187,10 @@ stan_regression <- function(dag, node, getparams = F)
 
 			if (arc$type == "varint")
 			{				
-				reg_string = paste0(reg_string, stan_indent(5), "// Varying intercepts definition\n")
+				reg_string = paste0(reg_string, stan_indent(5), "// Next level random intercepts\n")
 				reg_string = paste0(reg_string, stan_indent(5), "for(k in 1:N",nodeName,") {\n")
 				
-				reg_string = paste0(reg_string, stan_indent(8), "a_",nodeName,"[k] = a_",nodeName,"_0 + u_",nodeName,"[k];\n")
+				reg_string = paste0(reg_string, stan_indent(8), "a_",nodeName,"[k] = a_",parentName,"[",nodeName,"2",parentName,"[k]] + u_",nodeName,"[k];\n")
 				
 				reg_string = paste0(reg_string, stan_indent(5), "}\n")
 				
