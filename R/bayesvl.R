@@ -3,11 +3,16 @@ bayesvl <- function(data = NULL, nodes = list(), arcs = list()) {
   # build bayesvl class
   bvl <- new( "bayesvl" , 
           call = match.call(), 
-          data = as.data.frame(data),
+          rawdata = as.data.frame(data),
 					nodes = nodes,
 					arcs = arcs
 					)
   if (!missing(data)) attr(bvl,"nobs") = length(data[1])
+  
+  #slot(bvl,"stanfit",check=FALSE) <- logical(0)
+	#slot(bvl,"standata",check=FALSE) <- logical(0)
+	#slot(bvl,"rawdata",check=FALSE) <- logical(0)
+
   bvl
 }
 
@@ -116,12 +121,23 @@ bvl_bnBayes <- function(dag, data, method = "bayes", iss = 10, ...) {
 	return(bn.bayes)
 }
 
-bvl_bnStrength <- function(dag, data, criterion = "x2", ...) {
+bvl_bnStrength <- function(dag, data = NULL, criterion = "x2", ...) {
 	bnDag <- bvl_vl2bn(dag)
 	
 	strength = arc.strength(bnDag, data = data, criterion = criterion)
 	
 	return(strength)
+}
+
+bvl_bnScore <- function(dag, data = NULL, type = "bic", ...) {
+	bnDag <- bvl_vl2bn(dag)
+	
+	if (is.null(data))
+		data <- dag@rawdata
+
+	score = score(bnDag, data = data, type = type, ...)
+	
+	return(score)
 }
 
 bvl_bnBarchart <- function(dag, data, method = "bayes", iss = 10, ...) {

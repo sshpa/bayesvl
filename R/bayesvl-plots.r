@@ -15,8 +15,16 @@ bvl_plotPPC <- function(model, fun = "stat", stat = "mean", color_scheme = "blue
 {
 	required(bayesplot)
 	
-	y_rep <- as.matrix(fit, pars = "y_rep")
+	y_rep <- as.matrix(model@stanfit, pars = "y_rep")
 
 	bayesplot::color_scheme_set(color_scheme)
-	pp_check(as.numeric(data1$Burden), y_rep, fun = fun, stat = stat)
+	pp_check(as.numeric(model@standata$y), y_rep, fun = fun, stat = stat)
+}
+
+bvl_plotIntervals <- function(model, fun = "stat", stat = "mean", color_scheme = "blue")
+{
+	required(bayesplot)
+	
+	bayesplot::color_scheme_set(color_scheme)
+	bayesplot::mcmc_intervals(model@posterior, pars = params, point_est = "mean", prob = 0.8, prob_outer = 0.95)
 }

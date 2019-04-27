@@ -2,7 +2,9 @@ setClass("bayesvl", representation( call = "language",
                                 nodes = "list",
                                 arcs = "list",
                                 stanfit = "stanfit",
-                                data = "list",
+                                standata = "list",
+                                rawdata = "data.frame",
+                                posterior = "data.frame",
                                 pars = "character"
                                  ))
 
@@ -44,14 +46,27 @@ setMethod("show", "bayesvl", function(object){
   })
 
 setMethod("summary", "bayesvl", function(object){
-    if (!is.null(object@stanfit) && length(object@stanfit@model_name))
-    {
-    	show(object@stanfit)
-    }
-    else
-    {
-    	cat("\nModel is not calculated.\n")
-    }
+	cat("Model Info:\n")
+	
+	cat(paste0(stan_indent(2), "nodes:",stan_indent(5), length(object@nodes), "\n"))
+	cat(paste0(stan_indent(2), "arcs:",stan_indent(6), length(object@arcs), "\n"))
+	cat(paste0(stan_indent(2), "formula:",stan_indent(3), stan_formula(object), "\n"))
+	
+	if (!is.null(object@rawdata) && ncol(object@rawdata) > 1)
+	{
+		cat(paste0(stan_indent(2), "scores:",stan_indent(6), bvl_bnScore(object, object@rawdata), "\n"))
+	}
+	
+	cat("\n")	
+	cat("Estimates:\n")	
+  if (!is.null(object@stanfit) && length(object@stanfit@model_name))
+  {
+  	show(object@stanfit)
+  }
+  else
+  {
+  	cat(paste0(stan_indent(2), "model is not calculated.\n"))
+  }
 })
 
 

@@ -213,6 +213,63 @@ stan_regression <- function(dag, node, getparams = F)
 		return(reg_string)
 }
 
+stan_formula <- function(dag)
+{
+	formula_string <- ""
+	nextNodes <- bvl_getLeaves(dag)
+	
+	loopForI = ""
+
+	for(n in 1:length(nextNodes))
+	{
+		nodeName <- nextNodes[[n]]$name
+		template <- bvl_loadTemplate( nextNodes[[n]]$dist )
+		
+		formula_string = paste0(nodeName, " ~ ")
+
+
+		arcsTo <- bvl_getArcs(dag, to = nodeName)
+	
+		hasVarint <- bvl_getArcs(dag, to = nodeName, type = "varint")
+		hasSlope <- bvl_getArcs(dag, to = nodeName, type = "slope")
+	
+		if (length(hasVarint) == 0 && length(hasSlope) > 0)
+		{
+			formula_string = paste0(formula_string, "a_", nodeName, " + ")
+		}
+	
+		# loop for each arc to the node
+		for(p in 1:length(arcsTo))
+		{
+			arc = arcsTo[[p]]
+			#print(arc)
+	
+			parentName = arc$from
+			arcName = arc$name
+	
+			#print(parentName)
+			parent = dag@nodes[[parentName]]
+	
+			if (p > 1)
+			{
+				formula_string = paste0(formula_string, " + ")
+			}
+	
+			if (arc$type == "varint")
+			{
+				formula_string = paste0(formula_string, "a_", parentName, "[", parentName, loopForI, "]")
+			}
+			else if (arc$type == "slope")
+			{
+				formula_string = paste0(formula_string, "b_", arc$name, " * ", parentName, loopForI)
+			}
+	
+		}
+	}
+		
+	return(formula_string)
+}
+
 stan_prior <- function(net, node)
 {
 	prior_string = ""
@@ -488,8 +545,12 @@ bvl_modelFit <- function(net, dataList, warmup = 500, iter = 2000, chains = 4, c
 		mstan <- stan(model_code = model_string, data = dataList,
 	          		warmup=warmup , iter = iter, chains = chains, cores = cores, refresh=-1)
   }
+  
+  net@stanfit <- mstan
+  net@standata <- dataList
+  net@posterior <- as.data.frame(net@stanfit)
 
-	return(mstan)
+	return(net)
 }
 
 bvl_stanRun <- function(net, dataList, ...)
