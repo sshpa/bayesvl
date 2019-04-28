@@ -20,7 +20,7 @@ Here is the [CHANGELOG](https://github.com/sshpa/baysvl/blob/master/CHANGELOG.md
 To get started abd install the latest snapshot type in R console:
 
 ```sh
-> install.packages("https://github.com/sshpa/baysvl/archive/master.zip")
+> install.packages("https://github.com/sshpa/bayesvl/raw/master/bin/bayesvl_0.6.5.tgz")
 ```
 
 ## Create bayesian network structures
