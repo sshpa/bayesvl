@@ -13,21 +13,48 @@ bvl_plotParams <- function(model, row = 2, col = 2, credMass = 0.89) {
 }
 
 
+plotPPC <- function(stanfit, data, y_name, fun = "stat", stat = "mean", color_scheme = "blue")
+{
+	require(bayesplot)
+	
+	parName <- paste0("y_rep_",y_name)
+
+	y_rep <- as.matrix(stanfit, pars = parName)
+
+	bayesplot::color_scheme_set(color_scheme)
+	pp_check(as.numeric(data[y_name]), y_rep, fun = fun, stat = stat)
+}
+
+
 bvl_plotPPC <- function(model, fun = "stat", stat = "mean", color_scheme = "blue")
 {
 	require(bayesplot)
 	
-	y_rep <- as.matrix(model@stanfit, pars = "y_rep")
+	leaves <- bvl_getLeaves(model)
+	
+	for(i in length(leaves))
+	{
+		y_name <- leaves[[i]]$name
+		parName <- paste0("y_rep_",y_name)
 
-	bayesplot::color_scheme_set(color_scheme)
-	pp_check(as.numeric(model@standata$y), y_rep, fun = fun, stat = stat)
+		y_rep <- as.matrix(model@stanfit, pars = parName)
+		y <- model@standata[[y_name]]
+	
+		#print(length(y))
+		#print(length(y_rep))
+		
+		bayesplot::color_scheme_set(color_scheme)
+		p <- pp_check(y, y_rep, fun = fun, stat = stat)
+		
+		print(p)
+	}
 }
 
 bvl_plotDensOverlay <- function(model, n = 200, color_scheme = "blue")
 {
 	require(bayesplot)
 	
-	leaves <- getLeaves(model)
+	leaves <- bvl_getLeaves(model)
 	
 	for(i in length(leaves))
 	{
@@ -35,10 +62,13 @@ bvl_plotDensOverlay <- function(model, n = 200, color_scheme = "blue")
 		parName <- paste0("y_rep_",y_name)
 		
 		y_rep <- as.matrix(model@stanfit, pars = parName)
+		y <- model@standata[[y_name]]
 		#dim(y_rep)
 		
 		bayesplot::color_scheme_set(color_scheme)
-		ppc_dens_overlay(model@data[[y_name]], y_rep[1:n, ])
+		p <- ppc_dens_overlay(y, y_rep[1:n, ])
+		
+		print(p)
 	}
 }
 
