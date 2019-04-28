@@ -47,8 +47,8 @@ bvl_trace <- function(model, params = NULL)
 	if (is.null(params))
 		params <- stan_params(model)
 
-	coda <- stan2coda(model@stanfit)
-	traceplot(coda, pars = params)
+	#coda <- stan2coda(model@stanfit)
+	rstan::traceplot(model@stanfit, pars = params)
 }
 
 bvl_plotIntervals <- function(model, params = NULL, fun = "stat", stat = "mean", color_scheme = "blue")
