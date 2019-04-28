@@ -1,3 +1,7 @@
+creditInfo = "Vuong Quan Hoang - La Viet Phuong (2019).\nBayesVL package for Bayesian statistical analyses in R."
+bannerBreak = "\n*********************************************************************\n"
+cat(paste0(bannerBreak,creditInfo,bannerBreak,"\n"))
+
 setClass("bayesvl", representation( call = "language",
                                 nodes = "list",
                                 arcs = "list",
@@ -50,18 +54,14 @@ setMethod("summary", "bayesvl", function(object){
 	
 	cat(paste0(stan_indent(2), "nodes:",stan_indent(5), length(object@nodes), "\n"))
 	cat(paste0(stan_indent(2), "arcs:",stan_indent(6), length(object@arcs), "\n"))
-	cat(paste0(stan_indent(2), "formula:",stan_indent(3), stan_formula(object), "\n"))
+	cat(paste0(stan_indent(2), "scores:",stan_indent(4), bvl_bnScore(object), "\n"))
+	cat(paste0(stan_indent(2), "formula:",stan_indent(3), stan_formula(object), "\n"))	
 	
-	if (!is.null(object@rawdata) && ncol(object@rawdata) > 1)
-	{
-		cat(paste0(stan_indent(2), "scores:",stan_indent(6), bvl_bnScore(object, object@rawdata), "\n"))
-	}
-	
-	cat("\n")	
 	cat("Estimates:\n")	
   if (!is.null(object@stanfit) && length(object@stanfit@model_name))
   {
-  	show(object@stanfit)
+  	params = stan_params(object)
+  	print(object@stanfit, pars = params)
   }
   else
   {
@@ -267,3 +267,23 @@ setMethod("bvl_estModel", "bayesvl", function(net, dataList, ...) {
 	
 	return(fit)
 })
+
+if (!isGeneric("bvl_bnScore"))
+      setGeneric("bvl_bnScore", function(net, ...) standardGeneric("bvl_bnScore"))
+
+setMethod("bvl_bnScore", "bayesvl", function(net, ...) {			
+	if(length(net@nodes)==0)
+		return (0)
+	
+	if(length(net@standata)==0)
+		return (0)
+
+	dat <- as.data.frame(net@standata,stringsAsFactors=TRUE)[stan_data(net)]
+	cols <- sapply(dat, is.numeric)
+	dat[,cols] <- lapply(dat[,cols], as.factor)
+
+	score <- bnScore(net, dat, ...)
+	
+	return(score)
+})
+
