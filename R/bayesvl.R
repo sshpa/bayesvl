@@ -129,7 +129,7 @@ bvl_bnStrength <- function(dag, data = NULL, criterion = "x2", ...) {
 	return(strength)
 }
 
-bvl_bnScore <- function(dag, data = NULL, type = "bic", ...) {
+bnScore <- function(dag, data = NULL, type = "bic", ...) {
 	bnDag <- bvl_vl2bn(dag)
 	
 	if (is.null(data))
