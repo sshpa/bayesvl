@@ -43,6 +43,9 @@ bvl_plotPPC <- function(model, fun = "stat", stat = "mean", color_scheme = "blue
 		#print(length(y))
 		#print(length(y_rep))
 		
+		if (length(y_rep) < n)
+			n = length(y_rep)
+
 		bayesplot::color_scheme_set(color_scheme)
 		p <- pp_check(y, y_rep, fun = fun, stat = stat)
 		
@@ -64,6 +67,9 @@ bvl_plotDensOverlay <- function(model, n = 200, color_scheme = "blue")
 		y_rep <- as.matrix(model@stanfit, pars = parName)
 		y <- model@standata[[y_name]]
 		#dim(y_rep)
+		
+		if (length(y_rep) < n)
+			n = length(y_rep)
 		
 		bayesplot::color_scheme_set(color_scheme)
 		p <- ppc_dens_overlay(y, y_rep[1:n, ])
@@ -93,13 +99,14 @@ bvl_plotIntervals <- function(model, params = NULL, fun = "stat", stat = "mean",
 }
 
 
-bvl_plotDensity2d <- function(x, y, color)
+bvl_plotDensity2d <- function(model, x, y, color)
 {
 	require(viridis)
 	
-	ggplot(model@posterior, aes(x=x, y=y, color = color))+
+	ggplot(model@posterior, aes(x=model@posterior[[x]], y=model@posterior[[y]], color = model@posterior[[color]]))+
 		geom_point(alpha = 0.3)+
 		geom_density2d(color = "gray30")+
 		scale_color_viridis(option = "C")+ 
-		geom_abline(intercept=0,slope=1)
+		geom_abline(intercept=0,slope=1) +
+		labs(x = x, y = y, color = color)
 }
