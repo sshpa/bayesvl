@@ -122,6 +122,9 @@ bvl_bnBayes <- function(dag, data, method = "bayes", iss = 10, ...) {
 }
 
 bvl_bnStrength <- function(dag, data = NULL, criterion = "x2", ...) {
+	if (length(dag@arcs) < 1)
+		return(NA)
+		
 	bnDag <- bvl_vl2bn(dag)
 	
 	strength = arc.strength(bnDag, data = data, criterion = criterion)
@@ -130,6 +133,9 @@ bvl_bnStrength <- function(dag, data = NULL, criterion = "x2", ...) {
 }
 
 bnScore <- function(dag, data = NULL, type = "bic", ...) {
+	if (length(dag@arcs) < 1)
+		return(NA)
+
 	bnDag <- bvl_vl2bn(dag)
 	
 	if (is.null(data))

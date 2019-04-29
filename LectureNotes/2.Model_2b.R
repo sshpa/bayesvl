@@ -39,5 +39,8 @@ options(mc.cores = parallel::detectCores())
 # Fit the model
 fit <- bvl_modelFit(model, dat1042, warmup = 2000, iter = 5000, chains = 4, cores = 1)
 
+bvl_trace(fit)
+
+summary(fit)
 
 

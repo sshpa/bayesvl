@@ -263,42 +263,49 @@ stan_formulaNode <- function(dag, node, loopForI = "", outcome = T)
 
 	arcsTo <- bvl_getArcs(dag, to = nodeName)
 
-	hasVarint <- bvl_getArcs(dag, to = nodeName, type = "varint")
-	hasSlope <- bvl_getArcs(dag, to = nodeName, type = "slope")
-
-	if (length(hasVarint) == 0 && length(hasSlope) > 0)
+	if (length(arcsTo) > 0)
 	{
-		formula_string = paste0(formula_string, "a_", nodeName, " + ")
-	}
+		hasVarint <- bvl_getArcs(dag, to = nodeName, type = "varint")
+		hasSlope <- bvl_getArcs(dag, to = nodeName, type = "slope")
+	
+		if (length(hasVarint) == 0 && length(hasSlope) > 0)
+		{
+			formula_string = paste0(formula_string, "a_", nodeName, " + ")
+		}
 
-	# loop for each arc to the node
-	for(p in 1:length(arcsTo))
+		# loop for each arc to the node
+		for(p in 1:length(arcsTo))
+		{
+			arc = arcsTo[[p]]
+			#print(arc)
+	
+			parentName = arc$from
+			arcName = arc$name
+	
+			#print(parentName)
+			parent = dag@nodes[[parentName]]
+	
+			if (p > 1)
+			{
+				formula_string = paste0(formula_string, " + ")
+			}
+	
+			if (arc$type == "varint")
+			{
+				formula_string = paste0(formula_string, "a_", parentName, "[", parentName, loopForI, "]")
+			}
+			else if (arc$type == "slope")
+			{
+				formula_string = paste0(formula_string, "b_", arc$name, " * ", parentName, loopForI)
+			}
+	
+		}
+	}
+	else
 	{
-		arc = arcsTo[[p]]
-		#print(arc)
-
-		parentName = arc$from
-		arcName = arc$name
-
-		#print(parentName)
-		parent = dag@nodes[[parentName]]
-
-		if (p > 1)
-		{
-			formula_string = paste0(formula_string, " + ")
-		}
-
-		if (arc$type == "varint")
-		{
-			formula_string = paste0(formula_string, "a_", parentName, "[", parentName, loopForI, "]")
-		}
-		else if (arc$type == "slope")
-		{
-			formula_string = paste0(formula_string, "b_", arc$name, " * ", parentName, loopForI)
-		}
-
+		formula_string = paste0(formula_string, stan_replaceParam(template$stan_likelihood, nodeName))
 	}
-		
+	
 	return(formula_string)
 }
 
