@@ -2,7 +2,7 @@ bvl2stan.templates <- list(
     Bern = list(
         name = "bern",
         dist = "binomial",
-        stan_prior = "beta(1, 1)",
+        stan_prior = c("beta(1, 1)"),
         stan_likelihood = "bernoulli(theta_{0})",
         stan_yrep = "binomial_rng({0}[i], inv_logit(theta_{0}))",
         stan_loglik = "binomial_logit_lpmf({0}[i] | 1, theta_{0})",
@@ -15,7 +15,7 @@ bvl2stan.templates <- list(
 		Binomial = list(
         name = "binorm",
         dist = "binomial",
-        stan_prior = "beta(1, 1)",
+        stan_prior = c("beta(1, 1)"),
         stan_likelihood = "bernoulli(theta_{0})",
         stan_yrep = "normal_rng(theta_{0})",
         stan_loglik = "normal_rng(theta_{0})",
@@ -28,7 +28,7 @@ bvl2stan.templates <- list(
     Normal = list(
         name = "norm",
         dist = "normal",
-        stan_prior = "beta(1, 1)",
+        stan_prior = c("normal( 0, 1 )", "normal( 0.6, 10 )"),
         stan_likelihood = "normal(mu_{0}, sigma_{0})",
         stan_yrep = "normal_rng(mu_{0}[i], sigma_{0})",
         stan_loglik = "normal_lpdf({0}[i] | mu_{0}[i], sigma_{0})",
@@ -41,7 +41,7 @@ bvl2stan.templates <- list(
     Categorical = list(
         name = "cat",
         dist = "cat",
-        stan_prior = "normal(0, 100)",
+        stan_prior = c("normal(0, 100)"),
         stan_likelihood = "categorical_logit(softmax(theta_{0}))",
         stan_yrep = "categorical_rng(theta_{0}[i])",
         stan_loglik = "categorical_logit_lpmf({0} | theta_{0}[i])",
