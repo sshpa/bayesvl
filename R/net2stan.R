@@ -20,13 +20,15 @@ stan_dataParams <- function(node)
   param_string = list()
 	nodeName <- node$name
 
-	template <- bvl_loadTemplate( node$dist )
-
 	if (node$dist == "cat")
 	{
 		param_mu = list(name=paste0("N",nodeName), type="int", length="")
 		param_string[[param_mu$name]] = param_mu
 	}
+	else if (node$dist == "mul")
+		return(param_string)
+
+	template <- bvl_loadTemplate( node$dist )
 	
   loopNobs = "[Nobs]"  
   varname = nodeName
@@ -101,13 +103,48 @@ stan_yrep <- function(node)
 	return(dist_string)
 }
 
-stan_regression <- function(dag, node, getparams = F)
+stan_transdata <- function(dag, node, getparams = F)
 {
 	reg_string = ""
 	param_string = list()
 	nodeName <- node$name
 	template <- bvl_loadTemplate( node$dist )
 
+	if (node$dist == "mul")
+	{
+		arcsTo <- bvl_getArcs(dag, to = nodeName)
+		if (length(arcsTo) > 0)
+		{
+			param = list(name=nodeName, type = "vector[Nobs]", prior = "", isTransformed = F)
+			param_string[[param$name]] = param
+
+			reg_string = paste0(reg_string, stan_indent(5), "for (i in 1:Nobs) {\n")
+			reg_string = paste0(reg_string, stan_indent(8), nodeName, "[i] = ")
+			for(i in 1:length(arcsTo))
+			{
+				if (i > 1)
+					reg_string = paste0(reg_string, " * ")
+					
+				reg_string = paste0(reg_string, arcsTo[[i]]$from, "[i]")
+			}
+			reg_string = paste0(reg_string, ";\n")
+			reg_string = paste0(reg_string, stan_indent(5), "}\n")
+		}
+	}
+	
+	if (getparams)
+		return(param_string)
+	else
+		return(reg_string)
+}
+
+stan_regression <- function(dag, node, getparams = F)
+{
+	reg_string = ""
+	param_string = list()
+	nodeName <- node$name
+	template <- bvl_loadTemplate( node$dist )
+	
 	#message(paste("Parameter transform for...", nodeName))
 
 	# is leaf??
@@ -333,7 +370,8 @@ stan_prior <- function(net, node)
 	if (length(node$parents) == 0)
 	{
 		if (length(bvl_getArcs(net, from = nodeName, type = "varint"))==0 &&
-				length(bvl_getArcs(net, from = nodeName, type = "slope"))==0)
+				length(bvl_getArcs(net, from = nodeName, type = "slope"))==0 &&
+				length(bvl_getArcs(net, from = nodeName, type = "mul"))==0)
 		{
 		  if (is.null(node$prior))
 		  {
@@ -385,15 +423,23 @@ bvl_model2Stan <- function(net, quantities_add = "")
 	
 	level = 1
 
+	dataParams <- list()
+	
 	data_string <- "data{\n"
 	data_string <- paste0(data_string, stan_indent(5), "// Define variables in data\n");
 
 	param_string <- "parameters{\n"
 	param_string <- paste0(param_string, stan_indent(5), "// Define parameters to estimate\n");
 
-	transformedcode_string <- ""
-	transformedparam_string <- ""
+	transparam_code <- ""
+	transparam_var <- ""
+
+	transdata_string <- "transformed data{\n"
+	transdata_string <- paste0(transdata_string, stan_indent(5), "// Define transformed data\n");
 	
+	transdata_code <- ""
+	transdata_var <- ""
+
 	model_string <- "model{\n"
 
 	prior_string <- paste0(stan_indent(5), "// Priors\n")
@@ -404,9 +450,11 @@ bvl_model2Stan <- function(net, quantities_add = "")
 
 	for(n in 1:length(nextNodes))
 	{
+		template <- bvl_loadTemplate( nextNodes[[n]]$dist )
+		
 		quantities_var <- ""
 		quantities_var <- paste0(quantities_var, stan_indent(5), "// simulate data from the posterior\n")
-		quantities_var <- paste0(quantities_var, stan_indent(5), "vector[Nobs] y_rep_",nextNodes[[n]]$name,";\n")
+		quantities_var <- paste0(quantities_var, stan_indent(5), template$out_type, " y_rep_",nextNodes[[n]]$name,"[Nobs];\n")
 		quantities_var <- paste0(quantities_var, stan_indent(5), "// log-likelihood posterior\n")
 		quantities_var <- paste0(quantities_var, stan_indent(5), "vector[Nobs] log_lik_",nextNodes[[n]]$name,";\n")
 	
@@ -438,9 +486,17 @@ bvl_model2Stan <- function(net, quantities_add = "")
 			}
 
 			distParams = stan_dataParams(nextNodes[[n]])	
-			for(p in 1:length(distParams))
+			if (length(distParams) > 0)
 			{
-					data_string <- paste0(data_string, stan_indent(5), distParams[[p]]$type, " ", distParams[[p]]$name, distParams[[p]]$length,";\n")
+				for(p in 1:length(distParams))
+				{
+					if (!(distParams[[p]]$name %in% names(dataParams)))
+					{
+						data_string <- paste0(data_string, stan_indent(5), distParams[[p]]$type, " ", distParams[[p]]$name, distParams[[p]]$length,";\n")
+						
+						dataParams[[distParams[[p]]$name]] = distParams
+					}
+				}
 			}
 
 			#if (length(arcsFrom) > 0)
@@ -490,10 +546,10 @@ bvl_model2Stan <- function(net, quantities_add = "")
 				for(p in 1:length(distParams))
 				{
 					if (distParams[[p]]$name == stan_replaceParam(template$par_reg, nodeName) && length(nextNodes[[n]]$parents) > 0)
-						transformedparam_string <- paste0(transformedparam_string, stan_indent(5), distParams[[p]]$type, " ", distParams[[p]]$name, distParams[[p]]$length, ";\n")
+						transparam_var <- paste0(transparam_var, stan_indent(5), distParams[[p]]$type, " ", distParams[[p]]$name, distParams[[p]]$length, ";\n")
 				}
 			}			
-			transformedcode_string <- paste0(stan_regression(net, nextNodes[[n]], getparams = F), transformedcode_string)
+			transparam_code <- paste0(stan_regression(net, nextNodes[[n]], getparams = F), transparam_code)
 			
 			params <- stan_regression(net, nextNodes[[n]], getparams = T)
 			if (length(params) > 0)
@@ -502,7 +558,7 @@ bvl_model2Stan <- function(net, quantities_add = "")
 				{
 					#print(params[[p]]$isTransformed)
 					if (params[[p]]$isTransformed)
-						transformedparam_string <- paste0(stan_indent(5), params[[p]]$type, " ", params[[p]]$name, ";\n", transformedparam_string)
+						transparam_var <- paste0(stan_indent(5), params[[p]]$type, " ", params[[p]]$name, ";\n", transparam_var)
 				}
 			}
 			
@@ -522,6 +578,18 @@ bvl_model2Stan <- function(net, quantities_add = "")
 			{
 				likelihood_string <- paste0(likelihood_string, stan_indent(5), nextNodes[[n]]$name, " ~ ", stan_likelihood(nextNodes[[n]]),";\n")
 			}
+			
+			#print("Transformed data ...")
+			# Transformed data ...
+			params = stan_transdata(net, nextNodes[[n]], getparams = T)
+			if (length(params) > 0)
+			{ 
+				for(i in length(params))
+					transdata_var <- paste0(transdata_var, stan_indent(5), params[[i]]$type, " ", params[[i]]$name, ";\n")
+					
+				transdata_code <- paste0(transdata_code, stan_transdata(net, nextNodes[[n]], getparams = F), "\n")
+			}
+
 		}
 		
 		nextNodes <- bvl_getNext(net, nextNodes)
@@ -538,11 +606,15 @@ bvl_model2Stan <- function(net, quantities_add = "")
 	transformed_string <- "transformed parameters{\n"
 	transformed_string <- paste0(transformed_string, stan_indent(5), "// Transform parameters\n");
 	
-	transformed_string <- paste0(transformed_string, transformedparam_string);
-	transformed_string <- paste0(transformed_string, transformedcode_string);
+	transformed_string <- paste0(transformed_string, transparam_var);
+	transformed_string <- paste0(transformed_string, transparam_code);
 	
 	transformed_string <- paste0(transformed_string, "}\n")
 
+	transdata_string <- paste0(transdata_string, transdata_var,"\n")
+	transdata_string <- paste0(transdata_string, transdata_code)
+	transdata_string <- paste0(transdata_string, "}\n")
+	
 	#message("Generating local variables...")
 
 	# Priors
@@ -561,7 +633,7 @@ bvl_model2Stan <- function(net, quantities_add = "")
 	quantities_string <- paste0(quantities_string, "}\n")
 	
 	# Build the model
-	stan_string <- paste0(data_string, param_string, transformed_string, model_string,quantities_string)
+	stan_string <- paste0(data_string, transdata_string, param_string, transformed_string, model_string, quantities_string)
 
 	message(stan_string)
 

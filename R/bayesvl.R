@@ -139,7 +139,7 @@ bnScore <- function(dag, data = NULL, type = "bic", ...) {
 	bnDag <- bvl_vl2bn(dag)
 	
 	if (is.null(data))
-		data <- dag@rawdata
+		data <- dag@standata
 
 	score = score(bnDag, data = data, type = type, ...)
 	

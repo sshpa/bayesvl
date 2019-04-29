@@ -278,7 +278,7 @@ setMethod("bvl_bnScore", "bayesvl", function(net, ...) {
 	if(length(net@standata)==0)
 		return (NA)
 
-	if (length(dag@arcs) < 1)
+	if (length(net@arcs) < 1)
 		return(NA)
 
 	dat <- as.data.frame(net@standata,stringsAsFactors=TRUE)[stan_data(net)]
