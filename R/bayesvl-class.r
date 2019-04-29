@@ -273,10 +273,13 @@ if (!isGeneric("bvl_bnScore"))
 
 setMethod("bvl_bnScore", "bayesvl", function(net, ...) {			
 	if(length(net@nodes)==0)
-		return (0)
+		return (NA)
 	
 	if(length(net@standata)==0)
-		return (0)
+		return (NA)
+
+	if (length(dag@arcs) < 1)
+		return(NA)
 
 	dat <- as.data.frame(net@standata,stringsAsFactors=TRUE)[stan_data(net)]
 	cols <- sapply(dat, is.numeric)

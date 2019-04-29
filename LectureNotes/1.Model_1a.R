@@ -8,3 +8,5 @@ data <- list(Nobs=N, y=data_list)
 fit <- bvl_modelFit(dag, data)
 
 bvl_trace(fit)
+
+summary(fit)
