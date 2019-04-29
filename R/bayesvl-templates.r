@@ -1,4 +1,17 @@
 bvl2stan.templates <- list(
+    Dummy = list(
+        name = "mul",
+        dist = "mul",
+        stan_prior = c("normal( 0, 1 )", "normal( 0.6, 10 )"),
+        stan_likelihood = "normal(mu_{0}, sigma_{0})",
+        stan_yrep = "normal_rng(mu_{0}[i], sigma_{0})",
+        stan_loglik = "normal_lpdf({0}[i] | mu_{0}[i], sigma_{0})",
+        par_names = c("mu_{0}","sigma_{0}"),
+        par_types = c("real","real<lower=0>"),
+        par_reg = "mu_{0}",
+        out_type = "real",
+        vectorized = TRUE
+    ),
     Bern = list(
         name = "bern",
         dist = "binomial",
@@ -16,12 +29,12 @@ bvl2stan.templates <- list(
         name = "binorm",
         dist = "binomial",
         stan_prior = c("beta(1, 1)"),
-        stan_likelihood = "bernoulli(theta_{0})",
-        stan_yrep = "normal_rng(theta_{0})",
-        stan_loglik = "normal_rng(theta_{0})",
-        par_names = c("mu_{0}","sigma_{0}"),
-        par_types = c("real","real<lower=0>"),
-        par_reg = "mu_{0}",
+        stan_likelihood = "binomial_logit(1, theta_{0})",
+        stan_yrep = "binomial_rng({0}[i], inv_logit(theta_{0}[i]))",
+        stan_loglik = "binomial_logit_lpmf({0}[i] | 1, theta_{0}[i])",
+        par_names = c("theta_{0}"),
+        par_types = c("real"),
+        par_reg = "theta_{0}",
         out_type = "int<lower=0,upper=1>",
         vectorized = TRUE
     ),
@@ -59,7 +72,7 @@ bvl_loadTemplate <- function( fname ) {
 	{
 		fname <- "norm"
 	}
-		
+	
   tmpname <- bvl_templateExists(fname)
   
   templates <- bvl2stan.templates
