@@ -3,9 +3,9 @@
 # various utility functions for generate stan code from network graph
 #
 
-stan_replaceParam <- function(in_string, nodeName)
+stan_replaceParam <- function(in_string, nodeName, prefix = "")
 {
-	out_string = gsub("\\{0\\}",nodeName,in_string)
+	out_string = gsub("\\{0\\}",paste0(nodeName,prefix),in_string)
 
 	return(out_string)
 }
@@ -17,14 +17,24 @@ stan_indent <- function(n)
 
 stan_dataParams <- function(node)
 {
-  dist_string = ""
+  param_string = list()
 	nodeName <- node$name
 
 	template <- bvl_loadTemplate( node$dist )
 
-	dist_string = paste0(template$out_type," ",nodeName,"[Nobs]")
+	if (node$dist == "cat")
+	{
+		param_mu = list(name=paste0("N",nodeName), type="int", length="")
+		param_string[[param_mu$name]] = param_mu
+	}
+	
+  loopNobs = "[Nobs]"  
+  varname = nodeName
+  vartype = stan_replaceParam(template$out_type, nodeName)
+	param_mu = list(name=varname, type=vartype, length=loopNobs)
+	param_string[[param_mu$name]] = param_mu
 
-	return(dist_string)
+	return(param_string)
 }
 
 stan_likelihood <- function(node)
@@ -56,11 +66,39 @@ stan_likparams <- function(node)
 	  {
 	  	loopNobs = paste0("[Nobs","]")
 	  }
-  	param_mu = list(name=stan_replaceParam(pars[p], nodeName), type=types[p], length=loopNobs)
+	  varname = stan_replaceParam(pars[p], nodeName)
+	  vartype = stan_replaceParam(types[p], nodeName)
+  	param_mu = list(name=varname, type=vartype, length=loopNobs)
   	param_string[[param_mu$name]] = param_mu
 	}
 
 	return(param_string)
+}
+
+stan_loglik <- function(node)
+{
+  dist_string = ""
+	nodeName <- node$name
+
+	template <- bvl_loadTemplate( node$dist )
+
+	dist_string = template$stan_loglik
+	dist_string = stan_replaceParam(dist_string, nodeName)
+
+	return(dist_string)
+}
+
+stan_yrep <- function(node)
+{
+  dist_string = ""
+	nodeName <- node$name
+
+	template <- bvl_loadTemplate( node$dist )
+
+	dist_string = template$stan_yrep
+	dist_string = stan_replaceParam(dist_string, nodeName)
+
+	return(dist_string)
 }
 
 stan_regression <- function(dag, node, getparams = F)
@@ -357,10 +395,10 @@ bvl_model2Stan <- function(net, quantities_add = "")
 	
 	  quantities_code <- ""
 	  quantities_code <- paste0(quantities_code, stan_indent(5), "for (i in 1:num_elements(y_rep_",nextNodes[[n]]$name,")) {\n")
-	  quantities_code <- paste0(quantities_code, stan_indent(5), "  y_rep_",nextNodes[[n]]$name,"[i] = normal_rng(",stan_formulaNode(net, nextNodes[[n]], "[i]", outcome = F),", sigma_",nextNodes[[n]]$name,");\n")
+	  quantities_code <- paste0(quantities_code, stan_indent(5), "  y_rep_",nextNodes[[n]]$name,"[i] = ", stan_yrep(nextNodes[[n]]),";\n")
 	  quantities_code <- paste0(quantities_code, stan_indent(5), "}\n")
-	  quantities_code <- paste0(quantities_code, stan_indent(5), "for (i in 1:num_elements(log_lik_",nextNodes[[n]]$name,")) {\n")
-	  quantities_code <- paste0(quantities_code, stan_indent(5), "  log_lik_",nextNodes[[n]]$name,"[i] = normal_lpdf(",nextNodes[[n]]$name,"[i] | ",stan_formulaNode(net, nextNodes[[n]], "[i]", outcome = F),", sigma_",nextNodes[[n]]$name,");\n")
+	  quantities_code <- paste0(quantities_code, stan_indent(5), "for (i in 1:Nobs) {\n")
+	  quantities_code <- paste0(quantities_code, stan_indent(5), "  log_lik_",nextNodes[[n]]$name,"[i] = ", stan_loglik(nextNodes[[n]]),";\n")
 	  quantities_code <- paste0(quantities_code, stan_indent(5), "}\n")
 	}
 
@@ -379,21 +417,25 @@ bvl_model2Stan <- function(net, quantities_add = "")
 			if (level == 1)
 			{
 				data_string <- paste0(data_string, stan_indent(5), "int<lower=1> Nobs",";  // Number of observations (an integer)\n")
-				data_string <- paste0(data_string, stan_indent(5), stan_dataParams(nextNodes[[n]]), ";   // outcome variable\n")
+				data_string <- paste0(data_string, stan_indent(5), "// outcome variable\n")
 			}
-			else
-				data_string <- paste0(data_string, stan_indent(5), stan_dataParams(nextNodes[[n]]), ";\n")
 
-			if (length(arcsFrom) > 0)
+			distParams = stan_dataParams(nextNodes[[n]])	
+			for(p in 1:length(distParams))
 			{
-				for(a in 1:length(arcsFrom))
-				{
-					if (arcsFrom[[a]]$type == "varint")
-					{
-						data_string <- paste0(data_string, stan_indent(5), "int<lower=1> N",nodeName,";  // Level of ",nodeName," (an integer)\n")
-					}
-				}
+					data_string <- paste0(data_string, stan_indent(5), distParams[[p]]$type, " ", distParams[[p]]$name, distParams[[p]]$length,";\n")
 			}
+
+			#if (length(arcsFrom) > 0)
+			#{
+			#	for(a in 1:length(arcsFrom))
+			#	{
+			#		if (arcsFrom[[a]]$type == "varint")
+			#		{
+			#			data_string <- paste0(data_string, stan_indent(5), "int<lower=1> N",nodeName,";  // Level of ",nodeName," (an integer)\n")
+			#		}
+			#	}
+			#}
 			
 			#print("Generating parameters ...")
 			# Generating parameters ...
@@ -449,7 +491,7 @@ bvl_model2Stan <- function(net, quantities_add = "")
 			
 			#print("Generating priors ...")
 			# Generating priors ...
-			prior_string <- paste0(prior_string, stan_prior(net, nextNodes[[n]]))
+			prior_string <- paste0(prior_string, stan_prior(net, nextNodes[[n]]), ";\n")
 
 			#print("Generating Likelihoods ...")
 			# Generating Likelihoods ...
