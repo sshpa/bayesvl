@@ -20,7 +20,8 @@ Here is the [CHANGELOG](https://github.com/sshpa/baysvl/blob/master/CHANGELOG.md
 To get started abd install the latest snapshot type in R console:
 
 ```sh
-> install.packages("https://github.com/sshpa/bayesvl/raw/master/bin/bayesvl_0.6.5.tgz")
+> install.packages("devtools")
+> devtools::install_github("bayesvl/bayesvl")
 ```
 
 ## Create bayesian network structures
@@ -49,14 +50,14 @@ dag <- bvl_addArc(dag, "T", "DC")
 Generating the STAN code required for building structures of Bayesian networks for sampling and parameter learning
 
 ```r
-stan_code <- bvl_stanCode(dag, data)
-stan_code
+stan_code <- bvl_model2Stan(dag)
+cat(stan_code)
 ```
 
 Get model's parameters
 
 ```r
-params <- bvl_stanParams(dag, data)
+params <- bvl_stanParams(dag)
 params
 ```
 ## Sample and fit the STAN model
@@ -64,7 +65,7 @@ params
 Sampling the STAN model
 
 ```r
-stan_fit <- bvl_stanRun(dag, data, iter=20000 , warmup=2000 , chains=4 , cores=4)
-stan_fit
+stan_fit <- bvl_modelFit(dag, data, iter=20000 , warmup=2000 , chains=4 , cores=4)
+summary(stan_fit)
 ```
 
