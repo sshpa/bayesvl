@@ -16,6 +16,24 @@ bayesvl <- function(data = NULL, nodes = list(), arcs = list()) {
   bvl
 }
 
+bvl_validNode <- function(dag, node)
+{
+	arcs <- bvl_getArcs(dag, to=node$name)
+	
+	if (length(arcs) > 0)
+	{
+		if (node$dist == "trans")
+		{
+			for(i in 1:length(arcs))
+			{
+				if (arcs[[i]]$type != "td")
+					return(paste0("Invalid arc to node ",node$name))
+			}
+		}
+	}
+	return("ok")
+}
+
 bvl_getArcs <- function(dag, from = NULL, to = NULL, type = NULL) {
 	if (is.null(from) && is.null(to))
 		return (NULL)

@@ -110,26 +110,40 @@ stan_transdata <- function(dag, node, getparams = F)
 	nodeName <- node$name
 	template <- bvl_loadTemplate( node$dist )
 
-	if (node$dist == "mul")
-	{
+	if (node$dist == "trans")
+	{		
+		param = list(name=nodeName, type = "vector[Nobs]", prior = "", isTransformed = F)
+		param_string[[param$name]] = param
+
+		reg_string = paste0(reg_string, stan_indent(5), "for (i in 1:Nobs) {\n")
+		reg_string = paste0(reg_string, stan_indent(8), nodeName, "[i] = ")
+
 		arcsTo <- bvl_getArcs(dag, to = nodeName)
 		if (length(arcsTo) > 0)
 		{
-			param = list(name=nodeName, type = "vector[Nobs]", prior = "", isTransformed = F)
-			param_string[[param$name]] = param
-
-			reg_string = paste0(reg_string, stan_indent(5), "for (i in 1:Nobs) {\n")
-			reg_string = paste0(reg_string, stan_indent(8), nodeName, "[i] = ")
 			for(i in 1:length(arcsTo))
 			{
 				if (i > 1)
-					reg_string = paste0(reg_string, " * ")
+					reg_string = paste0(reg_string, arcsTo[[i]]$type)
+				else if (arcsTo[[i]]$type == "-")
+					reg_string = paste0(reg_string, arcsTo[[i]]$type)
 					
 				reg_string = paste0(reg_string, arcsTo[[i]]$from, "[i]")
 			}
-			reg_string = paste0(reg_string, ";\n")
-			reg_string = paste0(reg_string, stan_indent(5), "}\n")
 		}
+		else if (!is.null(node$prior))
+		{
+			out_string = node$prior
+			names = unique(names(model@nodes))
+			
+			for(i in 1:length(names))
+			{
+				out_string = gsub(paste0('\\<', names[i], '\\>'), paste0(names[i],"[i]"),out_string)
+			}
+			reg_string = paste0(reg_string, out_string)
+		}
+		reg_string = paste0(reg_string, ";\n")
+		reg_string = paste0(reg_string, stan_indent(5), "}\n")
 	}
 	
 	if (getparams)
@@ -363,6 +377,9 @@ stan_prior <- function(net, node)
 {
 	prior_string = list()
 
+	if (node$dist == "trans")
+		return(prior_string)
+		
 	nodeName <- node$name
 	template <- bvl_loadTemplate( node$dist )
 	#message(paste("Priors of", nodeName))
@@ -370,8 +387,7 @@ stan_prior <- function(net, node)
 	if (length(node$parents) == 0)
 	{
 		if (length(bvl_getArcs(net, from = nodeName, type = "varint"))==0 &&
-				length(bvl_getArcs(net, from = nodeName, type = "slope"))==0 &&
-				length(bvl_getArcs(net, from = nodeName, type = "mul"))==0)
+				length(bvl_getArcs(net, from = nodeName, type = "slope"))==0)
 		{
 		  if (is.null(node$prior))
 		  {
@@ -706,7 +722,7 @@ stanPost <- function(fit) {
 		return ( post )
 }
 
-bvl_modelFit <- function(net, dataList, warmup = 500, iter = 2000, chains = 4, cores = 1, writefile = F)
+bvl_modelFit <- function(net, dataList, warmup = 1000, iter = 5000, chains = 4, cores = 1, writefile = F)
 {
 	model_string <- bvl_model2Stan(net)
 

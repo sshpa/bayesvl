@@ -128,14 +128,23 @@ if (!isGeneric("bvl_addArc"))
 
 setMethod("bvl_addArc", "bayesvl", function(dag, from, to, type = "slope", prior = "normal(0,100)") {
 	if (!bvl_nodeExists(dag, from))
+	{
 		message(paste0("Error checking node.\n Invalid node '", from, "'."))
+		return(dag)
+	}
 	
 	if (!bvl_nodeExists(dag, to))
+	{
 		message(paste0("Error checking node.\n Invalid node '", to, "'."))
+		return(dag)
+	}
 
 	if (bvl_hasArc(dag, from, to))
+	{
+		message(paste0("Already has the arc from '", from, "' to '", to, "'."))
 		return(dag)
-		
+	}
+	
 	dag@nodes[[from]]$children = c(dag@nodes[[from]]$children, to)
 	dag@nodes[[to]]$parents = c(dag@nodes[[to]]$parents, from)
 	
