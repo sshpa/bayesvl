@@ -290,3 +290,15 @@ setMethod("bvl_bnScore", "bayesvl", function(net, ...) {
 	return(score)
 })
 
+if (!isGeneric("bvl_stanParams"))
+      setGeneric("bvl_stanParams", function(net) standardGeneric("bvl_stanParams"))
+
+setMethod("bvl_stanParams", "bayesvl", function(net) {			
+	if(length(net@nodes)==0)
+		return (NA)
+
+	params <- stan_params(net)
+	
+	return(params)
+})
+
