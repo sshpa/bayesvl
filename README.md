@@ -19,7 +19,7 @@ Here is the [CHANGELOG](https://github.com/sshpa/baysvl/blob/master/CHANGELOG.md
 
 To get started abd install the latest snapshot type in R console:
 
-```sh
+```r
 > install.packages("devtools")
 > devtools::install_github("sshpa/bayesvl")
 ```
