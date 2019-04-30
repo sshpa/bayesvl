@@ -25,15 +25,41 @@ bvl2stan.templates <- list(
         out_type = "int<lower=0,upper=1>",
         vectorized = TRUE
     ),
-		Binomial = list(
-        name = "binorm",
+		Gamma = list(
+        name = "gamma",
+        dist = "gamma",
+        stan_prior = c("beta(1, 1)"),
+        stan_likelihood = "gamma(alpha_{0}, beta_{0})",
+        stan_yrep = "gamma_rng(alpha_{0}[i], beta_{0}[i])",
+        stan_loglik = "gamma_lpdf({0}[i] | alpha_{0}[i], beta_{0}[i])",
+        par_names = c("alpha_{0}", "beta_{0}"),
+        par_types = c("real", "real"),
+        par_reg = "alpha_{0}",
+        out_type = "real",
+        vectorized = TRUE
+    ),
+		Poisson = list(
+        name = "pois",
+        dist = "pois",
+        stan_prior = c("beta(1, 1)"),
+        stan_likelihood = "poisson(lambda_{0})",
+        stan_yrep = "poisson_rng(lambda_{0}[i])",
+        stan_loglik = "poisson_lpmf({0}[i], lambda_{0}[i])",
+        par_names = c("lambda_{0}"),
+        par_types = c("real"),
+        par_reg = "lambda_{0}",
+        out_type = "real",
+        vectorized = TRUE
+    ),
+    Bern = list(
+        name = "bern",
         dist = "binomial",
         stan_prior = c("beta(1, 1)"),
-        stan_likelihood = "binomial_logit(1, theta_{0})",
-        stan_yrep = "binomial_rng({0}[i], inv_logit(theta_{0}[i]))",
-        stan_loglik = "binomial_logit_lpmf({0}[i] | 1, theta_{0}[i])",
+        stan_likelihood = "bernoulli(theta_{0})",
+        stan_yrep = "binomial_rng({0}[i], inv_logit(theta_{0}))",
+        stan_loglik = "binomial_logit_lpmf({0}[i] | 1, theta_{0})",
         par_names = c("theta_{0}"),
-        par_types = c("real"),
+        par_types = c("real<lower=0,upper=1>"),
         par_reg = "theta_{0}",
         out_type = "int<lower=0,upper=1>",
         vectorized = TRUE
