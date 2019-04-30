@@ -1,7 +1,7 @@
 bvl2stan.templates <- list(
     Dummy = list(
-        name = "mul",
-        dist = "mul",
+        name = "trans",
+        dist = "trans",
         stan_prior = c("normal( 0, 1 )", "normal( 0.6, 10 )"),
         stan_likelihood = "normal(mu_{0}, sigma_{0})",
         stan_yrep = "normal_rng(mu_{0}[i], sigma_{0})",
@@ -21,6 +21,19 @@ bvl2stan.templates <- list(
         stan_loglik = "binomial_logit_lpmf({0}[i] | 1, theta_{0})",
         par_names = c("theta_{0}"),
         par_types = c("real<lower=0,upper=1>"),
+        par_reg = "theta_{0}",
+        out_type = "int<lower=0,upper=1>",
+        vectorized = TRUE
+    ),
+		Binomial = list(
+        name = "binorm",
+        dist = "binomial",
+        stan_prior = c("beta(1, 1)"),
+        stan_likelihood = "binomial_logit(1, theta_{0})",
+        stan_yrep = "binomial_rng({0}[i], inv_logit(theta_{0}[i]))",
+        stan_loglik = "binomial_logit_lpmf({0}[i] | 1, theta_{0}[i])",
+        par_names = c("theta_{0}"),
+        par_types = c("real"),
         par_reg = "theta_{0}",
         out_type = "int<lower=0,upper=1>",
         vectorized = TRUE
@@ -51,17 +64,17 @@ bvl2stan.templates <- list(
         out_type = "real",
         vectorized = TRUE
     ),
-    Bern = list(
-        name = "bern",
-        dist = "binomial",
-        stan_prior = c("beta(1, 1)"),
-        stan_likelihood = "bernoulli(theta_{0})",
-        stan_yrep = "binomial_rng({0}[i], inv_logit(theta_{0}))",
-        stan_loglik = "binomial_logit_lpmf({0}[i] | 1, theta_{0})",
-        par_names = c("theta_{0}"),
-        par_types = c("real<lower=0,upper=1>"),
-        par_reg = "theta_{0}",
-        out_type = "int<lower=0,upper=1>",
+		Student = list(
+        name = "student",
+        dist = "student",
+        stan_prior = c("gamma(2, 0.1)", "exponential(1)"),
+        stan_likelihood = "student_t(nu_{0},mu_{0},sigma_{0})",
+        stan_yrep = "student_t_rng(lambda_{0}[i])",
+        stan_loglik = "student_t_lpdf({0}[i] | nu_{0}, mu_{0}[i], sigma_{0})",
+        par_names = c("nu_{0}","mu_{0}","sigma_{0}"),
+        par_types = c("real","real","real"),
+        par_reg = "mu_{0}",
+        out_type = "real",
         vectorized = TRUE
     ),
     Normal = list(
