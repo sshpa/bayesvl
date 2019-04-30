@@ -25,7 +25,7 @@ stan_dataParams <- function(node)
 		param_mu = list(name=paste0("N",nodeName), type="int", length="")
 		param_string[[param_mu$name]] = param_mu
 	}
-	else if (node$dist == "mul")
+	else if (node$dist == "trans")
 		return(param_string)
 
 	template <- bvl_loadTemplate( node$dist )
@@ -380,6 +380,15 @@ stan_prior <- function(net, node)
 	if (node$dist == "trans")
 		return(prior_string)
 		
+	if (length(node$children) >0)
+	{
+		for(i in 1:length(node$children))
+		{
+			if (net@nodes[[node$children[i]]]$dist == "trans")
+				return(prior_string)
+		}
+	}
+		
 	nodeName <- node$name
 	template <- bvl_loadTemplate( node$dist )
 	#message(paste("Priors of", nodeName))
@@ -651,7 +660,7 @@ bvl_model2Stan <- function(net, quantities_add = "")
 	# Build the model
 	stan_string <- paste0(data_string, transdata_string, param_string, transformed_string, model_string, quantities_string)
 
-	message(stan_string)
+	#message(stan_string)
 
 	return(stan_string)
 }
