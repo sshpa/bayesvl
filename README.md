@@ -21,7 +21,7 @@ To get started abd install the latest snapshot type in R console:
 
 ```sh
 > install.packages("devtools")
-> devtools::install_github("bayesvl/bayesvl")
+> devtools::install_github("sshpa/bayesvl")
 ```
 
 ## Create bayesian network structures
