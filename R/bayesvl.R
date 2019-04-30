@@ -151,14 +151,8 @@ bvl_bnStrength <- function(dag, data = NULL, criterion = "x2", ...) {
 }
 
 bnScore <- function(dag, data = NULL, type = "bic", ...) {
-	if (length(dag@arcs) < 1)
-		return(NA)
-
 	bnDag <- bvl_vl2bn(dag)
 	
-	if (is.null(data))
-		data <- dag@standata
-
 	score = score(bnDag, data = data, type = type, ...)
 	
 	return(score)

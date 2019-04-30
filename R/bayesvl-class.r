@@ -290,6 +290,12 @@ setMethod("bvl_bnScore", "bayesvl", function(net, ...) {
 	if (length(net@arcs) < 1)
 		return(NA)
 
+	for(i in 1:length(net@nodes))
+	{
+		if (!(net@nodes[[i]]$name %in% names(net@standata)))
+			return(NA)
+	}
+	
 	dat <- as.data.frame(net@standata,stringsAsFactors=TRUE)[stan_data(net)]
 	cols <- sapply(dat, is.numeric)
 	dat[,cols] <- lapply(dat[,cols], as.factor)
