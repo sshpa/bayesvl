@@ -112,38 +112,44 @@ stan_transdata <- function(dag, node, getparams = F)
 
 	if (node$dist == "trans")
 	{		
-		param = list(name=nodeName, type = "vector[Nobs]", prior = "", isTransformed = F)
-		param_string[[param$name]] = param
-
-		reg_string = paste0(reg_string, stan_indent(5), "for (i in 1:Nobs) {\n")
-		reg_string = paste0(reg_string, stan_indent(8), nodeName, "[i] = ")
-
 		arcsTo <- bvl_getArcs(dag, to = nodeName)
+
 		if (length(arcsTo) > 0)
 		{
-			for(i in 1:length(arcsTo))
+			param = list(name=nodeName, type = "vector[Nobs]", prior = "", isTransformed = F)
+			param_string[[param$name]] = param
+	
+			reg_string = paste0(reg_string, stan_indent(5), "for (i in 1:Nobs) {\n")
+			reg_string = paste0(reg_string, stan_indent(8), nodeName, "[i] = ")
+	
+			if (!is.null(node$prior))
 			{
-				if (i > 1)
-					reg_string = paste0(reg_string, arcsTo[[i]]$type)
-				else if (arcsTo[[i]]$type == "-")
-					reg_string = paste0(reg_string, arcsTo[[i]]$type)
-					
-				reg_string = paste0(reg_string, arcsTo[[i]]$from, "[i]")
+				out_string = node$prior
+				names = unique(names(model@nodes))
+				
+				for(i in 1:length(names))
+				{
+					out_string = gsub(paste0('\\<', names[i], '\\>'), paste0(names[i],"[i]"),out_string)
+				}
+				reg_string = paste0(reg_string, out_string)
 			}
-		}
-		else if (!is.null(node$prior))
-		{
-			out_string = node$prior
-			names = unique(names(model@nodes))
-			
-			for(i in 1:length(names))
+			else
 			{
-				out_string = gsub(paste0('\\<', names[i], '\\>'), paste0(names[i],"[i]"),out_string)
+				for(i in 1:length(arcsTo))
+				{
+					if (i > 1)
+						reg_string = paste0(reg_string, arcsTo[[i]]$type)
+					else if (arcsTo[[i]]$type == "-")
+						reg_string = paste0(reg_string, arcsTo[[i]]$type)
+						
+					reg_string = paste0(reg_string, arcsTo[[i]]$from, "[i]")
+				}
 			}
-			reg_string = paste0(reg_string, out_string)
+
+			reg_string = paste0(reg_string, ";\n")
+			reg_string = paste0(reg_string, stan_indent(5), "}\n")
 		}
-		reg_string = paste0(reg_string, ";\n")
-		reg_string = paste0(reg_string, stan_indent(5), "}\n")
+		
 	}
 	
 	if (getparams)
