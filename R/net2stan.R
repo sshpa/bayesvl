@@ -196,7 +196,7 @@ isVarint <- function(dag, node)
 	if (node$dist == "trans")
 		return(FALSE)
 		
-	varint <- bvl_getArcs(dag, to = node$name, type = "varint")
+	varint <- bvl_getArcs(dag, to = node$name, type = c("varint"))
 	
 	arcs <- bvl_getArcs(dag, to = node$name)
 		
@@ -210,9 +210,9 @@ isSlope <- function(dag, node)
 	if (node$dist == "trans")
 		return(FALSE)
 
-	varint <- bvl_getArcs(dag, to = node$name, type = "varint")
+	varint <- bvl_getArcs(dag, to = node$name, type = c("varint"))
 	
-	slope <- bvl_getArcs(dag, to = node$name, type = "slope")
+	slope <- bvl_getArcs(dag, to = node$name, type = c("slope"))
 		
 	arcs <- bvl_getArcs(dag, to = node$name)
 		
@@ -223,9 +223,9 @@ isSlope <- function(dag, node)
 
 isOp <- function(dag, node)
 {
-	varint <- bvl_getArcs(dag, to = node$name, type = "varint")
+	varint <- bvl_getArcs(dag, to = node$name, type = c("varint"))
 	
-	slope <- bvl_getArcs(dag, to = node$name, type = "slope")
+	slope <- bvl_getArcs(dag, to = node$name, type = c("slope"))
 		
 	arcs <- bvl_getArcs(dag, to = node$name)
 		
@@ -241,9 +241,9 @@ stan_regression <- function(dag, node, getparams = F)
 	nodeName <- node$name
 	template <- bvl_loadTemplate( node$dist )
 	
-	hasVarint <- bvl_getArcs(dag, to = nodeName, type = "varint")
-	hasSlope <- bvl_getArcs(dag, to = nodeName, type = "slope")
-	hasMul <- bvl_getArcs(dag, to = nodeName, type = "*")
+	hasVarint <- bvl_getArcs(dag, to = nodeName, type = c("varint"))
+	hasSlope <- bvl_getArcs(dag, to = nodeName, type = c("slope"))
+	hasMul <- bvl_getArcs(dag, to = nodeName, type = ops)
 
 	#message(paste("Parameter transform for...", nodeName))
 
@@ -468,8 +468,8 @@ stan_formulaNode <- function(dag, node, loopForI = "", outcome = T)
 
 	if (length(arcsTo) > 0)
 	{
-		hasVarint <- bvl_getArcs(dag, to = nodeName, type = "varint")
-		hasSlope <- bvl_getArcs(dag, to = nodeName, type = "slope")
+		hasVarint <- bvl_getArcs(dag, to = nodeName, type = c("varint"))
+		hasSlope <- bvl_getArcs(dag, to = nodeName, type = c("slope"))
 	
 		if (length(hasVarint) == 0 && length(hasSlope) > 0)
 		{
@@ -488,18 +488,27 @@ stan_formulaNode <- function(dag, node, loopForI = "", outcome = T)
 			#print(parentName)
 			parent = dag@nodes[[parentName]]
 	
-			if (p > 1)
-			{
-				formula_string = paste0(formula_string, " + ")
-			}
 	
 			if (arc$type == "varint")
 			{
+				if (p > 1)
+					formula_string = paste0(formula_string, " + ")
+
 				formula_string = paste0(formula_string, "a_", parentName, "[", parentName, loopForI, "]")
 			}
 			else if (arc$type == "slope")
 			{
+				if (p > 1)
+					formula_string = paste0(formula_string, " + ")
+
 				formula_string = paste0(formula_string, "b_", arc$name, " * ", parentName, loopForI)
+			}
+			else if (arc$type %in% ops)
+			{
+				if (p > 1)
+					formula_string = paste0(formula_string, " ", arc$type, " ")
+
+				formula_string = paste0(formula_string, parentName, loopForI)
 			}
 	
 		}
@@ -531,7 +540,7 @@ stan_prior <- function(net, node)
 
 	if (node$dist == "trans")
 		return(prior_string)
-		
+	
 	if (length(node$children) >0)
 	{
 		for(i in 1:length(node$children))
@@ -545,10 +554,9 @@ stan_prior <- function(net, node)
 	template <- bvl_loadTemplate( node$dist )
 	#message(paste("Priors of", nodeName))
 
-	if (length(node$parents) == 0)
+	if (bvl_isRoot(node))
 	{
-		if (length(bvl_getArcs(net, from = nodeName, type = "varint"))==0 &&
-				length(bvl_getArcs(net, from = nodeName, type = "slope"))==0)
+		if (length(bvl_getArcs(net, from = nodeName))==0)
 		{
 		  if (is.null(node$prior))
 		  {
