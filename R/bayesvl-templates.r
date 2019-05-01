@@ -1,7 +1,20 @@
-bvl2stan.templates <- list(
+bvl2stan.nodeTemplates <- list(
     Trans = list(
         name = "trans",
         dist = "trans",
+        stan_prior = c("normal( 0, 1 )", "normal( 0.6, 10 )"),
+        stan_likelihood = "normal(mu_{0}, sigma_{0})",
+        stan_yrep = "normal_rng(mu_{0}[i], sigma_{0})",
+        stan_loglik = "normal_lpdf({0}[i] | mu_{0}[i], sigma_{0})",
+        par_names = c("mu_{0}","sigma_{0}"),
+        par_types = c("real","real<lower=0>"),
+        par_reg = "mu_{0}",
+        out_type = "real",
+        vectorized = TRUE
+    ),
+    Dummy = list(
+        name = "dummy",
+        dist = "dummy",
         stan_prior = c("normal( 0, 1 )", "normal( 0.6, 10 )"),
         stan_likelihood = "normal(mu_{0}, sigma_{0})",
         stan_yrep = "normal_rng(mu_{0}[i], sigma_{0})",
@@ -105,6 +118,28 @@ bvl2stan.templates <- list(
     )
 )
 
+bvl2stan.arcTemplates <- list(
+    Slope = list(
+        name = "slope",
+        dist = "slope",
+        par_names = c("b_{0}_{1}"),
+        par_types = c("real"),
+        par_len = c(""),
+        par_trans = c(F),
+        par_lik = c(T),
+        stan_prior = c("normal( 0, 100 )")
+    ),
+    VarInt = list(
+        name = "varint",
+        dist = "varint",
+        par_names = c("a_{0}","a_{0}_0","u_{0}","sigma_{0}"),
+        par_types = c("vector[N{0}]","real","vector[N{0}]","real<lower=0>"),
+        par_len = c("[N{0}]","","[N{0}]",""),
+        par_trans = c(T,F,F,F),
+        par_lik = c(T,F,F,F),
+        stan_prior = c("","","normal(0, sigma_{0})","normal(0,100)")
+    )
+)
 
 bvl_loadTemplate <- function( fname ) {
 	if (is.null(fname))
@@ -114,7 +149,8 @@ bvl_loadTemplate <- function( fname ) {
 	
   tmpname <- bvl_templateExists(fname)
   
-  templates <- bvl2stan.templates
+  templates <- bvl2stan.nodeTemplates
+  
   if ( is.na(tmpname) ) stop(paste0("Distribution ",fname," not recognized."))
   return(templates[[ tmpname ]])
 }
@@ -122,13 +158,45 @@ bvl_loadTemplate <- function( fname ) {
 bvl_templateExists <- function( fname ) {
     the_match <- NA
     
-    templates <- bvl2stan.templates
+    templates <- bvl2stan.nodeTemplates
+    
     for ( i in 1:length(templates) ) {
-        R_name <- templates[[i]][['name']]
-        if ( fname %in% c(R_name) ) {
+        N_name <- templates[[i]][['name']]
+        if ( fname %in% c(N_name) ) {
             the_match <- names(templates)[i]
             return(the_match)
         }
     }
     return(the_match)
 }
+
+
+bvl_loadArcTemplate <- function( fname ) {
+	if (is.null(fname))
+	{
+		fname <- "norm"
+	}
+	
+  tmpname <- bvl_arcTemplateExists(fname)
+  
+  templates <- bvl2stan.arcTemplates
+  
+  if ( is.na(tmpname) ) stop(paste0("Arc type ",fname," not recognized."))
+  return(templates[[ tmpname ]])
+}
+
+bvl_arcTemplateExists <- function( fname ) {
+    the_match <- NA
+    
+    templates <- bvl2stan.arcTemplates
+    
+    for ( i in 1:length(templates) ) {
+        A_name <- templates[[i]][['name']]
+        if ( fname %in% c(A_name) ) {
+            the_match <- names(templates)[i]
+            return(the_match)
+        }
+    }
+    return(the_match)
+}
+

@@ -1,3 +1,5 @@
+#============================================
+#  Model using transformed data nodes
 
 # Design the model
 model <- bayesvl()
@@ -41,3 +43,30 @@ bvl_trace(fit)
 summary(fit)
 
 bvl_plotDensOverlay(fit)
+
+
+#============================================
+#  Model using dummy nodes
+
+# Design the model
+model <- bayesvl()
+model <- bvl_addNode(model, "T", "binorm")
+model <- bvl_addNode(model, "VB", "binorm")
+model <- bvl_addNode(model, "VC", "binorm")
+model <- bvl_addNode(model, "VT", "binorm")
+model <- bvl_addNode(model, "AVT", "binorm")
+model <- bvl_addNode(model, "Grp1", "dummy")
+model <- bvl_addNode(model, "Grp2", "dummy")
+
+model <- bvl_addArc(model, "AVT", "T", "slope")
+model <- bvl_addArc(model, "VT", "T", "slope")
+model <- bvl_addArc(model, "Grp2", "T", "+")
+model <- bvl_addArc(model, "VB", "Grp1", "slope")
+model <- bvl_addArc(model, "VC", "Grp1", "slope")
+model <- bvl_addArc(model, "VT", "Grp2", "*")
+model <- bvl_addArc(model, "Grp1", "Grp2", "*")
+
+options(mc.cores = parallel::detectCores())
+
+# Fit the model
+fit <- bvl_modelFit(model, dat, warmup = 2000, iter = 5000, chains = 4, cores = 1)

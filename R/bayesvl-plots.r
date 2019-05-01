@@ -1,5 +1,5 @@
 library(bayesplot)
-library(ggplot)
+library(ggplot2)
 
 plotParams <- function(post, row = 2, col = 2, credMass) {
 		par(mfrow=c(row,col))
