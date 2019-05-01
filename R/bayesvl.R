@@ -45,7 +45,7 @@ bvl_getArcs <- function(dag, from = NULL, to = NULL, type = NULL) {
 		
 	for(n in 1:length(dag@arcs))
 	{
-		if ((dag@arcs[[n]]$from == from || is.null(from)) && (dag@arcs[[n]]$to == to || is.null(to)) && (dag@arcs[[n]]$type == type || is.null(type)))
+		if ((dag@arcs[[n]]$from == from || is.null(from)) && (dag@arcs[[n]]$to == to || is.null(to)) && (dag@arcs[[n]]$type %in% type || is.null(type)))
 		{
 			arcs[[dag@arcs[[n]]$name]] = dag@arcs[[n]]
 		}

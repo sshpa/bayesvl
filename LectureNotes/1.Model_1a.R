@@ -5,6 +5,9 @@ N = 10       # Specify the total number of flips, denoted N.
 data_list <- c(1,0,1,1,0,1,0,0,0,0) # the trials of bias coin
 data <- list(Nobs=N, y=data_list)
 
+model_string <- bvl_model2Stan(dag)
+cat(model_string)
+
 fit <- bvl_modelFit(dag, data)
 
 bvl_trace(fit)
