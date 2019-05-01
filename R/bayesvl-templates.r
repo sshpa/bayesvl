@@ -1,5 +1,5 @@
 bvl2stan.templates <- list(
-    Dummy = list(
+    Trans = list(
         name = "trans",
         dist = "trans",
         stan_prior = c("normal( 0, 1 )", "normal( 0.6, 10 )"),
