@@ -721,7 +721,6 @@ bvl_model2Stan <- function(net, quantities_add = "")
 				param_string <- paste0(param_string, stan_indent(5), "\n");	
 			}
 			
-
 			#print("Generating transformed parameters ...")
 			# Generating transformed parameters ...
 			if (level == 1)
@@ -829,26 +828,54 @@ stan_params <- function(net)
 {
 	params <- c()
 
-	leaves <- bvl_getLeaves(net)
-	for(n in 1:length(leaves))
+	for(n in 1:length(net@nodes))
 	{
-		nodeName <- leaves[[n]]$name
-		template <- bvl_loadTemplate( leaves[[n]]$dist )
-
-		if (length(leaves[[n]]$parents) > 0)
+		nodeName <- net@nodes[[n]]$name
+		template <- bvl_loadTemplate(net@nodes[[n]]$dist)
+	
+		if (bvl_isLeaf(net@nodes[[n]]))
 		{
-			linearParams = stan_regression(net, leaves[[n]], getparams = T)
-
-			for(p in 1:length(linearParams))
+			distParams = stan_likparams(net@nodes[[n]])
+	
+			for(p in 1:length(distParams))
 			{
-				params <- c(params,linearParams[[p]]$name)
+				if (distParams[[p]]$name != stan_replaceNodeParam(template$par_reg, nodeName) || length(net@nodes[[n]]$parents) == 0)
+					params <- c(params, distParams[[p]]$name)
 			}
 		}
-		else
+
+		reg_params <- stan_regression(net, net@nodes[[n]], getparams = T)
+		if (length(reg_params) > 0)
 		{
-			params <- c(params, stan_replaceNodeParam(template$par_reg, nodeName))
+			for(p in 1:length(reg_params))
+			{
+				#print(reg_params[[p]]$isTransformed)
+				if (!reg_params[[p]]$isTransformed)
+					params <- c(params, reg_params[[p]]$name)
+			}
 		}
-	}
+  }
+  
+	#leaves <- bvl_getLeaves(net)
+	#for(n in 1:length(leaves))
+	#{
+	#	nodeName <- leaves[[n]]$name
+	#	template <- bvl_loadTemplate( leaves[[n]]$dist )
+  #
+	#	if (length(leaves[[n]]$parents) > 0)
+	#	{
+	#		linearParams = stan_regression(net, leaves[[n]], getparams = T)
+  #
+	#		for(p in 1:length(linearParams))
+	#		{
+	#			params <- c(params,linearParams[[p]]$name)
+	#		}
+	#	}
+	#	else
+	#	{
+	#		params <- c(params, stan_replaceNodeParam(template$par_reg, nodeName))
+	#	}
+	#}
 
 	return(params)
 }
