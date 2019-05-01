@@ -3,9 +3,20 @@
 # various utility functions for generate stan code from network graph
 #
 
-stan_replaceParam <- function(in_string, nodeName, prefix = "")
+ops <- c("*","+","-")
+
+stan_replaceNodeParam <- function(in_string, nodeName, suffix = "")
 {
-	out_string = gsub("\\{0\\}",paste0(nodeName,prefix),in_string)
+	out_string = gsub("\\{0\\}",paste0(nodeName, suffix), in_string)
+
+	return(out_string)
+}
+
+stan_replaceArcParam <- function(in_string, arc, suffix = "")
+{
+	out_string = gsub("\\{0\\}", arc$from, in_string)
+	out_string = gsub("\\{1\\}", arc$to, out_string)
+	out_string = paste0(out_string, suffix)
 
 	return(out_string)
 }
@@ -27,12 +38,14 @@ stan_dataParams <- function(node)
 	}
 	else if (node$dist == "trans")
 		return(param_string)
+	else if (node$dist == "dummy")
+		return(param_string)
 
 	template <- bvl_loadTemplate( node$dist )
 	
   loopNobs = "[Nobs]"  
   varname = nodeName
-  vartype = stan_replaceParam(template$out_type, nodeName)
+  vartype = stan_replaceNodeParam(template$out_type, nodeName)
 	param_mu = list(name=varname, type=vartype, length=loopNobs)
 	param_string[[param_mu$name]] = param_mu
 
@@ -47,7 +60,7 @@ stan_likelihood <- function(node)
 	template <- bvl_loadTemplate( node$dist )
 
 	dist_string = template$stan_likelihood
-	dist_string = stan_replaceParam(dist_string, nodeName)
+	dist_string = stan_replaceNodeParam(dist_string, nodeName)
 
 	return(dist_string)
 }
@@ -68,8 +81,8 @@ stan_likparams <- function(node)
 	  {
 	  	loopNobs = paste0("[Nobs","]")
 	  }
-	  varname = stan_replaceParam(pars[p], nodeName)
-	  vartype = stan_replaceParam(types[p], nodeName)
+	  varname = stan_replaceNodeParam(pars[p], nodeName)
+	  vartype = stan_replaceNodeParam(types[p], nodeName)
   	param_mu = list(name=varname, type=vartype, length=loopNobs)
   	param_string[[param_mu$name]] = param_mu
 	}
@@ -85,7 +98,7 @@ stan_loglik <- function(node)
 	template <- bvl_loadTemplate( node$dist )
 
 	dist_string = template$stan_loglik
-	dist_string = stan_replaceParam(dist_string, nodeName)
+	dist_string = stan_replaceNodeParam(dist_string, nodeName)
 
 	return(dist_string)
 }
@@ -98,7 +111,7 @@ stan_yrep <- function(node)
 	template <- bvl_loadTemplate( node$dist )
 
 	dist_string = template$stan_yrep
-	dist_string = stan_replaceParam(dist_string, nodeName)
+	dist_string = stan_replaceNodeParam(dist_string, nodeName)
 
 	return(dist_string)
 }
@@ -158,6 +171,69 @@ stan_transdata <- function(dag, node, getparams = F)
 		return(reg_string)
 }
 
+stan_getPars <- function(dag, arc, getName = F)
+{
+	params = list()
+	
+	template <- bvl_loadArcTemplate( arc$type )
+	
+	for(i in template$par_names)
+	{
+		param_name = stan_replaceArcParam(template$par_names[i], arc)
+		param_type = stan_replaceArcParam(template$par_types[i], arc)
+		param_prior = stan_replaceArcParam(template$stan_prior[i], arc)
+	
+		param = list(name=param_name, type = param_type, prior = param_prior, length=template$par_len[i], isLikelihood = template$par_lik[i], isTransformed = template$par_trans[i])
+		
+		params[[param$name]] = param
+	}
+	
+	return(params)
+}
+
+isVarint <- function(dag, node)
+{
+	if (node$dist == "trans")
+		return(FALSE)
+		
+	varint <- bvl_getArcs(dag, to = node$name, type = "varint")
+	
+	arcs <- bvl_getArcs(dag, to = node$name)
+		
+	hasVarint = ((length(varint) >0) & (length(varint)==length(arcs)))
+	
+	return(hasVarint)
+}
+
+isSlope <- function(dag, node)
+{
+	if (node$dist == "trans")
+		return(FALSE)
+
+	varint <- bvl_getArcs(dag, to = node$name, type = "varint")
+	
+	slope <- bvl_getArcs(dag, to = node$name, type = "slope")
+		
+	arcs <- bvl_getArcs(dag, to = node$name)
+		
+	hasSlope = ((length(slope) >0) & (length(varint)+length(slope)==length(arcs)))
+		
+	return(hasSlope)
+}
+
+isOp <- function(dag, node)
+{
+	varint <- bvl_getArcs(dag, to = node$name, type = "varint")
+	
+	slope <- bvl_getArcs(dag, to = node$name, type = "slope")
+		
+	arcs <- bvl_getArcs(dag, to = node$name)
+		
+	hasOp = ((length(arcs) >0) & (length(varint)+length(slope)<length(arcs)))
+	
+	return(hasOp)
+}
+
 stan_regression <- function(dag, node, getparams = F)
 {
 	reg_string = ""
@@ -165,6 +241,10 @@ stan_regression <- function(dag, node, getparams = F)
 	nodeName <- node$name
 	template <- bvl_loadTemplate( node$dist )
 	
+	hasVarint <- bvl_getArcs(dag, to = nodeName, type = "varint")
+	hasSlope <- bvl_getArcs(dag, to = nodeName, type = "slope")
+	hasMul <- bvl_getArcs(dag, to = nodeName, type = "*")
+
 	#message(paste("Parameter transform for...", nodeName))
 
 	# is leaf??
@@ -174,12 +254,9 @@ stan_regression <- function(dag, node, getparams = F)
 		loopForI = "[i]"
 		reg_string = paste0(reg_string, stan_indent(5), "for (i in 1:Nobs) {\n")
 
-		reg_string = paste0(reg_string, stan_indent(8), stan_replaceParam(template$par_reg, nodeName), loopForI, " = ")
+		reg_string = paste0(reg_string, stan_indent(8), stan_replaceNodeParam(template$par_reg, nodeName), loopForI, " = ")
 
 		arcsTo <- bvl_getArcs(dag, to = nodeName)
-
-		hasVarint <- bvl_getArcs(dag, to = nodeName, type = "varint")
-		hasSlope <- bvl_getArcs(dag, to = nodeName, type = "slope")
 
 		if (length(hasVarint) == 0 && length(hasSlope) > 0)
 		{
@@ -201,13 +278,11 @@ stan_regression <- function(dag, node, getparams = F)
 			#print(parentName)
 			parent = dag@nodes[[parentName]]
 
-			if (p > 1)
-			{
-				reg_string = paste0(reg_string, " + ")
-			}
-
 			if (arc$type == "varint")
 			{
+				if (p > 1)
+					reg_string = paste0(reg_string, " + ")
+
 				reg_string = paste0(reg_string, "a_", parentName, "[", parentName, loopForI, "]")
 
 				param = list(name=paste0("a_", parentName), type = paste0("vector[N",parentName,"]"), prior = "", length=paste0("[N",parentName,"]"), isTransformed = T)
@@ -215,10 +290,20 @@ stan_regression <- function(dag, node, getparams = F)
 			}
 			else if (arc$type == "slope")
 			{
+				if (p > 1)
+					reg_string = paste0(reg_string, " + ")
+
 				reg_string = paste0(reg_string, "b_", arc$name, " * ", parentName, loopForI)
 
 				param = list(name=paste0("b_", arc$name), type = "real", prior = "normal(0,100)", isTransformed = F)
 				param_string[[param$name]] = param
+			}
+			else if (arc$type %in% ops)
+			{
+				if (p > 1)
+					reg_string = paste0(reg_string, " ", arc$type, " ")
+
+				reg_string = paste0(reg_string, parentName, loopForI)
 			}
 
 		}
@@ -266,27 +351,25 @@ stan_regression <- function(dag, node, getparams = F)
 	}
 	else if (length(node$parents) > 0)
 	{
-		arcsTo <- bvl_getArcs(dag, to = nodeName)
 
-		# loop for each arc from the node
-		for(p in 1:length(arcsTo))
+		if (isVarint(dag, node))
 		{
-			arc = arcsTo[[p]]
-			#print(arc)
+			arcsTo <- bvl_getArcs(dag, to = nodeName)
 
-			parentName = arc$from
-			arcName = arc$name
+			# loop for each arc from the node
+			for(p in 1:length(arcsTo))
+			{
+				arc = arcsTo[[p]]
+	
+				parentName = arc$from
+				arcName = arc$name
+	
+				#print(parentName)
+				parent = dag@nodes[[parentName]]
 
-			#print(parentName)
-			parent = dag@nodes[[parentName]]
-
-			if (arc$type == "varint")
-			{				
-				reg_string = paste0(reg_string, stan_indent(5), "// Next level random intercepts\n")
+				reg_string = paste0(reg_string, stan_indent(5), "// Next level random intercepts\n")				
 				reg_string = paste0(reg_string, stan_indent(5), "for(k in 1:N",nodeName,") {\n")
-				
-				reg_string = paste0(reg_string, stan_indent(8), "a_",nodeName,"[k] = a_",parentName,"[",nodeName,"2",parentName,"[k]] + u_",nodeName,"[k];\n")
-				
+				reg_string = paste0(reg_string, stan_indent(8), "a_",nodeName,"[k] = a_",parentName,"[",nodeName,"2",parentName,"[k]] + u_",nodeName,"[k]")				
 				reg_string = paste0(reg_string, stan_indent(5), "}\n")
 				
 				param = list(name=paste0("a_",nodeName,"_0"), type = "real", prior = "", isTransformed = F)
@@ -298,8 +381,71 @@ stan_regression <- function(dag, node, getparams = F)
 				param = list(name=paste0("u_",nodeName), type = paste0("vector[N",nodeName,"]"), prior = paste0("normal(0, sigma_",nodeName,")"), isTransformed = F)
 				param_string[[param$name]] = param
 			}
-
 		}
+		else if (isSlope(dag, node))
+		{
+			arcsTo <- bvl_getArcs(dag, to = nodeName)
+
+			param = list(name=paste0(nodeName), type = "vector[Nobs]", prior = "", isTransformed = T)
+			param_string[[param$name]] = param
+			
+			reg_string = paste0(reg_string, stan_indent(5), "for(k in 1:Nobs) {\n")
+			reg_string = paste0(reg_string, stan_indent(8), nodeName,"[k] = a_", nodeName, " + ")
+			
+			param = list(name=paste0("a_", nodeName), type = "real", prior = "normal(0,100)", isTransformed = F)
+			param_string[[param$name]] = param
+
+			# loop for each arc from the node
+			for(p in 1:length(arcsTo))
+			{
+				arc = arcsTo[[p]]
+	
+				parentName = arc$from
+				arcName = arc$name
+	
+				#print(parentName)
+				parent = dag@nodes[[parentName]]
+				
+				if (p > 1)
+					reg_string = paste0(reg_string, " + ")
+				reg_string = paste0(reg_string, "b_",arc$name,"*",parentName,"[k]")
+
+				param = list(name=paste0("b_", arc$name), type = "real", prior = "normal(0,100)", isTransformed = F)
+				param_string[[param$name]] = param
+			}
+			reg_string = paste0(reg_string, ";\n")
+			reg_string = paste0(reg_string, stan_indent(5), "}\n")
+		}
+		else if (isOp(dag, node))
+		{
+			arcsTo <- bvl_getArcs(dag, to = nodeName)
+			
+			reg_string = paste0(reg_string, stan_indent(5), "for(k in 1:Nobs) {\n")
+			reg_string = paste0(reg_string, stan_indent(8), nodeName,"[k] = ")
+			
+			param = list(name=paste0(nodeName), type = "vector[Nobs]", prior = "", isTransformed = T)
+			param_string[[param$name]] = param
+
+			# loop for each arc from the node
+			for(p in 1:length(arcsTo))
+			{
+				arc = arcsTo[[p]]
+	
+				parentName = arc$from
+				arcName = arc$name
+	
+				#print(parentName)
+				parent = dag@nodes[[parentName]]
+				
+				if (p > 1)
+					reg_string = paste0(reg_string, arc$type)
+				reg_string = paste0(reg_string, parentName,"[k]")
+			}
+			reg_string = paste0(reg_string, ";\n")
+			reg_string = paste0(reg_string, stan_indent(5), "}\n")
+		}
+		
+
 	}
 
 	if (getparams)
@@ -360,7 +506,7 @@ stan_formulaNode <- function(dag, node, loopForI = "", outcome = T)
 	}
 	else
 	{
-		formula_string = paste0(formula_string, stan_replaceParam(template$stan_likelihood, nodeName))
+		formula_string = paste0(formula_string, stan_replaceNodeParam(template$stan_likelihood, nodeName))
 	}
 	
 	return(formula_string)
@@ -408,8 +554,8 @@ stan_prior <- function(net, node)
 		  {
 			  for(i in 1:length(template$par_names))
 			  {			  
-				  varname = stan_replaceParam(template$par_names[i], nodeName)
-				  prior_dist = stan_replaceParam(template$stan_prior[i], nodeName)
+				  varname = stan_replaceNodeParam(template$par_names[i], nodeName)
+				  prior_dist = stan_replaceNodeParam(template$stan_prior[i], nodeName)
 				  
 			  	prior = list(name=varname, prior=prior_dist)
 			  	prior_string[[prior$name]] = prior
@@ -417,8 +563,8 @@ stan_prior <- function(net, node)
 			}
 			else
 			{
-			  varname = stan_replaceParam(template$par_reg, nodeName)
-			  prior_dist = stan_replaceParam(node$prior, nodeName)
+			  varname = stan_replaceNodeParam(template$par_reg, nodeName)
+			  prior_dist = stan_replaceNodeParam(node$prior, nodeName)
 			  
 		  	prior = list(name=varname, prior=prior_dist)
 		  	prior_string[[prior$name]] = prior
@@ -549,7 +695,7 @@ bvl_model2Stan <- function(net, quantities_add = "")
 		
 				for(p in 1:length(distParams))
 				{
-					if (distParams[[p]]$name != stan_replaceParam(template$par_reg, nodeName) || length(nextNodes[[n]]$parents) == 0)
+					if (distParams[[p]]$name != stan_replaceNodeParam(template$par_reg, nodeName) || length(nextNodes[[n]]$parents) == 0)
 						param_string <- paste0(param_string, stan_indent(5), distParams[[p]]$type, " ", distParams[[p]]$name, ";\n")
 				}
 			}
@@ -576,7 +722,7 @@ bvl_model2Stan <- function(net, quantities_add = "")
 		
 				for(p in 1:length(distParams))
 				{
-					if (distParams[[p]]$name == stan_replaceParam(template$par_reg, nodeName) && length(nextNodes[[n]]$parents) > 0)
+					if (distParams[[p]]$name == stan_replaceNodeParam(template$par_reg, nodeName) && length(nextNodes[[n]]$parents) > 0)
 						transparam_var <- paste0(transparam_var, stan_indent(5), distParams[[p]]$type, " ", distParams[[p]]$name, distParams[[p]]$length, ";\n")
 				}
 			}			
@@ -692,7 +838,7 @@ stan_params <- function(net)
 		}
 		else
 		{
-			params <- c(params, stan_replaceParam(template$par_reg, nodeName))
+			params <- c(params, stan_replaceNodeParam(template$par_reg, nodeName))
 		}
 	}
 
