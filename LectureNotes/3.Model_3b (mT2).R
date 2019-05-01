@@ -39,3 +39,5 @@ fit <- bvl_modelFit(model, dat, warmup = 2000, iter = 5000, chains = 4, cores = 
 bvl_trace(fit)
 
 summary(fit)
+
+bvl_plotDensOverlay(fit)
