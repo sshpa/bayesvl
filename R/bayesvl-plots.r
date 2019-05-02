@@ -126,6 +126,16 @@ bvl_plotIntervals <- function(model, params = NULL, fun = "stat", stat = "mean",
 	bayesplot::mcmc_intervals(model@posterior, pars = params, point_est = "mean", prob = 0.8, prob_outer = 0.95)
 }
 
+bvl_plotAreas <- function(model, params = NULL, fun = "stat", stat = "mean", color_scheme = "blue")
+{
+	require(bayesplot)
+	
+	if (is.null(params))
+		params <- stan_params(model)
+
+	bayesplot::color_scheme_set(color_scheme)
+	bayesplot::mcmc_areas(model@posterior, pars = params, point_est = "mean", prob = 0.8, prob_outer = 0.95)
+}
 
 bvl_plotDensity2d <- function(model, x, y, color = NULL)
 {
