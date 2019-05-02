@@ -37,6 +37,23 @@ plotPPC <- function(stanfit, data, y_name, fun = "stat", stat = "mean", color_sc
 	pp_check(as.numeric(data[y_name]), y_rep, fun = fun, stat = stat)
 }
 
+bvl_logLik <- function(model)
+{
+	require(loo)
+
+	leaves <- bvl_getLeaves(model)
+	
+	for(i in length(leaves))
+	{
+		y_name <- leaves[[i]]$name
+		parName <- paste0("log_lik_",y_name)
+
+		log_lik_1 <- extract_log_lik(model@stanfit, parameter_name=parName, merge_chains = FALSE)
+		
+		return(log_lik_1)
+	}
+}
+
 
 bvl_plotPPC <- function(model, fun = "stat", stat = "mean", color_scheme = "blue")
 {

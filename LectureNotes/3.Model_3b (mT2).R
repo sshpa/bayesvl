@@ -72,3 +72,11 @@ cat(model_string)
 
 # Fit the model
 fit <- bvl_modelFit(model, dat, warmup = 2000, iter = 5000, chains = 4, cores = 1)
+
+bvl_trace(fit)
+
+summary(fit)
+
+bvl_plotDensOverlay(fit)
+
+log_lik_1 <- extract_log_lik(fit@stanfit, parameter_name="log_lik_T", merge_chains = FALSE)
