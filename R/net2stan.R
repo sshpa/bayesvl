@@ -880,18 +880,30 @@ stan_params <- function(net)
 	return(params)
 }
 
-stan_data <- function(net)
+stan_dataNodes <- function(net)
 {
 	params <- c()
 
 	for(n in 1:length(net@nodes))
 	{
-		nodeName <- names(net@nodes)[n]
-		
-		params <- c(params,nodeName)
+		if (!(net@nodes[[n]]$dist %in% c("dummy","trans")))
+		{	
+			nodeName <- net@nodes[[n]]$name
+			
+			params <- c(params,nodeName)
+		}
 	}
 
 	return(params)
+}
+
+stan_extractData <- function(net, data)
+{
+	params <- stan_dataNodes(net)
+
+	data1 <- data[ , (names(data) %in% params)]
+
+	return(data1)
 }
 
 stan2coda <- function(fit) {
@@ -918,8 +930,34 @@ stanPost <- function(fit) {
 		return ( post )
 }
 
-bvl_modelFit <- function(net, dataList, warmup = 1000, iter = 5000, chains = 4, cores = 1, writefile = F)
+bvl_modelData <- function(net, data)
 {
+	dataList <- list()
+
+	if (!bvl_validData(net, data))
+		stop("Invalid data to estimate!")
+	
+	dataList[["Nobs"]] <- length(data[ , 1])
+	
+	nodes <- stan_dataNodes(net)
+	for(i in 1:length(nodes))
+	{
+		dataList[[nodes[i]]] <- data[ , nodes[i]]
+	}
+	
+	return(dataList)
+}
+
+bvl_modelFit <- function(net, data, warmup = 1000, iter = 5000, chains = 4, cores = 1, writefile = F)
+{
+	if (!bvl_validModel(net))
+		stop("Invalid model to estimate!")
+		
+	if (!bvl_validData(net, data))
+		stop("Invalid data to estimate!")
+	
+	dataList <- bvl_modelData(net, data)
+	
 	model_string <- bvl_model2Stan(net)
 
 	message("Compiling and producing posterior samples from the model...")

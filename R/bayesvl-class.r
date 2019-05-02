@@ -169,10 +169,7 @@ setMethod("bvl_getNodeNames", "bayesvl", function(dag) {
 	if (is.null(dag@nodes))
 		return(nodes)
 	
-	for(n in 1:length(dag@nodes))
-	{
-		nodes = c(nodes, dag@nodes[[n]]$name)
-	}
+	nodes = names(dag@nodes)
 
 	return(nodes)
 })
@@ -277,26 +274,92 @@ setMethod("bvl_estModel", "bayesvl", function(net, dataList, ...) {
 	return(fit)
 })
 
-if (!isGeneric("bvl_bnScore"))
-      setGeneric("bvl_bnScore", function(net, ...) standardGeneric("bvl_bnScore"))
 
-setMethod("bvl_bnScore", "bayesvl", function(net, ...) {			
-	if(length(net@nodes)==0)
-		return (NA)
-	
-	if(length(net@standata)==0)
-		return (NA)
+if (!isGeneric("bvl_validModel"))
+      setGeneric("bvl_validModel", function(dag, ...) standardGeneric("bvl_validModel"))
 
-	if (length(net@arcs) < 1)
-		return(NA)
-
-	for(i in 1:length(net@nodes))
+setMethod("bvl_validModel", "bayesvl", function(dag) {
+	if (is.null(dag))
 	{
-		if (!(net@nodes[[i]]$name %in% names(net@standata)))
-			return(NA)
+		#stop("The model has no node!")
+		message("The model is null!")
+		return (FALSE)
+	}	
+	
+	if(length(dag@nodes)==0)
+	{
+		message("The model has no node!")
+		return (FALSE)
+	}	
+	
+	if (length(dag@arcs) < 1)
+	{
+		message("The model has no arc!")
+		return (FALSE)
+	}		
+
+	leaves = bvl_getLeaves(dag)
+	if (length(leaves) < 1)
+	{
+		message("The model is a loop!")
+		return (FALSE)
+	}		
+		
+	return(TRUE)
+})
+
+
+if (!isGeneric("bvl_validData"))
+      setGeneric("bvl_validData", function(dag, data, ...) standardGeneric("bvl_validData"))
+
+setMethod("bvl_validData", "bayesvl", function(dag, data, ...) {
+	if (is.null(data))
+	{
+		message("The data is null!")
+		return (FALSE)
+	}	
+	
+	if(class(data)!="data.frame")
+	{
+		message("The data must be data frame!")
+		return (FALSE)
+	}	
+	
+	nodes <- stan_dataNodes(dag)
+	for(i in 1:length(nodes))
+	{
+		if (!(nodes[i] %in% names(data)))
+		{
+			message(paste0("The node '", nodes[i], "' is not existed in data!"))
+			return (FALSE)
+		}
+	}
+
+	return(TRUE)
+})
+
+
+if (!isGeneric("bvl_bnScore"))
+      setGeneric("bvl_bnScore", function(net, data = NULL, ...) standardGeneric("bvl_bnScore"))
+
+setMethod("bvl_bnScore", "bayesvl", function(net, data = NULL, ...) {			
+	if(!bvl_validModel(net))
+	{
+		return (NA)
 	}
 	
-	dat <- as.data.frame(net@standata,stringsAsFactors=TRUE)[stan_data(net)]
+	if (length(data) == 0)
+	{
+		data = net@standata
+	}
+	
+	if(!bvl_validData(net, data))
+	{
+		return (NA)
+	}
+	
+	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(net)]
+	dat <- stan_extractData(model, data)
 	cols <- sapply(dat, is.numeric)
 	dat[,cols] <- lapply(dat[,cols], as.factor)
 
@@ -304,6 +367,96 @@ setMethod("bvl_bnScore", "bayesvl", function(net, ...) {
 	
 	return(score)
 })
+
+
+if (!isGeneric("bvl_bnBayes"))
+      setGeneric("bvl_bnBayes", function(net, data = NULL, method = "bayes", iss = 10, ...) standardGeneric("bvl_bnBayes"))
+
+setMethod("bvl_bnBayes", "bayesvl", function(net, data = NULL, method = "bayes", iss = 10, ...) {			
+	if(!bvl_validModel(net))
+	{
+		return (NA)
+	}
+	
+	if (length(data) == 0)
+	{
+		data = net@standata
+	}
+	
+	if(!bvl_validData(net, data))
+	{
+		return (NA)
+	}
+	
+	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(net)]
+	dat <- stan_extractData(model, data)
+	cols <- sapply(dat, is.numeric)
+	dat[,cols] <- lapply(dat[,cols], as.factor)
+
+	bn.bayes <- bnBayes(net, dat, method = method, iss = iss, ...)
+	
+	return(bn.bayes)
+})
+
+
+if (!isGeneric("bvl_bnBarchart"))
+      setGeneric("bvl_bnBarchart", function(net, data = NULL, method = "bayes", iss = 10, ...) standardGeneric("bvl_bnBarchart"))
+
+setMethod("bvl_bnBarchart", "bayesvl", function(net, data = NULL, method = "bayes", iss = 10, ...) {			
+	if(!bvl_validModel(net))
+	{
+		return (NA)
+	}
+	
+	if (length(data) == 0)
+	{
+		data = net@standata
+	}
+	
+	if(!bvl_validData(net, data))
+	{
+		return (NA)
+	}
+	
+	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(net)]
+	dat <- stan_extractData(model, data)
+	cols <- sapply(dat, is.numeric)
+	dat[,cols] <- lapply(dat[,cols], as.factor)
+
+	bnBarchart(net, dat, method = method, iss = iss, ...)
+})
+
+
+if (!isGeneric("bvl_bnStrength"))
+      setGeneric("bvl_bnStrength", function(net, data = NULL, criterion = "x2", ...) standardGeneric("bvl_bnStrength"))
+
+setMethod("bvl_bnStrength", "bayesvl", function(net, data = NULL, criterion = "x2", ...) {			
+	if(!bvl_validModel(net))
+	{
+		return (NA)
+	}
+	
+	if (length(data) == 0)
+	{
+		data = net@standata
+	}
+	
+	if(!bvl_validData(net, data))
+	{
+		return (NA)
+	}
+	
+	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(net)]
+	dat <- stan_extractData(model, data)
+	cols <- sapply(dat, is.numeric)
+	dat[,cols] <- lapply(dat[,cols], as.factor)
+
+	score <- bnStrength(net, dat, criterion = criterion, ...)
+	
+	return(score)
+})
+
+
 
 if (!isGeneric("bvl_stanParams"))
       setGeneric("bvl_stanParams", function(net) standardGeneric("bvl_stanParams"))
