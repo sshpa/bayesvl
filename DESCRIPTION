@@ -1,11 +1,11 @@
 Package: bayesvl
 Type: Package
-Title: The R package for visually learning the graphical structures of Bayesian networks and implementing Stan MCMC simulations.
-Version: 0.8.1
+Title: R package for visual learning the graphical structure of Bayesian networks.
+Version: 0.6.5
 Date: 2018-12-15
-Authors: Viet-Phuong La, Quan-Hoang Vuong
-Maintainers: Viet-Phuong La <phuong.laviet@phenikaa-uni.edu.vn>, Quan-Hoang Vuong (hoang.vuongquan@phenikaa-uni.edu.vn)
-Imports: coda, bnlearn
+Author: La-Viet Phuong, Vuong-Quan Hoang
+Maintainer: La-Viet Phuong <phuong.laviet@phenikaa-uni.edu.vn>
+Imports: coda, rstan, bnlearn, bayesplot
 Depends: rstan (>= 2.10.0), parallel, methods, stats, graphics
-Description: Utilities for fitting and comparing models, and constructing useful graphics
+Description: Utilities for fitting and comparing models
 License: GPL (>= 3)
