@@ -55,11 +55,29 @@ axis(2)
 
 # Design the model
 model <- bayesvl()
+model <- bvl_addNode(model, "Real", "binorm")
 model <- bvl_addNode(model, "Lie", "binorm")
 model <- bvl_addNode(model, "VB", "binorm")
 model <- bvl_addNode(model, "VC", "binorm")
 model <- bvl_addNode(model, "VT", "binorm")
+model <- bvl_addNode(model, "B_Lie", "trans")
+model <- bvl_addNode(model, "C_Lie", "trans")
+model <- bvl_addNode(model, "T_Lie", "trans")
 
-model <- bvl_addArc(model, "VB", "Lie", "slope")
-model <- bvl_addArc(model, "VC", "Lie", "slope")
-model <- bvl_addArc(model, "VT", "Lie", "slope")
+model <- bvl_addArc(model, "B_Lie", "Real", "slope")
+model <- bvl_addArc(model, "C_Lie", "Real", "slope")
+model <- bvl_addArc(model, "T_Lie", "Real", "slope")
+model <- bvl_addArc(model, "VB",    "B_Lie", "*")
+model <- bvl_addArc(model, "Lie",   "B_Lie", "*")
+model <- bvl_addArc(model, "VC",    "C_Lie", "*")
+model <- bvl_addArc(model, "Lie",   "C_Lie", "*")
+model <- bvl_addArc(model, "VT",    "T_Lie", "*")
+model <- bvl_addArc(model, "Lie",   "T_Lie", "*")
+
+model_string <- bvl_model2Stan(model)
+cat(model_string)
+
+options(mc.cores = parallel::detectCores())
+
+# Fit the model
+model <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4, cores = 4)

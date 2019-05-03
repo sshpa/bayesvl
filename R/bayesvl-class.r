@@ -350,7 +350,7 @@ setMethod("bvl_bnScore", "bayesvl", function(net, data = NULL, ...) {
 	
 	if (length(data) == 0)
 	{
-		data = net@standata
+		data = as.data.frame(net@standata)
 	}
 	
 	if(!bvl_validData(net, data))

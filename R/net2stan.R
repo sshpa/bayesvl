@@ -416,7 +416,7 @@ stan_regression <- function(dag, node, getparams = F)
 			reg_string = paste0(reg_string, ";\n")
 			reg_string = paste0(reg_string, stan_indent(5), "}\n")
 		}
-		else if (isOp(dag, node))
+		else if (isOp(dag, node) && node$dist != "trans")
 		{
 			arcsTo <- bvl_getArcs(dag, to = nodeName)
 			
