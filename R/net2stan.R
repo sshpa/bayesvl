@@ -26,7 +26,7 @@ stan_indent <- function(n)
 	return(strrep(" ",n))
 }
 
-stan_dataParams <- function(node)
+stan_dataParams <- function(dag, node)
 {
   param_string = list()
 	nodeName <- node$name
@@ -48,6 +48,12 @@ stan_dataParams <- function(node)
   vartype = stan_replaceNodeParam(template$out_type, nodeName)
 	param_mu = list(name=varname, type=vartype, length=loopNobs)
 	param_string[[param_mu$name]] = param_mu
+	
+	if (isVarintFrom(dag, node))
+	{
+		param_mu = list(name=paste0("N",nodeName), type="int", length="")
+		param_string[[param_mu$name]] = param_mu
+	}
 
 	return(param_string)
 }
@@ -191,7 +197,7 @@ stan_getPars <- function(dag, arc, getName = F)
 	return(params)
 }
 
-isVarint <- function(dag, node)
+isVarintTo <- function(dag, node)
 {
 	if (node$dist == "trans")
 		return(FALSE)
@@ -199,6 +205,20 @@ isVarint <- function(dag, node)
 	varint <- bvl_getArcs(dag, to = node$name, type = c("varint"))
 	
 	arcs <- bvl_getArcs(dag, to = node$name)
+		
+	hasVarint = ((length(varint) >0) & (length(varint)==length(arcs)))
+	
+	return(hasVarint)
+}
+
+isVarintFrom <- function(dag, node)
+{
+	if (node$dist == "trans")
+		return(FALSE)
+		
+	varint <- bvl_getArcs(dag, from = node$name, type = c("varint"))
+	
+	arcs <- bvl_getArcs(dag, from = node$name)
 		
 	hasVarint = ((length(varint) >0) & (length(varint)==length(arcs)))
 	
@@ -352,7 +372,7 @@ stan_regression <- function(dag, node, getparams = F)
 	else if (length(node$parents) > 0)
 	{
 
-		if (isVarint(dag, node))
+		if (isVarintTo(dag, node))
 		{
 			arcsTo <- bvl_getArcs(dag, to = nodeName)
 
@@ -366,7 +386,7 @@ stan_regression <- function(dag, node, getparams = F)
 	
 				#print(parentName)
 				parent = dag@nodes[[parentName]]
-
+				
 				reg_string = paste0(reg_string, stan_indent(5), "// Next level random intercepts\n")				
 				reg_string = paste0(reg_string, stan_indent(5), "for(k in 1:N",nodeName,") {\n")
 				reg_string = paste0(reg_string, stan_indent(8), "a_",nodeName,"[k] = a_",parentName,"[",nodeName,"2",parentName,"[k]] + u_",nodeName,"[k]")				
@@ -670,7 +690,7 @@ bvl_model2Stan <- function(net, quantities_add = "")
 				data_string <- paste0(data_string, stan_indent(5), "// outcome variable\n")
 			}
 
-			distParams = stan_dataParams(nextNodes[[n]])	
+			distParams = stan_dataParams(net, nextNodes[[n]])	
 			if (length(distParams) > 0)
 			{
 				for(p in 1:length(distParams))
@@ -942,7 +962,19 @@ bvl_modelData <- function(net, data)
 	nodes <- stan_dataNodes(net)
 	for(i in 1:length(nodes))
 	{
-		dataList[[nodes[i]]] <- data[ , nodes[i]]
+		#print(net@nodes[[nodes[i]]]$dist)
+		if (!(nodes[i] %in% names(dataList)))
+			dataList[[nodes[i]]] <- as.numeric(data[ , nodes[i]])
+		
+		if (net@nodes[[nodes[i]]]$dist == "cat" && !(paste0("N",nodes[i]) %in% names(dataList)))
+		{
+			dataList[[paste0("N",nodes[i])]] <- length(unique(data[ , nodes[i]]))
+		}
+
+		if (isVarintFrom(net, net@nodes[[nodes[i]]]) && !(paste0("N",nodes[i]) %in% names(dataList)))
+		{
+			dataList[[paste0("N",nodes[i])]] <- length(unique(data[ , nodes[i]]))
+		}
 	}
 	
 	return(dataList)
