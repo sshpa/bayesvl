@@ -22,22 +22,22 @@ bvl_bnBarchart(model, data1[c("Res","SatIns","Insured","SES","End")])
 model_string <- bvl_model2Stan(model)
 cat(model_string)
 
-dat1042 <- with(data1,
-            list(Nobs         = length(Res),
-                 NEnd         = length(unique(End)),
-                 End          = as.numeric(End),
-                 NSES         = length(unique(SES)),
-                 SES          = as.numeric(SES),
-                 NRes         = length(unique(Res)),
-                 Res          = as.numeric(Res),
-                 NInsured     = length(unique(Insured)),
-                 Insured      = as.numeric(Insured),
-                 SatIns       = as.numeric(SatIns)))
+#dat1042 <- with(data1,
+#            list(Nobs         = length(Res),
+#                 NEnd         = length(unique(End)),
+#                 End          = as.numeric(End),
+#                 NSES         = length(unique(SES)),
+#                 SES          = as.numeric(SES),
+#                 NRes         = length(unique(Res)),
+#                 Res          = as.numeric(Res),
+#                 NInsured     = length(unique(Insured)),
+#                 Insured      = as.numeric(Insured),
+#                 SatIns       = as.numeric(SatIns)))
 
 options(mc.cores = parallel::detectCores())
 
 # Fit the model
-fit <- bvl_modelFit(model, dat1042, warmup = 2000, iter = 5000, chains = 4, cores = 1)
+fit <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4, cores = 4)
 
 bvl_trace(fit)
 

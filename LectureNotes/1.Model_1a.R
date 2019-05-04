@@ -3,7 +3,9 @@ dag <- bvl_addNode(dag, "y", "bern","beta(1, 1)")
 
 N = 10       # Specify the total number of flips, denoted N.
 data_list <- c(1,0,1,1,0,1,0,0,0,0) # the trials of bias coin
-data <- list(Nobs=N, y=data_list)
+#data <- list(Nobs=N, y=data_list)
+
+data <- data.frame(y=data_list)
 
 model_string <- bvl_model2Stan(dag)
 cat(model_string)
