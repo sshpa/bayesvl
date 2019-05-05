@@ -143,4 +143,3 @@ options(mc.cores = parallel::detectCores())
 model <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4, cores = 4)
 
 bvl_trace(model)
-
