@@ -107,16 +107,16 @@ setMethod("bvl_hasArc", "bayesvl", function(object, from, to) {
 })
 
 if (!isGeneric("bvl_addNode"))
-      setGeneric("bvl_addNode", function(dag, name, dist = "norm", prior = NULL, ...) standardGeneric("bvl_addNode"))
+      setGeneric("bvl_addNode", function(dag, name, dist = "norm", prior = NULL, fun = NULL, out_type = NULL, lower = NULL, upper=NULL, ...) standardGeneric("bvl_addNode"))
       
-setMethod("bvl_addNode", "bayesvl", function(dag, name, dist = "norm", prior = NULL) {
+setMethod("bvl_addNode", "bayesvl", function(dag, name, dist = "norm", prior = NULL, out_type = NULL, lower = lower, upper=upper, ...) {
 	if (is.null(dag) || missing(dag))
 		dag = bayesvl()
 		
 	if (is.null(dag@nodes))
 		dag@nodes = list()
 	
-	node = list(name=name, dist=dist, prior=prior)
+	node = list(name=name, dist=dist, prior=prior, fun=fun, out_type=out_type, lower=lower)
 	dag@nodes[[name]] = node
 	
 	return(dag)
@@ -126,7 +126,7 @@ setMethod("bvl_addNode", "bayesvl", function(dag, name, dist = "norm", prior = N
 if (!isGeneric("bvl_addArc"))
       setGeneric("bvl_addArc", function(dag, from, to, type = "slope", ...) standardGeneric("bvl_addArc"))
 
-setMethod("bvl_addArc", "bayesvl", function(dag, from, to, type = "slope", prior = "normal(0,100)") {
+setMethod("bvl_addArc", "bayesvl", function(dag, from, to, type = "slope", prior = "normal(0,100)", fun = NULL) {
 	if (!bvl_nodeExists(dag, from))
 	{
 		message(paste0("Error checking node.\n Invalid node '", from, "'."))
@@ -148,7 +148,7 @@ setMethod("bvl_addArc", "bayesvl", function(dag, from, to, type = "slope", prior
 	dag@nodes[[from]]$children = c(dag@nodes[[from]]$children, to)
 	dag@nodes[[to]]$parents = c(dag@nodes[[to]]$parents, from)
 	
-	arc = list(name=paste0(from,"_",to), type = type, from = from, to = to, prior = prior)
+	arc = list(name=paste0(from,"_",to), type = type, from = from, to = to, prior = prior, fun = fun)
 	dag@arcs[[arc$name]] = arc
 	
 	return(dag)
@@ -333,6 +333,16 @@ setMethod("bvl_validData", "bayesvl", function(dag, data, ...) {
 			message(paste0("The node '", nodes[i], "' is not existed in data!"))
 			return (FALSE)
 		}
+
+		node = dag@nodes[[nodes[i]]]
+		if (node$dist %in% c("binom","bern"))
+		{
+			if (min(data[ ,node$name]) != 0)
+			{
+				message(paste0("The node '", nodes[i], "' values  must be (0, 1)!"))
+				return (FALSE)
+			}
+		}
 	}
 
 	return(TRUE)
@@ -354,9 +364,11 @@ setMethod("bvl_bnScore", "bayesvl", function(net, data = NULL, ...) {
 	}
 	
 	if(!bvl_validData(net, data))
-	{
 		return (NA)
-	}
+	
+	nodes <- stan_dataNodes(net)
+	if (length(nodes) != length(model@nodes))
+		return (NA)
 	
 	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(net)]
 	dat <- stan_extractData(model, data)
