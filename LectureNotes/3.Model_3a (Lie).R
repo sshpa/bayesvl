@@ -94,7 +94,7 @@ model <- bvl_addArc(model, "TandLie",  "O", "slope")
 
 model <- bvl_addArc(model, "Lie",   "O", "slope")
 
-model <- bvl_addNode(model, "Int1orInt2", "trans")
+model <- bvl_addNode(model, "Int1orInt2", "trans", fun = "({0} > 0 ? 1 : 0)", out_type = "int", lower = 0)
 model <- bvl_addArc(model, "Int1", "Int1orInt2", "+")
 model <- bvl_addArc(model, "Int2", "Int1orInt2", "+")
 
@@ -127,7 +127,7 @@ model <- bvl_addArc(model, "VT",  "O", "slope")
 
 model <- bvl_addArc(model, "Lie",   "O", "slope")
 
-model <- bvl_addNode(model, "Int1orInt2", "trans", out_type = "int", lower = 0)
+model <- bvl_addNode(model, "Int1orInt2", "trans", fun = "({0} > 0 ? 1 : 0)", out_type = "int", lower = 0)
 model <- bvl_addArc(model, "Int1", "Int1orInt2", "+")
 model <- bvl_addArc(model, "Int2", "Int1orInt2", "+")
 
@@ -142,4 +142,5 @@ options(mc.cores = parallel::detectCores())
 # Fit the model
 model <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4, cores = 4)
 
+bvl_trace(model)
 
