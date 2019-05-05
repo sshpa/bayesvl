@@ -107,16 +107,16 @@ setMethod("bvl_hasArc", "bayesvl", function(object, from, to) {
 })
 
 if (!isGeneric("bvl_addNode"))
-      setGeneric("bvl_addNode", function(dag, name, dist = "norm", prior = NULL, fun = NULL, out_type = NULL, lower = NULL, upper=NULL, ...) standardGeneric("bvl_addNode"))
+      setGeneric("bvl_addNode", function(dag, name, dist = "norm", priors = NULL, fun = NULL, out_type = NULL, lower = NULL, upper=NULL, ...) standardGeneric("bvl_addNode"))
       
-setMethod("bvl_addNode", "bayesvl", function(dag, name, dist = "norm", prior = NULL, out_type = NULL, lower = lower, upper=upper, ...) {
+setMethod("bvl_addNode", "bayesvl", function(dag, name, dist = "norm", priors = NULL, out_type = NULL, lower = lower, upper=upper, ...) {
 	if (is.null(dag) || missing(dag))
 		dag = bayesvl()
 		
 	if (is.null(dag@nodes))
 		dag@nodes = list()
 	
-	node = list(name=name, dist=dist, prior=prior, fun=fun, out_type=out_type, lower=lower)
+	node = list(name=name, dist=dist, priors=priors, fun=fun, out_type=out_type, lower=lower)
 	dag@nodes[[name]] = node
 	
 	return(dag)
@@ -124,9 +124,9 @@ setMethod("bvl_addNode", "bayesvl", function(dag, name, dist = "norm", prior = N
 
 
 if (!isGeneric("bvl_addArc"))
-      setGeneric("bvl_addArc", function(dag, from, to, type = "slope", ...) standardGeneric("bvl_addArc"))
+      setGeneric("bvl_addArc", function(dag, from, to, type = "slope", priors = NULL, ...) standardGeneric("bvl_addArc"))
 
-setMethod("bvl_addArc", "bayesvl", function(dag, from, to, type = "slope", prior = "normal(0,100)", fun = NULL) {
+setMethod("bvl_addArc", "bayesvl", function(dag, from, to, type = "slope", priors = NULL, fun = NULL) {
 	if (!bvl_nodeExists(dag, from))
 	{
 		message(paste0("Error checking node.\n Invalid node '", from, "'."))
@@ -148,8 +148,23 @@ setMethod("bvl_addArc", "bayesvl", function(dag, from, to, type = "slope", prior
 	dag@nodes[[from]]$children = c(dag@nodes[[from]]$children, to)
 	dag@nodes[[to]]$parents = c(dag@nodes[[to]]$parents, from)
 	
-	arc = list(name=paste0(from,"_",to), type = type, from = from, to = to, prior = prior, fun = fun)
+	arc = list(name=paste0(from,"_",to), type = type, from = from, to = to, priors = priors, fun = fun)
 	dag@arcs[[arc$name]] = arc
+	
+	return(dag)
+})
+
+if (!isGeneric("bvl_removeArc"))
+      setGeneric("bvl_removeArc", function(dag, from, to) standardGeneric("bvl_removeArc"))
+
+setMethod("bvl_removeArc", "bayesvl", function(dag, from, to) {
+	if (!bvl_hasArc(dag, from, to))
+	{
+		message(paste0("The arc from '", from, "' to '", to, "' is not existed."))
+		return(dag)
+	}
+	
+	dag@arcs[[paste0(from,"_",to)]] = NULL
 	
 	return(dag)
 })
