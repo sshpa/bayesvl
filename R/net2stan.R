@@ -13,6 +13,13 @@ stan_indent <- function(n)
 	return(strrep(" ",n))
 }
 
+stan_replaceFun <- function(in_string, code)
+{
+	out_string = gsub("\\{0\\}", code, in_string)
+
+	return(out_string)
+}
+
 stan_replaceNode <- function(in_string, node, suffix = "")
 {
 	out_string = gsub("\\{0\\}", paste0(node$name, suffix), in_string)
@@ -553,15 +560,21 @@ stan_transDataCode <- function(dag)
 				new_code = ""				
 				new_code = paste0(new_code, stan_indent(5), "for (i in 1:Nobs) {\n")
 				new_code = paste0(new_code, stan_indent(8), node$name, "[i] = ")
+				
+				code = ""
 				for(i in 1:length(arcsTo))
 				{
 					if (i > 1)
-						new_code = paste0(new_code, arcsTo[[i]]$type)
+						code = paste0(code, arcsTo[[i]]$type)
 					else if (arcsTo[[i]]$type == "-")
-						new_code = paste0(new_code, arcsTo[[i]]$type)
+						code = paste0(code, arcsTo[[i]]$type)
 					
-					new_code = paste0(new_code, arcsTo[[i]]$from, "[i]")
+					code = paste0(code, arcsTo[[i]]$from, "[i]")
 				}	
+				if (!is.null(node$fun))
+					code = stan_replaceFun(node$fun, code)
+				new_code = paste0(new_code, code)
+				
 				new_code = paste0(new_code, ";\n")
 				new_code = paste0(new_code, stan_indent(5), "}\n")
 				
@@ -642,7 +655,7 @@ isOpTo <- function(dag, node)
 }
 
 ############ FORMULA FUNCTIONS ##############
-stan_formulaNode <- function(dag, node, loopForI = "", outcome = T)
+stan_formulaAtNode <- function(dag, node, loopForI = "", outcome = F)
 {
 	formula_string <- ""
 
@@ -676,29 +689,50 @@ stan_formulaNode <- function(dag, node, loopForI = "", outcome = T)
 			#print(parentName)
 			parent = dag@nodes[[parentName]]
 	
-	
+			varname = paste0(parentName, loopForI)
+			if (parent$dist == "trans")
+				varname = paste0("{",parentName,"}")
+						
 			if (arc$type == "varint")
 			{
 				if (p > 1)
 					formula_string = paste0(formula_string, " + ")
-
-				formula_string = paste0(formula_string, "a_", parentName, "[", parentName, loopForI, "]")
+					
+				formula_string = paste0(formula_string, "a_", parentName, "[", varname, "]")
 			}
 			else if (arc$type == "slope")
 			{
 				if (p > 1)
 					formula_string = paste0(formula_string, " + ")
 
-				formula_string = paste0(formula_string, "b_", arc$name, " * ", parentName, loopForI)
+				formula_string = paste0(formula_string, "b_", arc$name, " * ", varname)
 			}
 			else if (arc$type %in% ops)
 			{
 				if (p > 1)
-					formula_string = paste0(formula_string, " ", arc$type, " ")
-
-				formula_string = paste0(formula_string, parentName, loopForI)
+					formula_string = paste0(formula_string, arc$type)
+				else if (arc$type == "-")
+					formula_string = paste0(formula_string, arc$type)
+				
+				formula_string = paste0(formula_string, varname)
 			}
-	
+		}
+		
+		if (!is.null(node$fun))
+			formula_string = stan_replaceFun(node$fun, formula_string)
+
+		# recursive
+		if (length(node$parents) > 0)
+		{
+			for(p in 1:length(node$parents))
+			{
+				parent = dag@nodes[[node$parents[p]]]
+				if (parent$dist == "trans")
+				{
+					parentFormula = stan_formulaAtNode(dag, parent, "", F)
+					formula_string = gsub(paste0("\\{",parent$name,"\\}"), parentFormula, formula_string)
+				}
+			}
 		}
 	}
 	else
@@ -716,7 +750,7 @@ stan_formula <- function(dag, loopForI = "", outcome = T)
 
 	for(n in 1:length(nextNodes))
 	{
-		formula_string = paste0(formula_string, stan_formulaNode(dag, nextNodes[[n]], loopForI, outcome), "\n")
+		formula_string = paste0(formula_string, stan_formulaAtNode(dag, nextNodes[[n]], loopForI, outcome), "\n")
 	}
 	
 	return(formula_string)
