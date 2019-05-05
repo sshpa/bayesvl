@@ -127,11 +127,11 @@ model <- bvl_addArc(model, "VT",  "O", "slope")
 
 model <- bvl_addArc(model, "Lie",   "O", "slope")
 
-model <- bvl_addNode(model, "Int1orInt2", "trans", fun = "({0} > 0 ? 1 : 0)", out_type = "int", lower = 0)
-model <- bvl_addArc(model, "Int1", "Int1orInt2", "+")
-model <- bvl_addArc(model, "Int2", "Int1orInt2", "+")
+model <- bvl_addNode(model, "Int1_or_Int2", "trans", fun = "({0} > 0 ? 1 : 0)", out_type = "int", lower = 0)
+model <- bvl_addArc(model, "Int1", "Int1_or_Int2", "+")
+model <- bvl_addArc(model, "Int2", "Int1_or_Int2", "+")
 
-model <- bvl_addArc(model, "Int1orInt2", "O", "varint")
+model <- bvl_addArc(model, "Int1_or_Int2", "O", "varint")
 
 model <- bvl_modelFix(model, data1)
 model_string <- bvl_model2Stan(model)
