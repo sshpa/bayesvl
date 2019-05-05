@@ -2,7 +2,7 @@ bvl2stan.nodeTemplates <- list(
     Trans = list(
         name = "trans",
         dist = "trans",
-        stan_prior = c("normal( 0, 1 )", "normal( 0.6, 10 )"),
+        stan_priors = c("normal( 0, 1 )", "normal( 0.6, 10 )"),
         stan_likelihood = "normal(mu_{0}, sigma_{0})",
         stan_yrep = "normal_rng(mu_{0}[i], sigma_{0})",
         stan_loglik = "normal_lpdf({0}[i] | mu_{0}[i], sigma_{0})",
@@ -15,7 +15,7 @@ bvl2stan.nodeTemplates <- list(
     Dummy = list(
         name = "dummy",
         dist = "dummy",
-        stan_prior = c("normal( 0, 1 )", "normal( 0.6, 10 )"),
+        stan_priors = c("normal( 0, 1 )", "normal( 0.6, 10 )"),
         stan_likelihood = "normal(mu_{0}, sigma_{0})",
         stan_yrep = "normal_rng(mu_{0}[i], sigma_{0})",
         stan_loglik = "normal_lpdf({0}[i] | mu_{0}[i], sigma_{0})",
@@ -28,7 +28,7 @@ bvl2stan.nodeTemplates <- list(
     Bern = list(
         name = "bern",
         dist = "binomial",
-        stan_prior = c("beta(1, 1)"),
+        stan_priors = c("beta(1, 1)"),
         stan_likelihood = "bernoulli(theta_{0})",
         stan_yrep = "binomial_rng({0}[i], inv_logit(theta_{0}))",
         stan_loglik = "binomial_logit_lpmf({0}[i] | 1, theta_{0})",
@@ -41,7 +41,7 @@ bvl2stan.nodeTemplates <- list(
     BernLogit = list(
         name = "bernlogit",
         dist = "binomial",
-        stan_prior = c("beta(1, 1)"),
+        stan_priors = c("beta(1, 1)"),
         stan_likelihood = "bernoulli_logit(theta_{0})",
         stan_yrep = "bernoulli_rng(inv_logit(theta_{0}))",
         stan_loglik = "bernoulli_logit_lpmf({0}[i] | 1, theta_{0})",
@@ -54,7 +54,7 @@ bvl2stan.nodeTemplates <- list(
 		Binomial = list(
         name = "binom",
         dist = "binomial",
-        stan_prior = c("beta(1, 1)"),
+        stan_priors = c("beta(1, 1)"),
         stan_likelihood = "binomial_logit(1, theta_{0})",
         stan_yrep = "binomial_rng({0}[i], inv_logit(theta_{0}[i]))",
         stan_loglik = "binomial_logit_lpmf({0}[i] | 1, theta_{0}[i])",
@@ -67,7 +67,7 @@ bvl2stan.nodeTemplates <- list(
     Beta = list(
         name = "beta",
         dist = "beta",
-        stan_prior = c("normal(0, 100)", "normal(0, 100)"),
+        stan_priors = c("normal(0, 100)", "normal(0, 100)"),
         stan_likelihood = "beta_proportion(mu_{0}, kappa_{0})",
         stan_yrep = "beta_proportion_rng(mu_{0}, kappa_{0})",
         stan_loglik = "beta_proportion_lpdf({0}[i], mu_{0}, kappa_{0})",
@@ -80,7 +80,7 @@ bvl2stan.nodeTemplates <- list(
 		Gamma = list(
         name = "gamma",
         dist = "gamma",
-        stan_prior = c("beta(1, 1)"),
+        stan_priors = c("beta(1, 1)"),
         stan_likelihood = "gamma(alpha_{0}, beta_{0})",
         stan_yrep = "gamma_rng(alpha_{0}[i], beta_{0}[i])",
         stan_loglik = "gamma_lpdf({0}[i] | alpha_{0}[i], beta_{0}[i])",
@@ -93,7 +93,7 @@ bvl2stan.nodeTemplates <- list(
 		Poisson = list(
         name = "pois",
         dist = "pois",
-        stan_prior = c("beta(1, 1)"),
+        stan_priors = c("beta(1, 1)"),
         stan_likelihood = "poisson(lambda_{0})",
         stan_yrep = "poisson_rng(lambda_{0}[i])",
         stan_loglik = "poisson_lpmf({0}[i], lambda_{0}[i])",
@@ -106,7 +106,7 @@ bvl2stan.nodeTemplates <- list(
 		Student = list(
         name = "student",
         dist = "student",
-        stan_prior = c("gamma(2, 0.1)", "exponential(1)"),
+        stan_priors = c("gamma(2, 0.1)", "exponential(1)"),
         stan_likelihood = "student_t(nu_{0},mu_{0},sigma_{0})",
         stan_yrep = "student_t_rng(nu_{0}, mu_{0}[i], sigma_{0})",
         stan_loglik = "student_t_lpdf({0}[i] | nu_{0}, mu_{0}[i], sigma_{0})",
@@ -119,7 +119,7 @@ bvl2stan.nodeTemplates <- list(
     Normal = list(
         name = "norm",
         dist = "normal",
-        stan_prior = c("normal( 0, 1 )", "normal( 0.6, 10 )"),
+        stan_priors = c("normal( 0, 1 )", "normal( 0.6, 10 )"),
         stan_likelihood = "normal(mu_{0}, sigma_{0})",
         stan_target = "normal({0}[i] | mu_{0}, sigma_{0})",
         stan_yrep = "normal_rng(mu_{0}[i], sigma_{0})",
@@ -133,7 +133,7 @@ bvl2stan.nodeTemplates <- list(
     Categorical = list(
         name = "cat",
         dist = "cat",
-        stan_prior = c("normal(0, 100)"),
+        stan_priors = c("normal(0, 100)"),
         stan_likelihood = "categorical_logit(softmax(theta_{0}))",
         stan_yrep = "categorical_rng(theta_{0}[i])",
         stan_loglik = "categorical_logit_lpmf({0} | theta_{0}[i])",
@@ -149,12 +149,12 @@ bvl2stan.arcTemplates <- list(
     Slope = list(
         name = "slope",
         dist = "slope",
-        par_names = c("b_{0}_{1}"),
+        par_names = c("a_{0}", "b_{0}_{1}"),
         par_types = c("real"),
         par_len = c(""),
         par_trans = c(F),
         par_lik = c(T),
-        stan_prior = c("normal( 0, 100 )")
+        stan_priors = c("normal( 0, 100 )", "normal( 0, 100 )")
     ),
     VarInt = list(
         name = "varint",
@@ -164,7 +164,7 @@ bvl2stan.arcTemplates <- list(
         par_len = c("[N{0}]","","[N{0}]",""),
         par_trans = c(T,F,F,F),
         par_lik = c(T,F,F,F),
-        stan_prior = c("","","normal(0, sigma_{0})","normal(0,100)")
+        stan_priors = c("","","normal(0, sigma_{0})","normal(0,100)")
     )
 )
 
@@ -282,3 +282,18 @@ bvl_arcTemplateExists <- function( fname ) {
     return(the_match)
 }
 
+bvl_arcPrior <- function(arc, pname)
+{
+	tmp <- bvl_loadArcTemplate(arc$type)
+	
+	if (length(arc$priors) > 0)
+	{
+		prior = arc$priors[grep(pname, arc$priors)]
+		
+		prior = sub(".*~", "", prior)
+	}
+	else
+		prior = tmp$stan_priors[grep(pname, tmp$par_names)]
+	
+	return(prior)
+}

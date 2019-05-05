@@ -1,6 +1,30 @@
 library(bayesplot)
 library(ggplot2)
 
+bvl_params <- function(model)
+{
+	if (is.null(model@posterior))
+		stop("Model is not estimated!")
+	
+	params <- c()
+	model_params <- stan_params(model)
+	for(i in 1:length(model_params))
+	{
+		if (model_params[[i]]$isReg)
+		{
+			if (model_params[[i]]$isVar)
+			{
+				var <- names(model@posterior)[grep(paste0(model_params[[i]]$name, "\\["), names(model@posterior))]
+				params <- c(params, var)
+			}
+			else
+				params <- c(params, model_params[[i]]$name)
+		}
+	}
+	
+	return(params)
+}
+
 plotParams <- function(post, row = 2, col = 2, credMass) {
 		par(mfrow=c(row,col))
 		
@@ -12,10 +36,14 @@ plotParams <- function(post, row = 2, col = 2, credMass) {
 		}
 }
 
-bvl_plotParams <- function(model, row = 2, col = 2, credMass = 0.89) {
+bvl_plotParams <- function(model, params = NULL, row = 2, col = 2, credMass = 0.89) {
 		par(mfrow=c(row,col))
 		
-		params = stan_params(model)
+		if (is.null(model@posterior))
+			stop("Model is not estimated!")
+		
+		if (is.null(params))
+			params <- bvl_params(model)
 
 		mcmcMat = as.matrix(model@posterior[params], chains=TRUE)
 		
@@ -115,26 +143,32 @@ bvl_diag <- function(model)
 	rstan::stan_diag(model@stanfit)
 }
 
-bvl_plotIntervals <- function(model, params = NULL, fun = "stat", stat = "mean", color_scheme = "blue")
+bvl_plotIntervals <- function(model, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue")
 {
 	require(bayesplot)
 	
+	if (is.null(model@posterior))
+		stop("Model is not estimated!")
+	
 	if (is.null(params))
-		params <- stan_paramNames(model)
-
+		params <- bvl_params(model)
+	
 	bayesplot::color_scheme_set(color_scheme)
-	bayesplot::mcmc_intervals(model@posterior, pars = params, point_est = "mean", prob = 0.8, prob_outer = 0.95)
+	bayesplot::mcmc_intervals(model@posterior, pars = params, point_est = "mean", prob = prob, prob_outer = prob_outer)
 }
 
-bvl_plotAreas <- function(model, params = NULL, fun = "stat", stat = "mean", color_scheme = "blue")
+bvl_plotAreas <- function(model, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue")
 {
 	require(bayesplot)
 	
+	if (is.null(model@posterior))
+		stop("Model is not estimated!")
+	
 	if (is.null(params))
-		params <- stan_paramNames(model)
+		params <- bvl_params(model)
 
 	bayesplot::color_scheme_set(color_scheme)
-	bayesplot::mcmc_areas(model@posterior, pars = params, point_est = "mean", prob = 0.8, prob_outer = 0.95)
+	bayesplot::mcmc_areas(model@posterior, pars = params, point_est = "mean", prob = prob, prob_outer = prob_outer)
 }
 
 bvl_plotDensity2d <- function(model, x, y, color = NULL)

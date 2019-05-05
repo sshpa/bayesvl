@@ -61,10 +61,10 @@ stan_paramOffset <- function(lower)
 
 # Create new parameter
 stan_newParam <- function(name, type, length=NULL, prior = NULL, fun = NULL, lower = NULL, 
-	isData = F, isTransData = F, isParam = F, isTransParam = F, isReg = F, comment = "")
+	isData = F, isTransData = F, isParam = F, isTransParam = F, isVar = F, isReg = F, comment = "")
 {	
 	param = list(name = name, type = type, length = length, prior = prior, fun = fun, lower = lower, 
-		isData = isData, isTransData = isTransData, isParam = isParam, isTransParam = isTransParam, isReg = isReg, comment = comment)
+		isData = isData, isTransData = isTransData, isParam = isParam, isTransParam = isTransParam, isVar = isVar, isReg = isReg, comment = comment)
 	
 	return (param)
 }
@@ -264,7 +264,7 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 					transparam_code = paste0(transparam_code, " + ")
 				transparam_code = paste0(transparam_code, "a_", parentName, "[", parentName, loopForI, stan_paramOffset(parent$lower), "]")
 
-				param = stan_newParam(name=paste0("a_", parentName), type = "vector", length=paste0("N",parentName), prior = arc$prior, isTransParam = T, isReg = T)
+				param = stan_newParam(name=paste0("a_", parentName), type = "vector", length=paste0("N",parentName), prior = bvl_arcPrior(arc, "a_{0}"), isTransParam = T, isReg = T, isVar = T)
 				params = stan_addParamToList(params, param)
 			}
 			else if (arc$type == "slope")
@@ -273,7 +273,7 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 					transparam_code = paste0(transparam_code, " + ")
 				transparam_code = paste0(transparam_code, "b_", arc$name, " * ", parentName, loopForI)
 
-				param = stan_newParam(name=paste0("b_", arcName), type = "real", prior = arc$prior, isParam = T, isReg = T)
+				param = stan_newParam(name=paste0("b_", arcName), type = "real", prior = bvl_arcPrior(arc, "b_{0}_{1}"), isParam = T, isReg = T)
 				params = stan_addParamToList(params, param)
 			}
 			else if (arc$type %in% ops)
@@ -315,7 +315,7 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 				param = stan_newParam(name=paste0("sigma_",nodeName), type = "real<lower=0>", prior = arc$prior, isParam = T, isReg = T)
 				params = stan_addParamToList(params, param)
 				
-				param = stan_newParam(name=paste0("u_",nodeName), type = "vector", length=paste0("N",nodeName), prior = paste0("normal(0, sigma_",nodeName,")"), isParam = T)
+				param = stan_newParam(name=paste0("u_",nodeName), type = "vector", length=paste0("N",nodeName), prior = paste0("normal(0, sigma_",nodeName,")"), isVar = T, isParam = T)
 				params = stan_addParamToList(params, param)
 			}
 		}
@@ -348,7 +348,7 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 				param = stan_newParam(name=paste0("sigma_",nodeName), type = "real<lower=0>", prior = arcsTo$prior, isParam = T, isReg = T)
 				params = stan_addParamToList(params, param)
 				
-				param = stan_newParam(name=paste0("u_",nodeName), type = "vector", length=paste0("N",nodeName), prior = paste0("normal(0, sigma_",nodeName,")"))
+				param = stan_newParam(name=paste0("u_",nodeName), type = "vector", length=paste0("N",nodeName), prior = paste0("normal(0, sigma_",nodeName,")"), isVar = T)
 				params = stan_addParamToList(params, param)
 			}
 		}
@@ -362,7 +362,7 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 			param = stan_newParam(name=nodeName, type = "vector", length="Nobs", isTransParam = T)
 			params = stan_addParamToList(params, param)
 			
-			param = stan_newParam(name=paste0("a_", nodeName), type = "real", prior = "normal(0,100)", isParam = T, isReg = T)
+			param = stan_newParam(name=paste0("a_", nodeName), type = "real", prior = bvl_arcPrior(arcsTo[[1]], "a_{0}"), isParam = T, isReg = T)
 			params = stan_addParamToList(params, param)
 
 			# loop for each arc from the node
@@ -378,7 +378,8 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 					transparam_code = paste0(transparam_code, " + ")
 				transparam_code = paste0(transparam_code, "b_",arc$name,"*",parentName,"[k]")
 
-				param = stan_newParam(name=paste0("b_", arcName), type = "real", prior = "normal(0,100)", isParam = T, isReg = T)
+				#print(bvl_arcPrior(arcsTo, "b_{0}_{1}"))
+				param = stan_newParam(name=paste0("b_", arcName), type = "real", prior = bvl_arcPrior(arc, "b_{0}_{1}"), isParam = T, isReg = T)
 				params = stan_addParamToList(params, param)
 			}
 			transparam_code = paste0(transparam_code, ";\n")
@@ -388,7 +389,7 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 		{
 			arcsTo <- bvl_getArcs(dag, to = nodeName)
 			
-			param = stan_newParam(name=nodeName, type = "vector", length="Nobs", isTransParam = T)
+			param = stan_newParam(name=nodeName, type = "vector", length="Nobs", isTransParam = T, isVar = T)
 			params = stan_addParamToList(params, param)
 
 			transparam_code = paste0(transparam_code, stan_indent(5), paste0("// Transforming data of ",nodeName,"\n"))
@@ -756,6 +757,29 @@ stan_formula <- function(dag, loopForI = "", outcome = T)
 	return(formula_string)
 }
 
+
+############ PRIOR FUNCTIONS ##############
+stan_priorString <- function(dag)
+{
+	prior_string <- ""
+	params <- stan_params(dag)
+	for(i in 1:length(params))
+	{
+		if (params[[i]]$isParam && !is.null(params[[i]]$prior))
+		{
+			#print(params[[i]]$prior)
+			prior_string <- paste0(prior_string, stan_indent(5), params[[i]]$name, " ~ ", params[[i]]$prior, ";\n")
+		}
+	}
+	
+	return(prior_string)
+}
+
+stan_priors <- function(dag)
+{
+	cat(stan_priorString(dag))
+}
+
 ############ MODEL BUILDING FUNCTIONS ##############
 bvl_model2Stan <- function(dag, quantities_add = "")
 {
@@ -834,15 +858,8 @@ bvl_model2Stan <- function(dag, quantities_add = "")
 
 	# Generating priors ...
 	message("Generating priors...")
-	params <- stan_params(dag)
 	prior_string <- paste0(stan_indent(5), "// Priors\n")
-	for(i in 1:length(params))
-	{
-		if (params[[i]]$isParam && !is.null(params[[i]]$prior))
-		{
-				prior_string <- paste0(prior_string, stan_indent(5), params[[i]]$name, " ~ ", params[[i]]$prior, ";\n")
-		}
-	}
+	prior_string <- paste0(prior_string, stan_priorString(dag))
 	prior_string <- paste0(prior_string, "\n")
 	
 	# Likelihoods
@@ -910,7 +927,7 @@ stan_paramNames <- function(dag, isReg = NULL, isParam = NULL)
 		if ((is.null(isReg) || isReg == paramList[[i]]$isReg) &&
 			  (is.null(isParam) || isParam == paramList[[i]]$isParam))
 			params = c(params, paramList[[i]]$name)
-
+		
 	return(params)
 }
 
