@@ -305,14 +305,14 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 			{				
 				transparam_code = paste0(transparam_code, stan_indent(5), "// Varying intercepts definition\n")
 				transparam_code = paste0(transparam_code, stan_indent(5), "for(k in 1:N",nodeName,") {\n")				
-				transparam_code = paste0(transparam_code, stan_indent(8), "a_",nodeName,"[k] = a_",nodeName,"_0 + u_",nodeName,"[k];\n")				
+				transparam_code = paste0(transparam_code, stan_indent(8), "a_",nodeName,"[k] = a0_",nodeName," + u_",nodeName,"[k];\n")				
 				transparam_code = paste0(transparam_code, stan_indent(5), "}\n")
 				transparam_code = paste0(transparam_code, "\n")
 
-				param = stan_newParam(name=paste0("a_",nodeName,"_0"), type = "real", isParam = T, isReg = T)
+				param = stan_newParam(name=paste0("a0_",nodeName), type = "real", prior = bvl_arcPrior(arc, "a0_{0}"), isParam = T, isReg = T)
 				params = stan_addParamToList(params, param)
 
-				param = stan_newParam(name=paste0("sigma_",nodeName), type = "real<lower=0>", prior = arc$prior, isParam = T, isReg = T)
+				param = stan_newParam(name=paste0("sigma_",nodeName), type = "real<lower=0>", prior = bvl_arcPrior(arc, "sigma_{0}"), isParam = T, isReg = T)
 				params = stan_addParamToList(params, param)
 				
 				param = stan_newParam(name=paste0("u_",nodeName), type = "vector", length=paste0("N",nodeName), prior = paste0("normal(0, sigma_",nodeName,")"), isVar = T, isParam = T)
@@ -342,7 +342,7 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 				transparam_code = paste0(transparam_code, stan_indent(5), "}\n")
 				transparam_code = paste0(transparam_code, "\n")
 
-				param = stan_newParam(name=paste0("a_",nodeName,"_0"), type = "real", prior = "", isParam = T, isReg = T)
+				param = stan_newParam(name=paste0("a0_",nodeName), type = "real", prior = "", isParam = T, isReg = T)
 				params = stan_addParamToList(params, param)
 
 				param = stan_newParam(name=paste0("sigma_",nodeName), type = "real<lower=0>", prior = arcsTo$prior, isParam = T, isReg = T)

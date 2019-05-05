@@ -159,7 +159,7 @@ bvl2stan.arcTemplates <- list(
     VarInt = list(
         name = "varint",
         dist = "varint",
-        par_names = c("a_{0}","a_{0}_0","u_{0}","sigma_{0}"),
+        par_names = c("a_{0}","a0_{0}","u_{0}","sigma_{0}"),
         par_types = c("vector[N{0}]","real","vector[N{0}]","real<lower=0>"),
         par_len = c("[N{0}]","","[N{0}]",""),
         par_trans = c(T,F,F,F),
@@ -290,7 +290,10 @@ bvl_arcPrior <- function(arc, pname)
 	{
 		prior = arc$priors[grep(pname, arc$priors)]
 		
-		prior = sub(".*~", "", prior)
+		if (!length(prior))
+			prior = tmp$stan_priors[grep(pname, tmp$par_names)]
+		else
+			prior = sub(".*~", "", prior)
 	}
 	else
 		prior = tmp$stan_priors[grep(pname, tmp$par_names)]
