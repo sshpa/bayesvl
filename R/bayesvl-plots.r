@@ -104,7 +104,7 @@ bvl_plotDensOverlay <- function(model, n = 200, color_scheme = "blue")
 bvl_trace <- function(model, params = NULL)
 {
 	if (is.null(params))
-		params <- stan_params(model)
+		params <- stan_paramNames(model, T)
 
 	#coda <- stan2coda(model@stanfit)
 	rstan::traceplot(model@stanfit, pars = params)
@@ -120,7 +120,7 @@ bvl_plotIntervals <- function(model, params = NULL, fun = "stat", stat = "mean",
 	require(bayesplot)
 	
 	if (is.null(params))
-		params <- stan_params(model)
+		params <- stan_paramNames(model)
 
 	bayesplot::color_scheme_set(color_scheme)
 	bayesplot::mcmc_intervals(model@posterior, pars = params, point_est = "mean", prob = 0.8, prob_outer = 0.95)
@@ -131,7 +131,7 @@ bvl_plotAreas <- function(model, params = NULL, fun = "stat", stat = "mean", col
 	require(bayesplot)
 	
 	if (is.null(params))
-		params <- stan_params(model)
+		params <- stan_paramNames(model)
 
 	bayesplot::color_scheme_set(color_scheme)
 	bayesplot::mcmc_areas(model@posterior, pars = params, point_est = "mean", prob = 0.8, prob_outer = 0.95)

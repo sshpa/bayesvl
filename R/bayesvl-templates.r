@@ -38,8 +38,21 @@ bvl2stan.nodeTemplates <- list(
         out_type = "int<lower=0,upper=1>",
         vectorized = TRUE
     ),
+    BernLogit = list(
+        name = "bernlogit",
+        dist = "binomial",
+        stan_prior = c("beta(1, 1)"),
+        stan_likelihood = "bernoulli_logit(theta_{0})",
+        stan_yrep = "bernoulli_rng(inv_logit(theta_{0}))",
+        stan_loglik = "bernoulli_logit_lpmf({0}[i] | 1, theta_{0})",
+        par_names = c("theta_{0}"),
+        par_types = c("real<lower=0,upper=1>"),
+        par_reg = "theta_{0}",
+        out_type = "int<lower=0,upper=1>",
+        vectorized = TRUE
+    ),
 		Binomial = list(
-        name = "binorm",
+        name = "binom",
         dist = "binomial",
         stan_prior = c("beta(1, 1)"),
         stan_likelihood = "binomial_logit(1, theta_{0})",
@@ -49,6 +62,19 @@ bvl2stan.nodeTemplates <- list(
         par_types = c("real"),
         par_reg = "theta_{0}",
         out_type = "int<lower=0,upper=1>",
+        vectorized = TRUE
+    ),
+    Beta = list(
+        name = "beta",
+        dist = "beta",
+        stan_prior = c("normal(0, 100)", "normal(0, 100)"),
+        stan_likelihood = "beta_proportion(mu_{0}, kappa_{0})",
+        stan_yrep = "beta_proportion_rng(mu_{0}, kappa_{0})",
+        stan_loglik = "beta_proportion_lpdf({0}[i], mu_{0}, kappa_{0})",
+        par_names = c("mu_{0}", "kappa_{0}"),
+        par_types = c("real", "real"),
+        par_reg = "mu_{0}",
+        out_type = "real",
         vectorized = TRUE
     ),
 		Gamma = list(
@@ -82,7 +108,7 @@ bvl2stan.nodeTemplates <- list(
         dist = "student",
         stan_prior = c("gamma(2, 0.1)", "exponential(1)"),
         stan_likelihood = "student_t(nu_{0},mu_{0},sigma_{0})",
-        stan_yrep = "student_t_rng(lambda_{0}[i])",
+        stan_yrep = "student_t_rng(nu_{0}, mu_{0}[i], sigma_{0})",
         stan_loglik = "student_t_lpdf({0}[i] | nu_{0}, mu_{0}[i], sigma_{0})",
         par_names = c("nu_{0}","mu_{0}","sigma_{0}"),
         par_types = c("real","real","real"),
@@ -95,6 +121,7 @@ bvl2stan.nodeTemplates <- list(
         dist = "normal",
         stan_prior = c("normal( 0, 1 )", "normal( 0.6, 10 )"),
         stan_likelihood = "normal(mu_{0}, sigma_{0})",
+        stan_target = "normal({0}[i] | mu_{0}, sigma_{0})",
         stan_yrep = "normal_rng(mu_{0}[i], sigma_{0})",
         stan_loglik = "normal_lpdf({0}[i] | mu_{0}[i], sigma_{0})",
         par_names = c("mu_{0}","sigma_{0}"),
@@ -141,6 +168,61 @@ bvl2stan.arcTemplates <- list(
     )
 )
 
+bvl2stan.funTemplates <- list(
+    Lookup = list(
+        name = "lookup",
+        stan_code = "",
+        par_names = c("b_{0}_{1}"),
+        par_types = c("real"),
+        par_len = c(""),
+        out_type = c("int")
+    ),
+    numElement = list(
+        name = "numElement",
+        stan_code = "int numElement(int[] m) {
+        int sorted[num_elements(m)];
+        int count = 1;
+        sorted = sort_asc(m);
+        for (i in 2:num_elements(sorted)) {
+          if (sorted[i] != sorted[i-1])
+             count = count + 1;
+        }
+        return(count);
+     }",
+        par_names = c("m"),
+        par_types = c("int[]"),
+        par_len = c(""),
+        out_type = c("int")
+    )
+)
+
+bvl_loadFunTemplate <- function( fname ) {
+	if (is.null(fname))
+		stop(paste0("Function ",fname," not recognized."))
+	
+  tmpname <- bvl_funTemplateExists(fname)
+  
+  templates <- bvl2stan.funTemplates
+  
+  if ( is.na(tmpname) ) stop(paste0("Function ",fname," not recognized."))
+  return(templates[[ tmpname ]])
+}
+
+bvl_funTemplateExists <- function( fname ) {
+    the_match <- NA
+    
+    templates <- bvl2stan.funTemplates
+    
+    for ( i in 1:length(templates) ) {
+        N_name <- templates[[i]][['name']]
+        if ( fname %in% c(N_name) ) {
+            the_match <- names(templates)[i]
+            return(the_match)
+        }
+    }
+    return(the_match)
+}
+
 bvl_loadTemplate <- function( fname ) {
 	if (is.null(fname))
 	{
@@ -174,7 +256,7 @@ bvl_templateExists <- function( fname ) {
 bvl_loadArcTemplate <- function( fname ) {
 	if (is.null(fname))
 	{
-		fname <- "norm"
+		fname <- "slope"
 	}
 	
   tmpname <- bvl_arcTemplateExists(fname)
