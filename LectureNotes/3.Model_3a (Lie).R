@@ -98,7 +98,7 @@ model <- bvl_addNode(model, "Int1_or_Int2", "trans", fun = "({0} > 0 ? 1 : 0)", 
 model <- bvl_addArc(model, "Int1", "Int1_or_Int2", "+")
 model <- bvl_addArc(model, "Int2", "Int1_or_Int2", "+")
 
-model <- bvl_addArc(model, "Int1_or_Int2", "O", "varint")
+model <- bvl_addArc(model, "Int1_or_Int2", "O", "varint", priors = c("a_ ~ normal(0,5)"))
 
 model <- bvl_modelFix(model, data1)
 model_string <- bvl_model2Stan(model)
@@ -111,9 +111,9 @@ model <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4, core
 
 bvl_plotIntervals(model)
 
-bvl_plotIntervals(model, c("b_B_and_Lie_O", "b_C_and_Lie_O", "b_T_and_Lie_O"))
+bvl_plotIntervals(model, c("b_B_and_Lie_O", "b_C_and_Lie_O", "b_T_and_Lie_O", "b_Lie_O"))
 
-bvl_plotIntervals(model, c("b_B_and_Viol_O", "b_C_and_Viol_O", "b_T_and_Viol_O"))
+bvl_plotIntervals(model, c("b_B_and_Viol_O", "b_C_and_Viol_O", "b_T_and_Viol_O", "b_Viol_O"))
 
 
 
