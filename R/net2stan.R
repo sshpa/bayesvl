@@ -955,8 +955,8 @@ stan_extractData <- function(net, data, all=F)
 	else
 		params <- stan_dataNodes(net)
 
-	if (!setequal(names(data1), params))
-		stop("the network and the data have different numbers of variables.")
+	#if (!setequal(names(data), params))
+	#	stop("the network and the data have different numbers of variables.")
 
 	data1 <- data[ , (names(data) %in% params)]
 
