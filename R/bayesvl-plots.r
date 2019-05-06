@@ -53,18 +53,6 @@ bvl_plotParams <- function(model, row = 2, col = 2, credMass = 0.89, params = NU
 		}
 }
 
-plotPPC <- function(stanfit, data, y_name, fun = "stat", stat = "mean", color_scheme = "blue")
-{
-	require(bayesplot)
-	
-	parName <- paste0("yrep_",y_name)
-
-	y_rep <- as.matrix(stanfit, pars = parName)
-
-	bayesplot::color_scheme_set(color_scheme)
-	pp_check(as.numeric(data[y_name]), y_rep, fun = fun, stat = stat)
-}
-
 bvl_logLik <- function(model)
 {
 	require(loo)
@@ -82,6 +70,17 @@ bvl_logLik <- function(model)
 	}
 }
 
+plotPPC <- function(stanfit, data, y_name, fun = "stat", stat = "mean", color_scheme = "blue")
+{
+	require(bayesplot)
+	
+	parName <- paste0("yrep_",y_name)
+
+	y_rep <- as.matrix(stanfit, pars = parName)
+
+	bayesplot::color_scheme_set(color_scheme)
+	pp_check(as.numeric(data[y_name]), y_rep, fun = fun, stat = stat)
+}
 
 bvl_plotPPC <- function(model, fun = "stat", stat = "mean", color_scheme = "blue")
 {
@@ -103,6 +102,79 @@ bvl_plotPPC <- function(model, fun = "stat", stat = "mean", color_scheme = "blue
 		print(p)
 	}
 }
+
+bvl_plotTest <- function(model, y_name, test_name, n = 200, color_scheme = "blue")
+{
+	require(ggplot2)
+	#require(dplyr)
+	
+	parName <- paste0("yrep_",test_name)
+
+	y_rep <- as.matrix(model@stanfit, pars = parName)
+	y <- model@standata[[y_name]]
+		
+	if (length(y_rep) < n)
+		n = length(y_rep)
+	
+	#for(i in 1:n)
+	#{
+	#	lines(density(y_rep[i,]), col=alpha("red", 0.4), type='l', ylim=10)
+		#data_frame(value = y_rep[i, ]) %>%
+    #      ggplot(., aes(value)) + 
+    #            geom_density(alpha = 0.1)
+	#}
+	
+	bayesplot::color_scheme_set(color_scheme)
+	ppc_dens_overlay(y, y_rep[1:n, ])
+}
+
+bvl_plotTest1 <- function(model, y_name, test_name, n = 200, size = 0.25,
+       alpha = 0.7,
+       trim = FALSE,
+       bw = "nrd0",
+       adjust = 1,
+       kernel = "gaussian",
+       n_dens = 1024) {
+    
+    require(ggplot2)
+       
+    parName <- paste0("yrep_",test_name)
+    y_rep <- as.matrix(model@stanfit, pars = parName)
+    if (length(y_rep) < n)
+    	n = length(y_rep)
+    data <- melt(y_rep[1:n, ])
+    
+    y <- model@standata[[y_name]]
+    
+    ggplot(data) +
+	    aes_(x = ~ value) +
+	    stat_density(
+	      aes_(group = ~ parameters, color = "yrep"),
+	      geom = "line",
+	      position = "identity",
+	      size = size,
+	      alpha = alpha,
+	      trim = trim,
+	      bw = bw,
+	      adjust = adjust,
+	      kernel = kernel,
+	      n = n_dens
+	    ) +
+	    stat_density(
+	      aes_(color = "y"),
+	      data = melt(y),
+	      geom = "line",
+	      position = "identity",
+	      lineend = "round",
+	      size = 1,
+	      trim = trim,
+	      bw = bw,
+	      adjust = adjust,
+	      kernel = kernel,
+	      n = n_dens
+    	)
+}
+    
 
 bvl_plotDensOverlay <- function(model, n = 200, color_scheme = "blue")
 {
@@ -194,7 +266,6 @@ bvl_plotDensity2d <- function(model, x, y, color = NULL, color_scheme = "red")
 			labs(x = x, y = y, color = color)
 	}
 }
-
 
 bvl_plotDensity <- function(model, params = NULL, size = 1)
 {
