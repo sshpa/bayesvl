@@ -60,7 +60,7 @@ setMethod("summary", "bayesvl", function(object){
 	cat("Estimates:\n")	
   if (!is.null(object@stanfit) && length(object@stanfit@model_name))
   {
-  	params = stan_params(object)
+  	params = bvl_params(object)
   	print(object@stanfit, pars = params)
   }
   else
@@ -107,16 +107,16 @@ setMethod("bvl_hasArc", "bayesvl", function(object, from, to) {
 })
 
 if (!isGeneric("bvl_addNode"))
-      setGeneric("bvl_addNode", function(dag, name, dist = "norm", priors = NULL, fun = NULL, out_type = NULL, lower = NULL, upper=NULL, ...) standardGeneric("bvl_addNode"))
+      setGeneric("bvl_addNode", function(dag, name, dist = "norm", priors = NULL, fun = NULL, out_type = NULL, lower = NULL, upper=NULL, test = NULL, ...) standardGeneric("bvl_addNode"))
       
-setMethod("bvl_addNode", "bayesvl", function(dag, name, dist = "norm", priors = NULL, out_type = NULL, lower = lower, upper=upper, ...) {
+setMethod("bvl_addNode", "bayesvl", function(dag, name, dist = "norm", priors = NULL, out_type = NULL, lower = lower, upper=upper, test = NULL, ...) {
 	if (is.null(dag) || missing(dag))
 		dag = bayesvl()
 		
 	if (is.null(dag@nodes))
 		dag@nodes = list()
 	
-	node = list(name=name, dist=dist, priors=priors, fun=fun, out_type=out_type, lower=lower)
+	node = list(name=name, dist=dist, priors=priors, fun=fun, out_type=out_type, lower=lower, test = test)
 	dag@nodes[[name]] = node
 	
 	return(dag)

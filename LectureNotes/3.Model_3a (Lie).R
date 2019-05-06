@@ -94,7 +94,7 @@ model <- bvl_addArc(model, "T_and_Lie",  "O", "slope")
 
 model <- bvl_addArc(model, "Lie",   "O", "slope")
 
-model <- bvl_addNode(model, "Int1_or_Int2", "trans", fun = "({0} > 0 ? 1 : 0)", out_type = "int", lower = 0)
+model <- bvl_addNode(model, "Int1_or_Int2", "trans", fun = "({0} > 0 ? 1 : 0)", out_type = "int", lower = 0, test = c(1, 2))
 model <- bvl_addArc(model, "Int1", "Int1_or_Int2", "+")
 model <- bvl_addArc(model, "Int2", "Int1_or_Int2", "+")
 
@@ -109,6 +109,8 @@ options(mc.cores = parallel::detectCores())
 # Fit the model
 model <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4, cores = 4)
 
+bvl_bnPlot(model)
+
 bvl_trace(model)
 
 bvl_plotIntervals(model)
@@ -117,9 +119,22 @@ bvl_plotIntervals(model, c("b_B_and_Lie_O", "b_C_and_Lie_O", "b_T_and_Lie_O", "b
 
 bvl_plotIntervals(model, c("b_B_and_Viol_O", "b_C_and_Viol_O", "b_T_and_Viol_O", "b_Viol_O"))
 
-bvl_plotAreas(model)
+bvl_plotAreas(model, c("b_B_and_Lie_O", "b_C_and_Lie_O", "b_T_and_Lie_O", "b_Lie_O"))
+
+bvl_plotAreas(model, c("b_B_and_Viol_O", "b_C_and_Viol_O", "b_T_and_Viol_O", "b_Viol_O"))
 
 
+bvl_plotDensity(model, c("b_B_and_Lie_O", "b_C_and_Lie_O", "b_T_and_Lie_O", "b_Lie_O"))
+
+bvl_plotDensity(model, c("b_B_and_Viol_O", "b_C_and_Viol_O", "b_T_and_Viol_O", "b_Viol_O"))
+
+bvl_plotDensity2d(model, "b_B_and_Viol_O", "b_C_and_Viol_O", color_scheme = "orange")
+bvl_plotDensity2d(model, "b_B_and_Viol_O", "b_T_and_Viol_O", color_scheme = "orange")
+bvl_plotDensity2d(model, "b_C_and_Viol_O", "b_T_and_Viol_O", color_scheme = "blue")
+
+bvl_plotDensity2d(model, "b_B_and_Lie_O", "b_C_and_Lie_O", color_scheme = "orange")
+bvl_plotDensity2d(model, "b_B_and_Lie_O", "b_T_and_Lie_O", color_scheme = "orange")
+bvl_plotDensity2d(model, "b_C_and_Lie_O", "b_T_and_Lie_O", color_scheme = "blue")
 
 data1$B_and_Lie <- data1$VB * data1$Lie
 data1$C_and_Lie <- data1$VC * data1$Lie
@@ -157,7 +172,7 @@ model <- bvl_addArc(model, "T_and_Lie",  "O", "slope")
 
 model <- bvl_addArc(model, "Lie",   "O", "slope")
 
-model <- bvl_addNode(model, "Int1_or_Int2", "trans", fun = "({0} > 0 ? 1 : 0)", out_type = "int", lower = 0)
+model <- bvl_addNode(model, "Int1_or_Int2", "trans", fun = "({0} > 0 ? 1 : 0)", out_type = "int", lower = 0, test = c(0, 1))
 model <- bvl_addArc(model, "Int1", "Int1_or_Int2", "+")
 model <- bvl_addArc(model, "Int2", "Int1_or_Int2", "+")
 

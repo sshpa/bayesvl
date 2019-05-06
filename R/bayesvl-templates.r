@@ -164,7 +164,7 @@ bvl2stan.arcTemplates <- list(
         par_len = c("[N{0}]","","[N{0}]",""),
         par_trans = c(T,F,F,F),
         par_lik = c(T,F,F,F),
-        stan_priors = c("","","normal(0, sigma_{0})","normal(0,10)")
+        stan_priors = c("","normal(0,10)","normal(0, sigma_{0})","normal(0,10)")
     )
 )
 
