@@ -948,9 +948,15 @@ stan_dataNodes <- function(net)
 	return(params)
 }
 
-stan_extractData <- function(net, data)
+stan_extractData <- function(net, data, all=F)
 {
-	params <- stan_dataNodes(net)
+	if (all)
+		params <- names(net@nodes)
+	else
+		params <- stan_dataNodes(net)
+
+	if (!setequal(names(data1), params))
+		stop("the network and the data have different numbers of variables.")
 
 	data1 <- data[ , (names(data) %in% params)]
 

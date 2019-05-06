@@ -377,16 +377,19 @@ setMethod("bvl_bnScore", "bayesvl", function(net, data = NULL, ...) {
 	{
 		data = as.data.frame(net@standata)
 	}
-	
-	if(!bvl_validData(net, data))
-		return (NA)
-	
-	nodes <- stan_dataNodes(net)
-	if (length(nodes) != length(model@nodes))
-		return (NA)
+		
+	#nodes <- stan_dataNodes(net)
+	#if (length(nodes) != length(model@nodes))
+	#	return (NA)
 	
 	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(net)]
-	dat <- stan_extractData(model, data)
+	dat <- stan_extractData(model, data, T)
+	if (!setequal(names(dat), names(net@nodes)))
+		return (NA)
+	
+	if(!bvl_validData(net, dat))
+		return (NA)
+
 	cols <- sapply(dat, is.numeric)
 	dat[,cols] <- lapply(dat[,cols], as.factor)
 
@@ -467,14 +470,17 @@ setMethod("bvl_bnStrength", "bayesvl", function(net, data = NULL, criterion = "x
 	{
 		data = net@standata
 	}
-	
-	if(!bvl_validData(net, data))
+		
+	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(net)]
+	dat <- stan_extractData(model, data, T)
+	if (!setequal(names(dat), names(net@nodes)))
+		return (NA)
+
+	if(!bvl_validData(net, dat))
 	{
 		return (NA)
 	}
-	
-	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(net)]
-	dat <- stan_extractData(model, data)
+
 	cols <- sapply(dat, is.numeric)
 	dat[,cols] <- lapply(dat[,cols], as.factor)
 

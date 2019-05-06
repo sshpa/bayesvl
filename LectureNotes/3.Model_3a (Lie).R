@@ -109,12 +109,27 @@ options(mc.cores = parallel::detectCores())
 # Fit the model
 model <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4, cores = 4)
 
+bvl_trace(model)
+
 bvl_plotIntervals(model)
 
 bvl_plotIntervals(model, c("b_B_and_Lie_O", "b_C_and_Lie_O", "b_T_and_Lie_O", "b_Lie_O"))
 
 bvl_plotIntervals(model, c("b_B_and_Viol_O", "b_C_and_Viol_O", "b_T_and_Viol_O", "b_Viol_O"))
 
+bvl_plotAreas(model)
+
+
+
+data1$B_and_Lie <- data1$VB * data1$Lie
+data1$C_and_Lie <- data1$VC * data1$Lie
+data1$T_and_Lie <- data1$VT * data1$Lie
+
+data1$B_and_Viol <- data1$VB * data1$Viol
+data1$C_and_Viol <- data1$VC * data1$Viol
+data1$T_and_Viol <- data1$VT * data1$Viol
+
+data1$Int1_or_Int2 <- (data1$Int1 | data1$Int2) * 1
 
 
 # Design the model
