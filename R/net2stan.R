@@ -492,6 +492,59 @@ stan_yrepString <- function(node)
 	return(yrepString)
 }
 
+stan_yrepTest <- function(dag, node, getCode = T)
+{
+  yrepVar = ""
+  yrepCode = ""
+	nodeName <- node$name
+
+	template <- bvl_loadTemplate( node$dist )
+
+	if (!is.null(template$stan_yrep))
+	{
+		
+		for(i in 1:length(dag@nodes))
+		{
+			if (length(dag@nodes[[i]]$test) > 0)
+			{
+				for(v in 1:length(dag@nodes[[i]]$test))
+				{
+					val = dag@nodes[[i]]$test[[v]]
+					
+					lik = stan_formulaAtNode(model, node, "[i]", re = F)
+					lik = gsub(paste0(dag@nodes[[i]]$name,"\\[i\\]"), val, lik)
+					
+					new_parreg = stan_replaceFun(template$par_reg, paste0(dag@nodes[[i]]$name, "_", val))
+					
+					par_reg = gsub("\\{","\\\\{",template$par_reg)
+					par_reg = gsub("\\}","\\\\}",par_reg)
+					
+					yrepLik = template$stan_yrep
+					yrepLik = gsub(paste0(par_reg, "\\[i\\]"), lik, yrepLik)
+					yrepLik = stan_replaceNode(yrepLik, node)
+					
+					#yrepLik = stan_replaceFun(yrepLik, suffix)
+
+				  yrepCode <- paste0(yrepCode, stan_indent(5), "for (i in 1:Nobs) {\n")
+				  #yrepCode <- paste0(yrepCode, stan_indent(8), new_parreg, " = ", lik, ";\n")
+				  yrepCode <- paste0(yrepCode, stan_indent(8), "yrep_", paste0(dag@nodes[[i]]$name, "_", val), "[i] = ", yrepLik, ";\n")
+				  yrepCode <- paste0(yrepCode, stan_indent(5), "}\n")
+				  
+				  #yrepVar <- paste0(yrepVar, stan_indent(5), "real ", new_parreg, ";\n")
+				  yrepVar <- paste0(yrepVar, stan_indent(5), template$out_type, " yrep_", paste0(dag@nodes[[i]]$name, "_", val), "[Nobs];\n")
+				}
+			}
+		}
+		
+	}
+
+	if (getCode)
+		return(yrepCode)
+	else
+		return(yrepVar)
+}
+
+
 ############### TRANSFORMED DATA BLOCK FUNCTIONS ########
 stan_transDataAtNode <- function(dag, node)
 {
@@ -581,7 +634,7 @@ stan_transDataCode <- function(dag)
 				
 				if (isVarintFrom(dag, node))
 				{
-					new_code = paste0(new_code, stan_indent(5), "N", node$name, " = numElement(",node$name,");\n")
+					new_code = paste0(new_code, stan_indent(5), "N", node$name, " = numLevels(",node$name,");\n")
 				}
 				new_code = paste0(new_code, "\n")
 				
@@ -656,7 +709,7 @@ isOpTo <- function(dag, node)
 }
 
 ############ FORMULA FUNCTIONS ##############
-stan_formulaAtNode <- function(dag, node, loopForI = "", outcome = F)
+stan_formulaAtNode <- function(dag, node, loopForI = "", outcome = F, re = T)
 {
 	formula_string <- ""
 
@@ -730,7 +783,11 @@ stan_formulaAtNode <- function(dag, node, loopForI = "", outcome = F)
 				parent = dag@nodes[[node$parents[p]]]
 				if (parent$dist == "trans")
 				{
-					parentFormula = stan_formulaAtNode(dag, parent, "", F)
+					if (re)
+						parentFormula = stan_formulaAtNode(dag, parent, loopForI, F)
+					else
+						parentFormula = paste0(parent$name, loopForI)
+						
 					formula_string = gsub(paste0("\\{",parent$name,"\\}"), parentFormula, formula_string)
 				}
 			}
@@ -786,7 +843,7 @@ bvl_model2Stan <- function(dag, quantities_add = "")
 	print("Generating stan model ...")
 	
 	fun_string <- "functions{\n"
-	fun_string <- paste0(fun_string, stan_indent(5), "int numElement(int[] m) {\n")
+	fun_string <- paste0(fun_string, stan_indent(5), "int numLevels(int[] m) {\n")
 	fun_string <- paste0(fun_string, stan_indent(8), "int sorted[num_elements(m)];\n")
 	fun_string <- paste0(fun_string, stan_indent(8), "int count = 1;\n")
 	fun_string <- paste0(fun_string, stan_indent(8), "sorted = sort_asc(m);\n")
@@ -887,7 +944,7 @@ bvl_model2Stan <- function(dag, quantities_add = "")
 	  if(stan_yrepString(nextNodes[[n]]) != "")
 	  {
 		quantities_var <- paste0(quantities_var, stan_indent(5), "// simulate data from the posterior\n")
-		quantities_var <- paste0(quantities_var, stan_indent(5), template$out_type, " y_rep_",nextNodes[[n]]$name,"[Nobs];\n")
+		quantities_var <- paste0(quantities_var, stan_indent(5), template$out_type, " yrep_",nextNodes[[n]]$name,"[Nobs];\n")
 		}
 		quantities_var <- paste0(quantities_var, stan_indent(5), "// log-likelihood posterior\n")
 		quantities_var <- paste0(quantities_var, stan_indent(5), "vector[Nobs] log_lik_",nextNodes[[n]]$name,";\n")
@@ -895,14 +952,17 @@ bvl_model2Stan <- function(dag, quantities_add = "")
 	  quantities_code <- ""
 	  if(stan_yrepString(nextNodes[[n]]) != "")
 	  {
-	  quantities_code <- paste0(quantities_code, stan_indent(5), "for (i in 1:num_elements(y_rep_",nextNodes[[n]]$name,")) {\n")
-	  quantities_code <- paste0(quantities_code, stan_indent(5), "  y_rep_",nextNodes[[n]]$name,"[i] = ", stan_yrepString(nextNodes[[n]]),";\n")
+	  quantities_code <- paste0(quantities_code, stan_indent(5), "for (i in 1:num_elements(yrep_",nextNodes[[n]]$name,")) {\n")
+	  quantities_code <- paste0(quantities_code, stan_indent(5), "  yrep_",nextNodes[[n]]$name,"[i] = ", stan_yrepString(nextNodes[[n]]),";\n")
 	  quantities_code <- paste0(quantities_code, stan_indent(5), "}\n")
 	  }
 	  
 	  quantities_code <- paste0(quantities_code, stan_indent(5), "for (i in 1:Nobs) {\n")
 	  quantities_code <- paste0(quantities_code, stan_indent(5), "  log_lik_",nextNodes[[n]]$name,"[i] = ", stan_loglikString(nextNodes[[n]]),";\n")
 	  quantities_code <- paste0(quantities_code, stan_indent(5), "}\n")
+
+		quantities_var <- paste0(quantities_var, stan_yrepTest(dag, nextNodes[[n]], F))
+		quantities_code <- paste0(quantities_code, stan_yrepTest(dag, nextNodes[[n]], T))
 	}
 	quantities_string <- paste0(quantities_string, quantities_var, quantities_add, quantities_code)
 	quantities_string <- paste0(quantities_string, "}\n")

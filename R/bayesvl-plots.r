@@ -36,7 +36,7 @@ plotParams <- function(post, row = 2, col = 2, credMass) {
 		}
 }
 
-bvl_plotParams <- function(model, params = NULL, row = 2, col = 2, credMass = 0.89) {
+bvl_plotParams <- function(model, row = 2, col = 2, credMass = 0.89, params = NULL) {
 		par(mfrow=c(row,col))
 		
 		if (is.null(model@posterior))
@@ -57,7 +57,7 @@ plotPPC <- function(stanfit, data, y_name, fun = "stat", stat = "mean", color_sc
 {
 	require(bayesplot)
 	
-	parName <- paste0("y_rep_",y_name)
+	parName <- paste0("yrep_",y_name)
 
 	y_rep <- as.matrix(stanfit, pars = parName)
 
@@ -92,7 +92,7 @@ bvl_plotPPC <- function(model, fun = "stat", stat = "mean", color_scheme = "blue
 	for(i in length(leaves))
 	{
 		y_name <- leaves[[i]]$name
-		parName <- paste0("y_rep_",y_name)
+		parName <- paste0("yrep_",y_name)
 
 		y_rep <- as.matrix(model@stanfit, pars = parName)
 		y <- model@standata[[y_name]]
@@ -113,7 +113,7 @@ bvl_plotDensOverlay <- function(model, n = 200, color_scheme = "blue")
 	for(i in length(leaves))
 	{
 		y_name <- leaves[[i]]$name
-		parName <- paste0("y_rep_",y_name)
+		parName <- paste0("yrep_",y_name)
 		
 		y_rep <- as.matrix(model@stanfit, pars = parName)
 		y <- model@standata[[y_name]]
@@ -171,14 +171,14 @@ bvl_plotAreas <- function(model, params = NULL, fun = "stat", stat = "mean", pro
 	bayesplot::mcmc_areas(model@posterior, pars = params, point_est = "mean", prob = prob, prob_outer = prob_outer)
 }
 
-bvl_plotDensity2d <- function(model, x, y, color = NULL)
+bvl_plotDensity2d <- function(model, x, y, color = NULL, color_scheme = "red")
 {
 	require(viridis)
 	
 	if (is.null(color))
 	{
 		ggplot(model@posterior, aes(x=model@posterior[[x]], y=model@posterior[[y]])) +
-			geom_point(alpha = 0.3, color = "red")+
+			geom_point(alpha = 0.3, color = color_scheme)+
 			geom_density2d(color = "gray30")+
 			scale_color_viridis(option = "C")+ 
 			geom_abline(intercept=0,slope=1) +
@@ -195,6 +195,25 @@ bvl_plotDensity2d <- function(model, x, y, color = NULL)
 	}
 }
 
+
+bvl_plotDensity <- function(model, params = NULL, size = 1)
+{
+	require(viridis)
+	require(ggplot2)
+	require(reshape2)
+	
+	if (is.null(model@stanfit))
+		stop("Model is not estimated!")
+	
+	if (is.null(params))
+		params <- bvl_params(model)
+
+	postParams <- rstan::extract(model@stanfit, pars = params)
+	
+	ref <- melt(postParams)
+	colnames(ref)[2:3] <- c("value","Params")
+	ggplot(data=ref,aes(x=value, color=Params))+geom_density(size=size)
+}
 
 #-------------
 plotPost = function( paramSampleVec , cenTend=c("mode","median","mean")[1] , 
