@@ -412,14 +412,17 @@ setMethod("bvl_bnBayes", "bayesvl", function(net, data = NULL, method = "bayes",
 	{
 		data = net@standata
 	}
-	
-	if(!bvl_validData(net, data))
+		
+	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(net)]
+	dat <- stan_extractData(model, data, T)
+	if (!setequal(names(dat), names(net@nodes)))
+		return (NA)
+
+	if(!bvl_validData(net, dat))
 	{
 		return (NA)
 	}
-	
-	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(net)]
-	dat <- stan_extractData(model, data)
+
 	cols <- sapply(dat, is.numeric)
 	dat[,cols] <- lapply(dat[,cols], as.factor)
 
@@ -442,14 +445,17 @@ setMethod("bvl_bnBarchart", "bayesvl", function(net, data = NULL, method = "baye
 	{
 		data = net@standata
 	}
-	
-	if(!bvl_validData(net, data))
+		
+	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(net)]
+	dat <- stan_extractData(model, data, T)
+	if (!setequal(names(dat), names(net@nodes)))
+		return (NA)
+
+	if(!bvl_validData(net, dat))
 	{
 		return (NA)
 	}
-	
-	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(net)]
-	dat <- stan_extractData(model, data)
+
 	cols <- sapply(dat, is.numeric)
 	dat[,cols] <- lapply(dat[,cols], as.factor)
 
