@@ -154,7 +154,7 @@ bvl2stan.arcTemplates <- list(
         par_len = c(""),
         par_trans = c(F),
         par_lik = c(T),
-        stan_priors = c("normal( 0, 100 )", "normal( 0, 100 )")
+        stan_priors = c("normal( 0, 10 )", "normal( 0, 10 )")
     ),
     VarInt = list(
         name = "varint",
@@ -164,7 +164,7 @@ bvl2stan.arcTemplates <- list(
         par_len = c("[N{0}]","","[N{0}]",""),
         par_trans = c(T,F,F,F),
         par_lik = c(T,F,F,F),
-        stan_priors = c("","","normal(0, sigma_{0})","normal(0,100)")
+        stan_priors = c("","","normal(0, sigma_{0})","normal(0,10)")
     )
 )
 
