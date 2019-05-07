@@ -65,7 +65,7 @@ setMethod("summary", "bayesvl", function(object){
   }
   else
   {
-  	cat(paste0(stan_indent(2), "model is not calculated.\n"))
+  	cat(paste0(stan_indent(2), "model is not estimated.\n"))
   }
 })
 

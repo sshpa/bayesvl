@@ -716,9 +716,6 @@ stan_formulaAtNode <- function(dag, node, loopForI = "", outcome = F, re = T)
 	nodeName <- node$name
 	template <- bvl_loadTemplate( node$dist )
 	
-	if (outcome)
-		formula_string = paste0(nodeName, " ~ ")
-
 	arcsTo <- bvl_getArcs(dag, to = nodeName)
 
 	if (length(arcsTo) > 0)
@@ -798,6 +795,9 @@ stan_formulaAtNode <- function(dag, node, loopForI = "", outcome = F, re = T)
 		formula_string = paste0(formula_string, stan_replaceNode(template$stan_likelihood, node))
 	}
 	
+	if (outcome)
+		formula_string = paste0(nodeName, " ~ ", formula_string)
+
 	return(formula_string)
 }
 
@@ -808,12 +808,21 @@ stan_formula <- function(dag, loopForI = "", outcome = T)
 
 	for(n in 1:length(nextNodes))
 	{
+		nodeName <- nextNodes[[n]]$name
+		template <- bvl_loadTemplate( nextNodes[[n]]$dist )
+
 		formula_string = paste0(formula_string, stan_formulaAtNode(dag, nextNodes[[n]], loopForI, outcome), "\n")
 	}
 	
 	return(formula_string)
 }
 
+bvl_formula <- function(dag, nodeName, outcome = T, re = F)
+{
+	f <- stan_formulaAtNode(dag, dag@nodes[[nodeName]], loopForI = "", outcome = outcome, re = re)
+	
+	cat(f)
+}
 
 ############ PRIOR FUNCTIONS ##############
 stan_priorString <- function(dag)
