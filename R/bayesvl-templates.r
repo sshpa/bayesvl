@@ -10,6 +10,7 @@ bvl2stan.nodeTemplates <- list(
         par_types = c("real","real<lower=0>"),
         par_reg = "mu_{0}",
         out_type = "real",
+        formula = "{0} ~ {f}",
         vectorized = TRUE
     ),
     Dummy = list(
@@ -23,6 +24,7 @@ bvl2stan.nodeTemplates <- list(
         par_types = c("real","real<lower=0>"),
         par_reg = "mu_{0}",
         out_type = "real",
+        formula = "{0} ~ {f}",
         vectorized = TRUE
     ),
     Bern = list(
@@ -36,6 +38,7 @@ bvl2stan.nodeTemplates <- list(
         par_types = c("real<lower=0,upper=1>"),
         par_reg = "theta_{0}",
         out_type = "int<lower=0,upper=1>",
+        formula = "{0} ~ {f}",
         vectorized = TRUE
     ),
     BernLogit = list(
@@ -49,6 +52,7 @@ bvl2stan.nodeTemplates <- list(
         par_types = c("real<lower=0,upper=1>"),
         par_reg = "theta_{0}",
         out_type = "int<lower=0,upper=1>",
+        formula = "{0} ~ {f}",
         vectorized = TRUE
     ),
 		Binomial = list(
@@ -62,6 +66,7 @@ bvl2stan.nodeTemplates <- list(
         par_types = c("real"),
         par_reg = "theta_{0}",
         out_type = "int<lower=0,upper=1>",
+        formula = "logit({0}) ~ {f}",
         vectorized = TRUE
     ),
     Beta = list(
@@ -75,6 +80,7 @@ bvl2stan.nodeTemplates <- list(
         par_types = c("real", "real"),
         par_reg = "mu_{0}",
         out_type = "real",
+        formula = "{0} ~ {f}",
         vectorized = TRUE
     ),
 		Gamma = list(
@@ -88,6 +94,7 @@ bvl2stan.nodeTemplates <- list(
         par_types = c("real", "real"),
         par_reg = "alpha_{0}",
         out_type = "real",
+        formula = "{0} ~ {f}",
         vectorized = TRUE
     ),
 		Poisson = list(
@@ -101,6 +108,7 @@ bvl2stan.nodeTemplates <- list(
         par_types = c("real"),
         par_reg = "lambda_{0}",
         out_type = "real",
+        formula = "{0} ~ {f}",
         vectorized = TRUE
     ),
 		Student = list(
@@ -114,6 +122,7 @@ bvl2stan.nodeTemplates <- list(
         par_types = c("real","real","real"),
         par_reg = "mu_{0}",
         out_type = "real",
+        formula = "{0} ~ {f}",
         vectorized = TRUE
     ),
     Normal = list(
@@ -128,6 +137,7 @@ bvl2stan.nodeTemplates <- list(
         par_types = c("real","real<lower=0>"),
         par_reg = "mu_{0}",
         out_type = "real",
+        formula = "{0} ~ {f}",
         vectorized = TRUE
     ),
     Categorical = list(
@@ -141,6 +151,7 @@ bvl2stan.nodeTemplates <- list(
         par_types = c("vector[N{0}]"),
         par_reg = "theta_{0}",
         out_type = "int<lower=1,upper=N{0}>",
+        formula = "{0} ~ {f}",
         vectorized = TRUE
     )
 )
