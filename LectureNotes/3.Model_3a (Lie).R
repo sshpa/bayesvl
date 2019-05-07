@@ -94,7 +94,7 @@ model <- bvl_addArc(model, "T_and_Lie",  "O", "slope")
 
 model <- bvl_addArc(model, "Lie",   "O", "slope")
 
-model <- bvl_addNode(model, "Int1_or_Int2", "trans", fun = "({0} > 0 ? 1 : 0)", out_type = "int", lower = 0, test = c(1, 2))
+model <- bvl_addNode(model, "Int1_or_Int2", "trans", fun = "({0} > 0 ? 1 : 0)", out_type = "int", lower = 0, test = c(0, 1))
 model <- bvl_addArc(model, "Int1", "Int1_or_Int2", "+")
 model <- bvl_addArc(model, "Int2", "Int1_or_Int2", "+")
 
@@ -138,6 +138,7 @@ bvl_plotDensity2d(model, "b_C_and_Lie_O", "b_T_and_Lie_O", color_scheme = "blue"
 
 bvl_plotDensity2d(model, "a_Int1_or_Int2[1]", "a_Int1_or_Int2[2]", color_scheme = "purple")
 
+bvl_plotDensity(model, c("a_Int1_or_Int2[1]", "a_Int1_or_Int2[2]"))
 
 
 
