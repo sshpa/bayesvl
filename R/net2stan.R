@@ -241,7 +241,8 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 		transparam_code = paste0(transparam_code, stan_indent(8), stan_replaceNode(template$par_reg, node), loopForI, " = ")
 
 		# slope without varying intercept
-		if (!isVarintTo(dag, node) && isSlopeTo(dag, node))
+		hasVarintTo <- bvl_getArcs(dag, to = node$name, type = c("varint"))
+		if (length(hasVarintTo) < 1 && isSlopeTo(dag, node))
 		{
 			transparam_code = paste0(transparam_code, "a_", nodeName, " + ")
 
@@ -509,7 +510,16 @@ stan_yrepTest <- function(dag, node, getCode = T)
 			{
 				for(v in 1:length(dag@nodes[[i]]$test))
 				{
+					offset = 0;
+					
+					arcs = bvl_getArcs(dag, from = dag@nodes[[i]]$name, to = node$name, type = "varint")
+					if (length(arcs) > 0 && dag@nodes[[i]]$lower < 1)
+					{
+						offset = 1 - dag@nodes[[i]]$lower
+					}
+					
 					val = dag@nodes[[i]]$test[[v]]
+					val = val + offset
 					
 					lik = stan_formulaAtNode(model, node, "[i]", re = F)
 					lik = gsub(paste0(dag@nodes[[i]]$name,"\\[i\\]"), val, lik)
@@ -672,6 +682,7 @@ isVarintTo <- function(dag, node)
 		
 	varint <- bvl_getArcs(dag, to = node$name, type = c("varint"))
 	
+	#print(varint)
 	arcs <- bvl_getArcs(dag, to = node$name)
 		
 	hasVarint = ((length(varint) >0) & (length(varint)==length(arcs)))
