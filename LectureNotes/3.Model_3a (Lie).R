@@ -136,6 +136,11 @@ bvl_plotDensity2d(model, "b_B_and_Lie_O", "b_C_and_Lie_O", color_scheme = "orang
 bvl_plotDensity2d(model, "b_B_and_Lie_O", "b_T_and_Lie_O", color_scheme = "orange")
 bvl_plotDensity2d(model, "b_C_and_Lie_O", "b_T_and_Lie_O", color_scheme = "blue")
 
+bvl_plotDensity2d(model, "a_Int1_or_Int2[1]", "a_Int1_or_Int2[2]", color_scheme = "purple")
+
+
+
+
 data1$B_and_Lie <- data1$VB * data1$Lie
 data1$C_and_Lie <- data1$VC * data1$Lie
 data1$T_and_Lie <- data1$VT * data1$Lie
