@@ -387,6 +387,27 @@ bvl_plotAcf = function( model, params = NULL) {
   )  
 }
 
+bvl_plotAcfs = function( model, params = NULL, row = 2, col = 2) {
+	par(mfrow=c(row,col))
+
+  DBDAplColors = c("skyblue","black","royalblue","steelblue")
+
+	if (is.null(model@stanfit))
+		stop("Model is not estimated!")
+
+	codaObject <- stan2coda(model@stanfit)
+	
+	if (is.null(params))
+		params <- bvl_params(model)
+
+  for(i in 1:length(params))
+  {
+	  tryVal = try(
+	    DbdaAcfPlot(codaObject, params[i], main = params[i])
+	  )
+  }  
+}
+
 #-------------
 plotPost = function( paramSampleVec , cenTend=c("mode","median","mean")[1] , 
                      compVal=NULL, ROPE=NULL, credMass=0.95, HDItextPlace=0.7, 
@@ -610,7 +631,7 @@ HDIofGrid = function( probMassVec , credMass=0.95 ) {
 #------------------------------------------------------------------------------
 # Function(s) for plotting properties of mcmc coda objects.
 
-DbdaAcfPlot = function( codaObject , parName=varnames(codaObject)[1] , plColors=NULL ) {
+DbdaAcfPlot = function( codaObject , parName=varnames(codaObject)[1] , plColors=NULL, main = "" ) {
   if ( all( parName != varnames(codaObject) ) ) { 
     stop("parName must be a column name of coda object")
   }
@@ -624,7 +645,7 @@ DbdaAcfPlot = function( codaObject , parName=varnames(codaObject)[1] , plColors=
     yMat = cbind(yMat,acfInfo$acf)
   }
   matplot( xMat , yMat , type="o" , pch=20 , col=plColors , ylim=c(0,1) ,
-           main="" , xlab="Lag" , ylab="Autocorrelation" )
+           main=main , xlab="Lag" , ylab="Autocorrelation" )
   abline(h=0,lty="dashed")
   EffChnLngth = effectiveSize(codaObject[,c(parName)])
   text( x=max(xMat) , y=max(yMat) , adj=c(1.0,1.0) , cex=1.25 ,
