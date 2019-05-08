@@ -195,10 +195,32 @@ bvl_plotDensOverlay <- function(model, n = 200, color_scheme = "blue")
 			n = length(y_rep)
 		
 		bayesplot::color_scheme_set(color_scheme)
-		p <- ppc_dens_overlay(y, y_rep[1:n, ])
+		p <- ppc_dens_over(y, y_rep[1:n, ])
 		
 		print(p)
 	}
+}
+
+bvl_plotTest <- function(model, y_name, test_name, n = 200, color_scheme = "blue")
+{
+	require(bayesplot)
+	
+	leaves <- bvl_getLeaves(model)
+	
+	y_name <- leaves[[i]]$name
+	parName <- paste0("yrep_",test_name)
+	
+	y_rep <- as.matrix(model@stanfit, pars = parName)
+	y <- model@standata[[y_name]]
+	#dim(y_rep)
+	
+	if (length(y_rep) < n)
+		n = length(y_rep)
+	
+	bayesplot::color_scheme_set(color_scheme)
+	p <- ppc_dens_overlay(y, y_rep[1:n, ])
+	
+	print(p)
 }
 
 bvl_trace <- function(model, params = NULL)
@@ -243,6 +265,32 @@ bvl_plotAreas <- function(model, params = NULL, fun = "stat", stat = "mean", pro
 	bayesplot::mcmc_areas(model@posterior, pars = params, point_est = "mean", prob = prob, prob_outer = prob_outer)
 }
 
+bvl_plotPairs <- function(model, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue")
+{
+	require(bayesplot)
+	
+	if (is.null(model@posterior))
+		stop("Model is not estimated!")
+	
+	if (is.null(params))
+		params <- bvl_params(model)
+
+	bayesplot::color_scheme_set(color_scheme)
+	bayesplot::mcmc_pairs(model@posterior, pars = params, off_diag_args = list(size = 1.5))
+}
+
+bvl_plotDiag <- function(model, params = NULL)
+{
+	require(bayesplot)
+	
+	coda <- stan2coda(model@stanfit)
+	
+	if (is.null(params))
+		params <- bvl_params(model)
+
+	diagMCMC(model@posterior, parName = params)
+}
+
 bvl_plotDensity2d <- function(model, x, y, color = NULL, color_scheme = "red")
 {
 	require(viridis)
@@ -284,6 +332,59 @@ bvl_plotDensity <- function(model, params = NULL, size = 1)
 	ref <- melt(postParams)
 	colnames(ref)[2:3] <- c("value","Params")
 	ggplot(data=ref,aes(x=value, color=Params))+geom_density(size=size)
+}
+
+
+bvl_plotGelman = function( model, params = NULL) {
+  DBDAplColors = c("skyblue","black","royalblue","steelblue")
+
+	if (is.null(model@stanfit))
+		stop("Model is not estimated!")
+
+	codaObject <- stan2coda(model@stanfit)
+	
+	if (is.null(params))
+		params <- bvl_params(model)
+
+  tryVal = try(
+    coda::gelman.plot( codaObject[,params] , main="" , auto.layout=TRUE , 
+                       col=DBDAplColors )
+  )  
+}
+
+bvl_plotGelmans = function( model, params = NULL, row = 2, col = 2) {
+	par(mfrow=c(row,col))
+
+  DBDAplColors = c("skyblue","black","royalblue","steelblue")
+
+	if (is.null(model@stanfit))
+		stop("Model is not estimated!")
+
+	codaObject <- stan2coda(model@stanfit)
+	
+	if (is.null(params))
+		params <- bvl_params(model)
+
+  tryVal = try(
+    coda::gelman.plot( codaObject[,params] , main="" , auto.layout=FALSE , 
+                       col=DBDAplColors )
+  )  
+}
+
+bvl_plotAcf = function( model, params = NULL) {
+  DBDAplColors = c("skyblue","black","royalblue","steelblue")
+
+	if (is.null(model@stanfit))
+		stop("Model is not estimated!")
+
+	codaObject <- stan2coda(model@stanfit)
+	
+	if (is.null(params))
+		params <- bvl_params(model)
+
+  tryVal = try(
+    DbdaAcfPlot(codaObject, params)
+  )  
 }
 
 #-------------
@@ -627,4 +728,85 @@ diagStanFit = function( stanFit , parName ,
   #if ( !is.null(saveName) ) {
   #  saveGraph( file=paste0(saveName,"Diag",parName), type=saveType)
   #}
+}
+
+
+############################
+ppc_dens_over <- function(y, yrep, ...,
+                             size = 0.25,
+                             alpha = 0.7,
+                             trim = FALSE,
+                             bw = "nrd0",
+                             adjust = 1,
+                             kernel = "gaussian",
+                             n_dens = 1024) {
+
+  #check_ignored_arguments(...)
+  data <- ppc_data(y, yrep)
+
+  ggplot(data) +
+    aes_(x = ~ value) +
+    stat_density(
+      aes_(group = ~ rep_id, color = "yrep"),
+      data = function(x) dplyr::filter(x, !.data$is_y),
+      geom = "line",
+      position = "identity",
+      size = size,
+      alpha = alpha,
+      trim = trim,
+      bw = bw,
+      adjust = adjust,
+      kernel = kernel,
+      n = n_dens
+    ) +
+    stat_density(
+      aes_(color = "y"),
+      data = function(x) dplyr::filter(x, .data$is_y),
+      geom = "line",
+      position = "identity",
+      lineend = "round",
+      size = 1,
+      trim = trim,
+      bw = bw,
+      adjust = adjust,
+      kernel = kernel,
+      n = n_dens
+    ) +
+    scale_color_manual(
+    values = get_color(c("dh", "lh")),
+    labels = c("y", "yrep")
+ 		 ) +
+    yaxis_title(FALSE) +
+    xaxis_title(FALSE) +
+    yaxis_text(TRUE) +
+    yaxis_ticks(TRUE)
+}
+
+
+
+get_color <- function(levels) {
+  sel <- which(!levels %in% scheme_level_names())
+  if (length(sel))
+    levels[sel] <- sapply(levels[sel], full_level_name)
+  stopifnot(all(levels %in% scheme_level_names()))
+  color_vals <- color_scheme_get()[levels]
+  unlist(color_vals, use.names = FALSE)
+}
+full_level_name <- function(x) {
+  switch(x,
+         l = "light", lh = "light_highlight",
+         m = "mid", mh = "mid_highlight",
+         d = "dark", dh = "dark_highlight"
+         )
+}
+
+
+# Color scheme level names
+scheme_level_names <- function() {
+  c("light",
+    "light_highlight",
+    "mid",
+    "mid_highlight",
+    "dark",
+    "dark_highlight")
 }

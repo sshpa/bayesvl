@@ -1120,7 +1120,7 @@ bvl_modelFix <- function(dag, data)
 	return(dag)
 }
 
-bvl_modelFit <- function(net, data, warmup = 1000, iter = 5000, chains = 4, cores = 4, writefile = F)
+bvl_modelFit <- function(net, data, warmup = 1000, iter = 5000, chains = 4, cores = 4, writefile = F, ppc = "")
 {
 	if (!bvl_validModel(net))
 		stop("Invalid model to estimate!")
@@ -1131,7 +1131,7 @@ bvl_modelFit <- function(net, data, warmup = 1000, iter = 5000, chains = 4, core
 	dataList <- bvl_modelData(net, data)
 	
 	net <- bvl_modelFix(net, data)
-	model_string <- bvl_model2Stan(net)
+	model_string <- bvl_model2Stan(net, quantities_add = ppc)
 
 	message("Compiling and producing posterior samples from the model...")
 	if (writefile)
