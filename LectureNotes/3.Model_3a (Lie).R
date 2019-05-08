@@ -140,7 +140,7 @@ bvl_plotDensity2d(model, "a_Int1_or_Int2[1]", "a_Int1_or_Int2[2]", color_scheme 
 
 bvl_plotDensity(model, c("a_Int1_or_Int2[1]", "a_Int1_or_Int2[2]"))
 
-
+paramName <- "yrep_Int1_or_Int2_1"
 
 data1$B_and_Lie <- data1$VB * data1$Lie
 data1$C_and_Lie <- data1$VC * data1$Lie
