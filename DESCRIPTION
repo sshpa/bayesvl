@@ -1,7 +1,7 @@
 Package: bayesvl
 Type: Package
 Title: R package for visual learning the graphical structure of Bayesian networks.
-Version: 0.6.5
+Version: 0.7.0
 Date: 2018-12-15
 Authors@R: c(person("Viet-Phuong", "Developer", role = c("aut", "cre"), email = c("lvphuong@gmail.com","phuong.laviet@phenikaa-uni.edu.vn")),person("Quan-Hoang", "Developer", role = c("aut", "cre"), email = c("qvuong.ulb@gmail.com","hoang.vuongquan@phenikaa-uni.edu.vn")))
 Author: Viet-Phuong La, Quan-Hoang Vuong
