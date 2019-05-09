@@ -1,11 +1,16 @@
 bayesvl ChangeLog
 -------------------------
+0.7.0
+ * fixed alpha intercept for varying intercept model
+ * fixed lower=0 for varying intercept model
+ * change file net2stan.r to bayesvl2stan.r
+ * added WAIC calculation
+ 
 0.6.8
- * update arc templates
- * validate model
- * auto generate data list for Stan estimation
- * compare log_lik function
- * calculated WAIC
+ * added arc templates
+ * added validate model functions
+ * added auto generate data list for Stan estimation
+ * added compare log_lik function
 
 0.6.5
  * support node type Dummy for temporary parameters
@@ -16,14 +21,30 @@ bayesvl ChangeLog
  * update readme.md
 
 0.6.0
- * generate Stan code from network graph
+ * added more distribution templates
+ * updated stan code generator from network graph
  * update readme.md
 
 0.5.1
- * convert between bayesvl network structure and bnlearn network structure
+ * lots of documentation updates.
 
 0.5.0
- * initialize network function
- * add a node to network for a variable in survey data 
- * add an arc between variables in survey data 
+ * added functions for stan code generating
+ * added distribution templates
  * update readme.md
+
+0.3.0
+ * added bnPlot(), bnScore(), bnStrength() to call bnlearn functions
+ * added utitlites for convert between bayesvl network structure and bnlearn network structure
+ * update readme.md
+
+0.2.0
+ * added functions for add/remove node to network graph 
+ * added functions for add/remove arc between variable nodes
+ * initialize network function
+ * implemented object bayesvl class
+ * first completely documented release
+
+0.1.0
+ * package description & other information
+ * initial release
