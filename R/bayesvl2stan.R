@@ -134,6 +134,14 @@ stan_dataAtNode <- function(dag, node)
 		dataParams = stan_addParamToList(dataParams, param)
 	}
 
+	if (isVarintFrom(dag, node) && isVarintTo(dag, node))
+	{
+		parentName = node$parents[[1]]
+		
+		param = stan_newParam(name=paste0(nodeName,"2",parentName), type = "int", length=paste0("N",nodeName), isData = T)
+		dataParams = stan_addParamToList(dataParams, param)
+	}
+
 	return(dataParams)
 }
 
@@ -339,12 +347,15 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 				
 				transparam_code = paste0(transparam_code, stan_indent(5), "// Next level random intercepts\n")				
 				transparam_code = paste0(transparam_code, stan_indent(5), "for(k in 1:N",nodeName,") {\n")
-				transparam_code = paste0(transparam_code, stan_indent(8), "a_",nodeName,"[k] = a_",parentName,"[",nodeName,"2",parentName,"[k]] + u_",nodeName,"[k]")				
+				transparam_code = paste0(transparam_code, stan_indent(8), "a_",nodeName,"[k] = a_",parentName,"[",nodeName,"2",parentName,"[k]] + u_",nodeName,"[k];\n")
 				transparam_code = paste0(transparam_code, stan_indent(5), "}\n")
 				transparam_code = paste0(transparam_code, "\n")
 
-				param = stan_newParam(name=paste0("a0_",nodeName), type = "real", prior = "", isParam = T, isReg = T)
+				param = stan_newParam(name=paste0("a_",nodeName), type = "real", length=paste0("N",nodeName), prior = "", isTransParam = T, isReg = T)
 				params = stan_addParamToList(params, param)
+
+				#param = stan_newParam(name=paste0("a0_",nodeName), type = "real", prior = "", isParam = T, isReg = T)
+				#params = stan_addParamToList(params, param)
 
 				param = stan_newParam(name=paste0("sigma_",nodeName), type = "real<lower=0>", prior = arcsTo$prior, isParam = T, isReg = T)
 				params = stan_addParamToList(params, param)
@@ -1080,9 +1091,9 @@ bvl_modelData <- function(net, data)
 	nodes <- stan_dataNodes(net)
 	for(i in 1:length(nodes))
 	{
-		#print(net@nodes[[nodes[i]]]$dist)
+		node <- net@nodes[[nodes[i]]]
 		dataList[[nodes[i]]] <- as.numeric(data[ , nodes[i]])
-		if (net@nodes[[nodes[i]]]$dist == "cat")
+		if (node$dist == "cat")
 		{
 			dataList[[paste0("N",nodes[i])]] <- length(unique(data[ , nodes[i]]))
 		}
@@ -1090,6 +1101,15 @@ bvl_modelData <- function(net, data)
 		if (isVarintFrom(net, net@nodes[[nodes[i]]]) && !(paste0("N",nodes[i]) %in% names(dataList)))
 		{
 			dataList[[paste0("N",nodes[i])]] <- length(unique(data[ , nodes[i]]))
+		}
+
+		if (isVarintFrom(net, node) && isVarintTo(net, node))
+		{
+			parentName = node$parents[[1]]
+			dataName = paste0(nodes[i],"2",parentName)
+			#print(parentName)
+			
+			dataList[[dataName]]  <- unique(data[c(nodes[i], parentName)])[,parentName]
 		}
 	}
 	
