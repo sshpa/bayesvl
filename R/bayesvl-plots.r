@@ -207,7 +207,6 @@ bvl_plotTest <- function(model, y_name, test_name, n = 200, color_scheme = "blue
 	
 	leaves <- bvl_getLeaves(model)
 	
-	y_name <- leaves[[i]]$name
 	parName <- paste0("yrep_",test_name)
 	
 	y_rep <- as.matrix(model@stanfit, pars = parName)
@@ -218,7 +217,7 @@ bvl_plotTest <- function(model, y_name, test_name, n = 200, color_scheme = "blue
 		n = length(y_rep)
 	
 	bayesplot::color_scheme_set(color_scheme)
-	p <- ppc_dens_overlay(y, y_rep[1:n, ])
+	p <- ppc_dens_over(y, y_rep[1:n, ])
 	
 	print(p)
 }
@@ -797,8 +796,8 @@ ppc_dens_over <- function(y, yrep, ...,
     values = get_color(c("dh", "lh")),
     labels = c("y", "yrep")
  		 ) +
-    yaxis_title(FALSE) +
-    xaxis_title(FALSE) +
+    yaxis_title(TRUE) +
+    xaxis_title(TRUE) +
     yaxis_text(TRUE) +
     yaxis_ticks(TRUE)
 }
