@@ -4,7 +4,7 @@ Title: R package for visual learning the graphical structure of Bayesian network
 Version: 0.6.5
 Date: 2018-12-15
 Author: Viet-Phuong La, Quan-Hoang Vuong
-Maintainer: Viet-Phuong La <lvphuong@gmail.com, phuong.laviet@phenikaa-uni.edu.vn>, Quan-Hoang Vuong <qvuong.ulb@gmail.com, hoang.vuongquan@phenikaa-uni.edu.vn>
+Maintainer: Viet-Phuong La <phuong.laviet@phenikaa-uni.edu.vn>, Quan-Hoang Vuong <hoang.vuongquan@phenikaa-uni.edu.vn>
 Imports: coda, rstan, bnlearn, ggplot2, bayesplot, viridis, reshape2
 Depends: rstan (>= 2.10.0), parallel, methods, stats, graphics, bayesplot, viridis, reshape2
 Description: Utilities for fitting and comparing models, and constructing usefil graphics
