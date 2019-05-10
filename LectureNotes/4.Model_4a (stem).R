@@ -46,9 +46,9 @@ bvl_trace(model)
 data1$CarMotGr[data1$CarMotGr == "labor"] <- "Labor"
 data1$CarMotGr <- droplevels(data1$CarMotGr)
 
-data1$Careers <- as.numeric(data1$CarMotGr) + as.numeric(data1$CarFatGr) - 1
+data1$ParentJob <- as.numeric(data1$CarMotGr) + as.numeric(data1$CarFatGr) - 1
 
-data1$SexCar <- factor(paste0(data1$Sex,"_",data1$Careers))
+data1$SexPJ <- factor(paste0(data1$Sex,"_",data1$ParentJob))
 
 # Design the model
 model <- bayesvl()
@@ -71,9 +71,9 @@ model <- bvl_addArc(model, "OnlyChi",  "APS45ID", "slope")
 model <- bvl_addArc(model, "NumberofChi",  "APS45ID", "slope")
 model <- bvl_addArc(model, "EcoStt",   "APS45ID", "slope")
 
-model <- bvl_addArc(model, "SexCar", "APS45ID", "varint")
+model <- bvl_addArc(model, "SexPJ", "APS45ID", "varint")
 
-model <- bvl_addArc(model, "Sex", "SexCar", "varint")
+model <- bvl_addArc(model, "Sex", "SexPJ", "varint")
 
 model <- bvl_modelFix(model, data1)
 model_string <- bvl_model2Stan(model)
