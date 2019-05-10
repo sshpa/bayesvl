@@ -369,13 +369,14 @@ if (!isGeneric("bvl_bnScore"))
 
 setMethod("bvl_bnScore", "bayesvl", function(net, data = NULL, ...) {			
 	if(!bvl_validModel(net))
-	{
 		return (NA)
-	}
 	
-	if (length(data) == 0)
+	if (is.null(data))
 	{
-		data = as.data.frame(net@standata)
+		if (!setequal(names(net@standata), names(net@nodes)))
+			return (NA)
+
+		data <- as.data.frame(net@standata[names(net@nodes)])
 	}
 		
 	#nodes <- stan_dataNodes(net)
