@@ -50,20 +50,23 @@ data1$ParentJob <- as.numeric(data1$CarMotGr) + as.numeric(data1$CarFatGr) - 1
 
 data1$SexPJ <- factor(paste0(data1$Sex,"_",data1$ParentJob))
 
+data1$OnlyChi <- ifelse(data1$RankingF + data1$NumberofChi== 2, 1, 0)
+
 # Design the model
 model <- bayesvl()
 model <- bvl_addNode(model, "APS45ID", "norm")
 model <- bvl_addNode(model, "EcoStt", "cat")
 model <- bvl_addNode(model, "EduMot", "cat")
 model <- bvl_addNode(model, "EduFat", "cat")
-model <- bvl_addNode(model, "RankingF", "cat")
+#model <- bvl_addNode(model, "RankingF", "cat")
+model <- bvl_addNode(model, "OnlyChi", "cat")
 model <- bvl_addNode(model, "NumberofChi", "cat")
 model <- bvl_addNode(model, "Sex", "cat")
-model <- bvl_addNode(model, "SexCar", "cat")
+model <- bvl_addNode(model, "SexPJ", "cat")
 
-model <- bvl_addNode(model, "OnlyChi", "trans", fun = "({0} == 2 ? 1 : 0)")
-model <- bvl_addArc(model, "RankingF",  "OnlyChi", "+")
-model <- bvl_addArc(model, "NumberofChi",  "OnlyChi", "+")
+#model <- bvl_addNode(model, "OnlyChi", "trans", fun = "({0} == 2 ? 1 : 0)")
+#model <- bvl_addArc(model, "RankingF",  "OnlyChi", "+")
+#model <- bvl_addArc(model, "NumberofChi",  "OnlyChi", "+")
 
 model <- bvl_addArc(model, "EduMot",  "APS45ID", "slope")
 model <- bvl_addArc(model, "EduFat",  "APS45ID", "slope")
