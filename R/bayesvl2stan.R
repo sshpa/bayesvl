@@ -273,8 +273,8 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 					transparam_code = paste0(transparam_code, " + ")
 				transparam_code = paste0(transparam_code, "a_", parentName, "[", parentName, loopForI, stan_paramOffset(parent$lower), "]")
 
-				param = stan_newParam(name=paste0("a_", parentName), type = "vector", length=paste0("N",parentName), prior = bvl_arcPrior(arc, "a_{0}"), isTransParam = T, isReg = T, isVar = T)
-				params = stan_addParamToList(params, param)
+				#param = stan_newParam(name=paste0("a_", parentName), type = "vector", length=paste0("N",parentName), prior = bvl_arcPrior(arc, "a_{0}"), isTransParam = T, isReg = T, isVar = T)
+				#params = stan_addParamToList(params, param)
 			}
 			else if (arc$type == "slope")
 			{
@@ -318,6 +318,9 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 				transparam_code = paste0(transparam_code, stan_indent(5), "}\n")
 				transparam_code = paste0(transparam_code, "\n")
 
+				param = stan_newParam(name=paste0("a_", nodeName), type = "vector", length=paste0("N",nodeName), prior = bvl_arcPrior(arc, "a_{0}"), isTransParam = T, isReg = T, isVar = T)
+				params = stan_addParamToList(params, param)
+
 				param = stan_newParam(name=paste0("a0_",nodeName), type = "real", prior = bvl_arcPrior(arc, "a0_{0}"), isParam = T, isReg = T)
 				params = stan_addParamToList(params, param)
 
@@ -351,16 +354,16 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 				transparam_code = paste0(transparam_code, stan_indent(5), "}\n")
 				transparam_code = paste0(transparam_code, "\n")
 
-				param = stan_newParam(name=paste0("a_",nodeName), type = "real", length=paste0("N",nodeName), prior = "", isTransParam = T, isReg = T)
+				param = stan_newParam(name=paste0("a_", nodeName), type = "real", length=paste0("N",nodeName), prior = bvl_arcPrior(arc, "a_{0}"), isTransParam = T, isReg = T, isVar = T)
 				params = stan_addParamToList(params, param)
 
-				#param = stan_newParam(name=paste0("a0_",nodeName), type = "real", prior = "", isParam = T, isReg = T)
+				#param = stan_newParam(name=paste0("a0_",nodeName), type = "real", prior = bvl_arcPrior(arc, "a0_{0}"), isParam = T, isReg = T)
 				#params = stan_addParamToList(params, param)
 
-				param = stan_newParam(name=paste0("sigma_",nodeName), type = "real<lower=0>", prior = arcsTo$prior, isParam = T, isReg = T)
+				param = stan_newParam(name=paste0("sigma_",nodeName), type = "real<lower=0>", prior = bvl_arcPrior(arc, "sigma_{0}"), isParam = T, isReg = T)
 				params = stan_addParamToList(params, param)
 				
-				param = stan_newParam(name=paste0("u_",nodeName), type = "vector", length=paste0("N",nodeName), prior = paste0("normal(0, sigma_",nodeName,")"), isVar = T)
+				param = stan_newParam(name=paste0("u_",nodeName), type = "vector", length=paste0("N",nodeName), prior = paste0("normal(0, sigma_",nodeName,")"), isVar = T, isParam = T)
 				params = stan_addParamToList(params, param)
 			}
 		}
