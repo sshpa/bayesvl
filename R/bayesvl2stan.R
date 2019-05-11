@@ -1133,7 +1133,7 @@ bvl_modelFix <- function(dag, data)
 		if (isVarintFrom(dag, node) && (node$dist != "trans"))
 		{
 			minX = min(unique(as.numeric(data[ , node$name])))
-			print(node$name)
+			#print(node$name)
 			if (minX < 1)
 				node$lower = minX
 		}

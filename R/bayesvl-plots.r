@@ -137,7 +137,7 @@ bvl_plotTest1 <- function(model, y_name, test_name, n = 200, size = 0.25,
        n_dens = 1024) {
     
     require(ggplot2)
-       
+
     parName <- paste0("yrep_",test_name)
     y_rep <- as.matrix(model@stanfit, pars = parName)
     if (length(y_rep) < n)
