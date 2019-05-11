@@ -236,7 +236,7 @@ bvl_diag <- function(model)
 	rstan::stan_diag(model@stanfit)
 }
 
-bvl_plotIntervals <- function(model, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue")
+bvl_plotIntervals <- function(model, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
 {
 	require(bayesplot)
 	
@@ -245,12 +245,20 @@ bvl_plotIntervals <- function(model, params = NULL, fun = "stat", stat = "mean",
 	
 	if (is.null(params))
 		params <- bvl_params(model)
-	
+		
 	bayesplot::color_scheme_set(color_scheme)
-	bayesplot::mcmc_intervals(model@posterior, pars = params, point_est = "mean", prob = prob, prob_outer = prob_outer)
+	
+	if (!is.null(labels) && length(labels) == length(params))
+	{
+		dat <- model@posterior[params]
+		colnames(dat) <- labels
+		bayesplot::mcmc_intervals(dat, pars = labels, point_est = "mean", prob = prob, prob_outer = prob_outer)
+	}
+	else
+		bayesplot::mcmc_intervals(model@posterior, pars = params, point_est = "mean", prob = prob, prob_outer = prob_outer)	
 }
 
-bvl_plotAreas <- function(model, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue")
+bvl_plotAreas <- function(model, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
 {
 	require(bayesplot)
 	
@@ -261,10 +269,18 @@ bvl_plotAreas <- function(model, params = NULL, fun = "stat", stat = "mean", pro
 		params <- bvl_params(model)
 
 	bayesplot::color_scheme_set(color_scheme)
-	bayesplot::mcmc_areas(model@posterior, pars = params, point_est = "mean", prob = prob, prob_outer = prob_outer)
+
+	if (!is.null(labels) && length(labels) == length(params))
+	{
+		dat <- model@posterior[params]
+		colnames(dat) <- labels
+		bayesplot::mcmc_intervals(dat, pars = labels, point_est = "mean", prob = prob, prob_outer = prob_outer)
+	}
+	else
+		bayesplot::mcmc_areas(model@posterior, pars = params, point_est = "mean", prob = prob, prob_outer = prob_outer)
 }
 
-bvl_plotPairs <- function(model, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue")
+bvl_plotPairs <- function(model, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
 {
 	require(bayesplot)
 	
@@ -275,7 +291,15 @@ bvl_plotPairs <- function(model, params = NULL, fun = "stat", stat = "mean", pro
 		params <- bvl_params(model)
 
 	bayesplot::color_scheme_set(color_scheme)
-	bayesplot::mcmc_pairs(model@posterior, pars = params, off_diag_args = list(size = 1.5))
+
+	if (!is.null(labels) && length(labels) == length(params))
+	{
+		dat <- model@posterior[params]
+		colnames(dat) <- labels
+		bayesplot::mcmc_intervals(dat, pars = labels, point_est = "mean", prob = prob, prob_outer = prob_outer)
+	}
+	else
+		bayesplot::mcmc_pairs(model@posterior, pars = params, off_diag_args = list(size = 1.5))
 }
 
 bvl_plotDiag <- function(model, params = NULL)
@@ -290,9 +314,20 @@ bvl_plotDiag <- function(model, params = NULL)
 	diagMCMC(model@posterior, parName = params)
 }
 
-bvl_plotDensity2d <- function(model, x, y, color = NULL, color_scheme = "red")
+bvl_plotDensity2d <- function(model, x, y, color = NULL, color_scheme = "red", labels = NULL)
 {
 	require(viridis)
+	
+	if (!is.null(labels))
+	{
+		labx = labels[1]
+		laby = labels[2]
+	}
+	else
+	{
+		labx = x
+		laby = y
+	}
 	
 	if (is.null(color))
 	{
@@ -301,7 +336,7 @@ bvl_plotDensity2d <- function(model, x, y, color = NULL, color_scheme = "red")
 			geom_density2d(color = "gray30")+
 			scale_color_viridis(option = "C")+ 
 			geom_abline(intercept=0,slope=1) +
-			labs(x = x, y = y, color = color)
+			labs(x = labx, y = laby, color = color)
 	}
 	else
 	{
@@ -310,11 +345,11 @@ bvl_plotDensity2d <- function(model, x, y, color = NULL, color_scheme = "red")
 			geom_density2d(color = "gray30")+
 			scale_color_viridis(option = "C")+ 
 			geom_abline(intercept=0,slope=1) +
-			labs(x = x, y = y, color = color)
+			labs(x = labx, y = laby, color = color)
 	}
 }
 
-bvl_plotDensity <- function(model, params = NULL, size = 1)
+bvl_plotDensity <- function(model, params = NULL, size = 1, labels = NULL)
 {
 	require(viridis)
 	require(ggplot2)
@@ -328,6 +363,9 @@ bvl_plotDensity <- function(model, params = NULL, size = 1)
 
 	postParams <- rstan::extract(model@stanfit, pars = params)
 	
+	if (!is.null(labels) && length(labels) == length(names(postParams)))
+		names(postParams) <- labels
+
 	ref <- melt(postParams)
 	colnames(ref)[2:3] <- c("value","Params")
 	ggplot(data=ref,aes(x=value, color=Params))+geom_density(size=size)

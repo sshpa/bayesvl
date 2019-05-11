@@ -527,7 +527,7 @@ stan_yrepTest <- function(dag, node, getCode = T)
 					offset = 0;
 					
 					arcs = bvl_getArcs(dag, from = dag@nodes[[i]]$name, to = node$name, type = "varint")
-					if (length(arcs) > 0 && dag@nodes[[i]]$lower < 1)
+					if (length(arcs) > 0 && (!is.null(dag@nodes[[i]]$lower) && dag@nodes[[i]]$lower < 1))
 					{
 						offset = 1 - dag@nodes[[i]]$lower
 					}

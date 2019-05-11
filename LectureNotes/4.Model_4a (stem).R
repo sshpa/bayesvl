@@ -62,7 +62,7 @@ model <- bvl_addNode(model, "EduFat", "cat")
 model <- bvl_addNode(model, "OnlyChi", "binom")
 model <- bvl_addNode(model, "NumberofChi", "cat")
 model <- bvl_addNode(model, "Sex", "cat")
-model <- bvl_addNode(model, "SexPJ", "cat")
+model <- bvl_addNode(model, "SexPJ", "cat", test = c(1,2,3,4,5,6))
 
 #model <- bvl_addNode(model, "OnlyChi", "trans", fun = "({0} == 2 ? 1 : 0)")
 #model <- bvl_addArc(model, "RankingF",  "OnlyChi", "+")

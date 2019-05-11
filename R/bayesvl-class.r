@@ -320,6 +320,12 @@ setMethod("bvl_validModel", "bayesvl", function(dag) {
 		return (FALSE)
 	}		
 		
+	if (length(leaves) > 1)
+	{
+		message("Too many outcome node. This version only work with 1 outcome variable!")
+		return (FALSE)
+	}		
+
 	return(TRUE)
 })
 
