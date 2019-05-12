@@ -1,6 +1,6 @@
 Package: bayesvl
 Type: Package
-Title: R package for visual learning the graphical structure of Bayesian networks.
+Title: R package for visually learning the graphical structure of Bayesian networks and performing MCMC with Stan
 Version: 0.7.0
 Date: 2019-05-08
 Authors@R: c(person("Viet-Phuong", "Developer", role = c("aut", "cre"), email = c("lvphuong@gmail.com","phuong.laviet@phenikaa-uni.edu.vn")),person("Quan-Hoang", "Developer", role = c("aut", "cre"), email = c("qvuong.ulb@gmail.com","hoang.vuongquan@phenikaa-uni.edu.vn")))
