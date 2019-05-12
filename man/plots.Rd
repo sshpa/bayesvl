@@ -41,14 +41,10 @@ bvl_plotTest (dag, y_name, test_name, n = 200, color_scheme = "blue")
 
 }
 \examples{
-dag = bayesvl()
 
-# add nodes to dag
-dag = bvl_addNode(dag, "node1")
-dag = bvl_addNode(dag, "node2")
+# plot uncertainty intervals of all paramaters
+bvl_plotIntervals(dag)
 
-# add the path between two nodes
-dag = bvl_addNode(dag, "node1", "node2")
 }
 \author{La Viet-Phuong, Vuong Quan-Hoang}
 \keyword{directed acyclic graphs, bayesvl}

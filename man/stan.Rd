@@ -15,7 +15,7 @@
 bvl_model2Stan(dag, pcc = "")
 
 # compile and simulate samples from the model.
-bvl_modelFit(dag, data, warmup = 1000, iter = 5000, chains = 4, cores = 4, writefile = F, ppc = "")
+bvl_modelFit(dag, data, warmup = 1000, iter = 5000, chains = 4, cores = 1, writefile = F, ppc = "")
 
 # summarize the stan priors used for the model.
 stan_priors(dag)
@@ -25,7 +25,13 @@ stan_params(dag)
 }
 \arguments{
   \item{dag}{an object of class \code{bayesvl}}
-  \item{pcc}{a character string, posterior check scripts.}
+  \item{pcc}{Optional: a character string contains posterior check scripts}
+  \item{data}{a data frame or list containing the data}
+
+  \item{warmup}{Optional: Number of warmup iterations. By default, half of iter}
+  \item{iter}{Optional: Number of iterations of sampling. Default is 5000}
+  \item{chains}{Optional: Number of independent chains to sample from. Default is 4}
+  \item{cores}{Optional: Number of processor cores to distribute chains over, using parallel. Default is 1}
 }
 \value{
 
