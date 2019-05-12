@@ -9,11 +9,14 @@
 
 }
 \usage{
-# added a new node to the graph.
+# Plots historgram grid computed from posterior draws
 bvl_plotParams (dag, row = 2, col = 2, credMass = 0.89, params = NULL)
 
-# added a new path between nodes to the graph.
+# The interface to mcmc_intervals for plotting uncertainty intervals computed from posterior draws
 bvl_plotIntervals (dag, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
+
+# The interface to mcmc_intervals for plotting density computed from posterior draws
+bvl_plotAreas (dag, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
 
 bvl_plotPairs (dag, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
 
@@ -27,14 +30,7 @@ bvl_plotTest (dag, y_name, test_name, n = 200, color_scheme = "blue")
 }
 \arguments{
   \item{dag}{an object of class \code{bayesvl}}
-  \item{name}{a character string, the name of a node.}
-  \item{dist}{a character string, distribution code of the node (\code{norm}, \code{binom}).}
-  \item{priors}{a vector of string, the priors of the node or path.}
-  \item{fun}{a character string, the transform function of the node.}
-  \item{out_type}{a character string, the variable data type (\code{int}, \code{real}, ...).}
-
-  \item{from}{a character string, the name of node the path connect from.}
-  \item{to}{a character string, the name of node the path connect to.}
+  \item{params}{a vector of character string, the name of stan parameters.}
 }
 \value{
 
