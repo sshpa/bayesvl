@@ -1,7 +1,7 @@
 BayesVL
 ==========
 
-The R package for visually learning the graphical structures of Bayesian networks.
+The R package for visually learning the graphical structures of Bayesian networks, and performing Hamiltonian MCMC with Stan.
 
 Features:
 
@@ -17,7 +17,7 @@ Here is the [CHANGELOG](https://github.com/sshpa/baysvl/blob/master/CHANGELOG.md
 
 ## Install
 
-To get started abd install the latest snapshot type in R console:
+Getting started and installing the latest snapshot type in R console:
 
 ```r
 > install.packages("devtools")
@@ -26,7 +26,7 @@ To get started abd install the latest snapshot type in R console:
 
 ## Create bayesian network structures
 
-Create network node for each variable in the survey
+Creating network node for each variable in the survey
 
 ```r
 dag <- bayesvl()
@@ -37,7 +37,7 @@ dag <- bvl_addNode(dag, "DC")
 dag <- bvl_addNode(dag, "MD")
 ```
 
-Start adding arcs between variables in the survey
+Starting to add arcs between variables (nodes) using data from the survey
 
 ```r
 dag <- bvl_addArc(dag, "B", "DC")
@@ -54,7 +54,7 @@ stan_code <- bvl_model2Stan(dag)
 cat(stan_code)
 ```
 
-Get model's parameters
+Getting the model's parameters
 
 ```r
 params <- bvl_stanParams(dag)
