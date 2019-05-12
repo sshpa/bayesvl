@@ -9,7 +9,7 @@ Features:
     * Creating one or more random Bayesian networks learned from dataset with customized constraints
     * Generating JAGS/STAN code for structures of Bayesian networks for sampling and parameter learning
     * Plotting the network graphs and MCMC
-    * Compatible with R 2.x or newer version
+    * Compatibility with R 2.x or newer version
 
 Here is the [CHANGELOG](https://github.com/sshpa/baysvl/blob/master/CHANGELOG.md)
 
@@ -26,7 +26,7 @@ Getting started and installing the latest snapshot type in R console:
 
 ## Create bayesian network structures
 
-Creating network node for each variable in the survey
+Creating a node for each variable in the proposed network
 
 ```r
 dag <- bayesvl()
@@ -37,7 +37,7 @@ dag <- bvl_addNode(dag, "DC")
 dag <- bvl_addNode(dag, "MD")
 ```
 
-Starting to add arcs between variables (nodes) using data from the survey
+Starting to add arcs between variables (nodes) using the survey data
 
 ```r
 dag <- bvl_addArc(dag, "B", "DC")
