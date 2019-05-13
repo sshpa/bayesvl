@@ -305,6 +305,18 @@ bvl_arcTemplateName <- function()
   return(tname)
 }
 
+bvl_nodeTemplateName <- function()
+{
+	tname <- c()
+	
+  templates <- bvl2stan.nodeTemplates
+  
+  for ( i in 1:length(templates) ) {
+  	tname <- c(tname, templates[[i]][['name']])
+  }
+  return(tname)
+}
+
 bvl_arcPrior <- function(arc, pname)
 {
 	tmp <- bvl_loadArcTemplate(arc$type)
