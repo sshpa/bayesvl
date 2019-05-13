@@ -293,6 +293,18 @@ bvl_arcTemplateExists <- function( fname ) {
     return(the_match)
 }
 
+bvl_arcTemplateName <- function()
+{
+	tname <- c()
+	
+  templates <- bvl2stan.arcTemplates
+  
+  for ( i in 1:length(templates) ) {
+  	tname <- c(tname, templates[[i]][['name']])
+  }
+  return(tname)
+}
+
 bvl_arcPrior <- function(arc, pname)
 {
 	tmp <- bvl_loadArcTemplate(arc$type)
