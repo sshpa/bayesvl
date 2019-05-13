@@ -2,6 +2,13 @@
 \alias{bayesvl plot utilities}
 \alias{bvl_plotParams}
 \alias{bvl_plotIntervals}
+\alias{bvl_plotAreas}
+\alias{bvl_plotPairs}
+\alias{bvl_plotDensity}
+\alias{bvl_plotTrace}
+\alias{bvl_plotGelman}
+\alias{bvl_plotTest}
+\alias{bvl_plotDiag}
 \title{Plot utilities for bayesvl objects}
 \description{
 
@@ -24,6 +31,8 @@ bvl_plotDensity (dag, params = NULL, size = 1, labels = NULL)
 
 bvl_plotTrace (dag, params = NULL)
 
+bvl_plotDiag (dag)
+
 bvl_plotGelman (dag, params = NULL)
 
 bvl_plotTest (dag, y_name, test_name, n = 200, color_scheme = "blue")
@@ -34,7 +43,7 @@ bvl_plotTest (dag, y_name, test_name, n = 200, color_scheme = "blue")
 }
 \value{
 
-  \code{bvl_addNode(), bvl_addArc()} return object class \code{bayesvl}. \cr
+  \code{bvl_plotIntervals(), bvl_plotPairs()} return a ggplot object that can be further customized using the ggplot2 package. \cr
 
 }
 \references{

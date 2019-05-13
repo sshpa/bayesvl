@@ -37,7 +37,12 @@ stan_params(dag)
 
   \code{bvl_model2Stan()} return character string of rstan code generated from the model. \cr
 
-  \code{bvl_modelFit()} return object class \code{bayesvl} which contains result. \cr
+  \code{bvl_modelFit()} return an object class \code{bayesvl} which contains result with the following slots.
+    \item{model}{Stan model code}
+    \item{stanfit}{\code{stanfit} object returned by \code{\link{stan}}}
+    \item{standata}{The data}
+    \item{pars}{Parameter names monitored in samples}
+    \item{formula}{Generated formula from the model}
 }
 \references{
 
