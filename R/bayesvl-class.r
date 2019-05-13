@@ -116,6 +116,12 @@ setMethod("bvl_addNode", "bayesvl", function(dag, name, dist = "norm", priors = 
 	if (is.null(dag@nodes))
 		dag@nodes = list()
 	
+	if (!(dist %in% bvl_nodeTemplateName()))
+	{
+		message(paste0("The package not support this type of node."))
+		return(dag)
+	}
+
 	node = list(name=name, dist=dist, priors=priors, fun=fun, out_type=out_type, lower=lower, test = test)
 	dag@nodes[[name]] = node
 	
@@ -147,7 +153,7 @@ setMethod("bvl_addArc", "bayesvl", function(dag, from, to, type = "slope", prior
 	
 	if (!((type %in% ops) || (type %in% bvl_arcTemplateName())))
 	{
-		message(paste0("Already has the arc from '", from, "' to '", to, "'."))
+		message(paste0("The package not support this type of arc."))
 		return(dag)
 	}
 
