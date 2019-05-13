@@ -145,6 +145,12 @@ setMethod("bvl_addArc", "bayesvl", function(dag, from, to, type = "slope", prior
 		return(dag)
 	}
 	
+	if (!((type %in% ops) || (type %in% bvl_arcTemplateName())))
+	{
+		message(paste0("Already has the arc from '", from, "' to '", to, "'."))
+		return(dag)
+	}
+
 	dag@nodes[[from]]$children = c(dag@nodes[[from]]$children, to)
 	dag@nodes[[to]]$parents = c(dag@nodes[[to]]$parents, from)
 	

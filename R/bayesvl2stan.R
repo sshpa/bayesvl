@@ -3,6 +3,8 @@
 # various utility functions for generate stan code from network graph
 #
 
+options(mc.cores = parallel::detectCores())
+
 # valid operators
 ops <- c("*","+","-")
 # valid functions
@@ -866,13 +868,19 @@ stan_priorString <- function(dag)
 	return(prior_string)
 }
 
+# summarize the stan priors used for the model.
 stan_priors <- function(dag)
 {
+	print("Priors for model\n")
+	print("================\n")
+	print("\n")
+	
 	cat(stan_priorString(dag))
 }
 
 ############ MODEL BUILDING FUNCTIONS ##############
-bvl_model2Stan <- function(dag, quantities_add = "")
+# build RStan models from directed acyclic graph.
+bvl_model2Stan <- function(dag, ppc = "")
 {
 	print("Generating stan model ...")
 	
@@ -998,7 +1006,7 @@ bvl_model2Stan <- function(dag, quantities_add = "")
 		quantities_var <- paste0(quantities_var, stan_yrepTest(dag, nextNodes[[n]], F))
 		quantities_code <- paste0(quantities_code, stan_yrepTest(dag, nextNodes[[n]], T))
 	}
-	quantities_string <- paste0(quantities_string, quantities_var, quantities_add, quantities_code)
+	quantities_string <- paste0(quantities_string, quantities_var, ppc, quantities_code)
 	quantities_string <- paste0(quantities_string, "}\n")
 	
 	# Build the model
@@ -1144,7 +1152,7 @@ bvl_modelFix <- function(dag, data)
 	return(dag)
 }
 
-bvl_modelFit <- function(net, data, warmup = 1000, iter = 5000, chains = 4, cores = 4, writefile = F, ppc = "")
+bvl_modelFit <- function(net, data, warmup = 1000, iter = 5000, chains = 4, cores = 1, writefile = F, ppc = "")
 {
 	if (!bvl_validModel(net))
 		stop("Invalid model to estimate!")
@@ -1155,7 +1163,7 @@ bvl_modelFit <- function(net, data, warmup = 1000, iter = 5000, chains = 4, core
 	dataList <- bvl_modelData(net, data)
 	
 	net <- bvl_modelFix(net, data)
-	model_string <- bvl_model2Stan(net, quantities_add = ppc)
+	model_string <- bvl_model2Stan(net, ppc = ppc)
 
 	message("Compiling and producing posterior samples from the model...")
 	if (writefile)

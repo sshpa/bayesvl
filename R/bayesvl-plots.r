@@ -231,9 +231,19 @@ bvl_trace <- function(model, params = NULL)
 	rstan::traceplot(model@stanfit, pars = params)
 }
 
+bvl_plotTrace <- function(model, params = NULL)
+{
+	bvl_trace(model, params)
+}
+
 bvl_diag <- function(model)
 {
 	rstan::stan_diag(model@stanfit)
+}
+
+bvl_plotDiag <- function(model)
+{
+	bvl_diag(model)
 }
 
 bvl_plotIntervals <- function(model, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
@@ -372,7 +382,7 @@ bvl_plotDensity <- function(model, params = NULL, size = 1, labels = NULL)
 }
 
 
-bvl_plotGelman = function( model, params = NULL) {
+bvl_plotGelman <- function( model, params = NULL) {
   DBDAplColors = c("skyblue","black","royalblue","steelblue")
 
 	if (is.null(model@stanfit))
@@ -389,7 +399,7 @@ bvl_plotGelman = function( model, params = NULL) {
   )  
 }
 
-bvl_plotGelmans = function( model, params = NULL, row = 2, col = 2) {
+bvl_plotGelmans <- function( model, params = NULL, row = 2, col = 2) {
 	par(mfrow=c(row,col))
 
   DBDAplColors = c("skyblue","black","royalblue","steelblue")
@@ -408,7 +418,7 @@ bvl_plotGelmans = function( model, params = NULL, row = 2, col = 2) {
   )  
 }
 
-bvl_plotAcf = function( model, params = NULL) {
+bvl_plotAcf <- function( model, params = NULL) {
   DBDAplColors = c("skyblue","black","royalblue","steelblue")
 
 	if (is.null(model@stanfit))
@@ -424,7 +434,7 @@ bvl_plotAcf = function( model, params = NULL) {
   )  
 }
 
-bvl_plotAcfs = function( model, params = NULL, row = 2, col = 2) {
+bvl_plotAcfs <- function( model, params = NULL, row = 2, col = 2) {
 	par(mfrow=c(row,col))
 
   DBDAplColors = c("skyblue","black","royalblue","steelblue")
