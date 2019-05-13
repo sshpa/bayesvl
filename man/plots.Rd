@@ -16,7 +16,7 @@
 
 }
 \usage{
-# Plots historgram grid computed from posterior draws
+# Plots historgram of regression parameters computed from posterior draws in grid layout
 bvl_plotParams (dag, row = 2, col = 2, credMass = 0.89, params = NULL)
 
 # The interface to mcmc_intervals for plotting uncertainty intervals computed from posterior draws
@@ -39,7 +39,8 @@ bvl_plotTest (dag, y_name, test_name, n = 200, color_scheme = "blue")
 }
 \arguments{
   \item{dag}{an object of class \code{bayesvl}}
-  \item{params}{a vector of character string, the name of stan parameters.}
+  \item{params}{Optional: character vector of parameter names.}
+  \item{labels}{Optional: character vector of parameter labels.}
 }
 \value{
 

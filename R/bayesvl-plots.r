@@ -1,6 +1,9 @@
 library(bayesplot)
 library(ggplot2)
 
+#------------------------------------------------------------------------------
+# Get regression parameter names
+
 bvl_params <- function(model)
 {
 	if (is.null(model@posterior))
@@ -24,6 +27,9 @@ bvl_params <- function(model)
 	
 	return(params)
 }
+
+#------------------------------------------------------------------------------
+# Plot histograms of regression parameter names in grid layout
 
 plotParams <- function(post, row = 2, col = 2, credMass) {
 		par(mfrow=c(row,col))
@@ -455,7 +461,9 @@ bvl_plotAcfs <- function( model, params = NULL, row = 2, col = 2) {
   }  
 }
 
-#-------------
+#------------------------------------------------------------------------------
+# Plot posterior historam
+
 plotPost = function( paramSampleVec , cenTend=c("mode","median","mean")[1] , 
                      compVal=NULL, ROPE=NULL, credMass=0.95, HDItextPlace=0.7, 
                      xlab=NULL , xlim=NULL , yaxt=NULL , ylab=NULL , 
