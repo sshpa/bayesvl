@@ -542,13 +542,13 @@ setMethod("bvl_bnStrength", "bayesvl", function(net, data = NULL, criterion = "x
 #   vector charactor of parameter names
 
 if (!isGeneric("bvl_stanParams"))
-      setGeneric("bvl_stanParams", function(net) standardGeneric("bvl_stanParams"))
+      setGeneric("bvl_stanParams", function(dag) standardGeneric("bvl_stanParams"))
 
-setMethod("bvl_stanParams", "bayesvl", function(net) {			
-	if(length(net@nodes)==0)
+setMethod("bvl_stanParams", "bayesvl", function(dag) {			
+	if(length(dag@nodes)==0)
 		return (NA)
 
-	params <- stan_params(net)
+	params <- stan_params(dag)
 	
 	return(params)
 })
