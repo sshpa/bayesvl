@@ -1,12 +1,12 @@
 is.empty <- function(object) {
 	if (class(object) == "NULL")
-		return (FALSE)	
+		return (TRUE)	
 
 	if (is.null(object))
-		return (FALSE)
+		return (TRUE)
 		
 	if (length(object) == 0)
-		return (FALSE)
+		return (TRUE)
 	
-	return(TRUE)
+	return(FALSE)
 } 

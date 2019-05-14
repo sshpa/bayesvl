@@ -11,9 +11,9 @@
   \tabular{ll}{
     Package: \tab bayesvl\cr
     Type: \tab Package\cr
-    Version: \tab 0.7.68\cr
+    Version: \tab 0.7.59\cr
     Date: \tab 13 May 2019\cr
-    License: \tab GPL-3 \cr
+    License: \tab GPL-3\cr
   }
   
 }
@@ -23,8 +23,6 @@
 \references{
   
 }
-
-\examples{}  
 
 \seealso{
   \code{\link{bvl_modelFit}}, \code{\link{bvl_model2Stan}} 

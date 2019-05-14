@@ -288,38 +288,39 @@ setMethod("bvl_bn2vl", "bayesvl", function(dag) {
 })
 
 if (!isGeneric("bvl_validModel"))
-      setGeneric("bvl_validModel", function(dag) standardGeneric("bvl_validModel"))
+      setGeneric("bvl_validModel", function(dag, silent = F) standardGeneric("bvl_validModel"))
 
-setMethod("bvl_validModel", "bayesvl", function(dag) {
+setMethod("bvl_validModel", "bayesvl", function(dag, silent = F) {
 	if (is.null(dag))
 	{
-		#stop("The model has no node!")
-		message("The model is null!")
+		if (!silent)
+			message("The model is null!")
+			
 		return (FALSE)
 	}	
 	
 	if(length(dag@nodes)==0)
 	{
-		message("The model has no node!")
+		if (!silent)
+			message("The model has no node!")
+			
 		return (FALSE)
 	}	
 	
-	#if (length(dag@arcs) < 1)
-	#{
-	#	message("The model has no arc!")
-	#	return (FALSE)
-	#}		
-
 	leaves = bvl_getLeaves(dag)
 	if (length(leaves) < 1)
 	{
-		message("The model is a loop!")
+		if (!silent)
+			message("The model is a loop!")
+
 		return (FALSE)
 	}		
 		
 	if (length(leaves) > 1)
 	{
-		message("Too many outcome node. This version only work with 1 outcome variable!")
+		if (!silent)
+			message("Too many outcome node. This version only work with 1 outcome variable!")
+
 		return (FALSE)
 	}		
 
@@ -328,18 +329,20 @@ setMethod("bvl_validModel", "bayesvl", function(dag) {
 
 
 if (!isGeneric("bvl_validData"))
-      setGeneric("bvl_validData", function(dag, data) standardGeneric("bvl_validData"))
+      setGeneric("bvl_validData", function(dag, data, silent = F) standardGeneric("bvl_validData"))
 
-setMethod("bvl_validData", "bayesvl", function(dag, data) {
+setMethod("bvl_validData", "bayesvl", function(dag, data, silent = F) {
 	if (is.null(data))
 	{
-		message("The data is null!")
+		if (!silent)
+			message("The data is null!")
 		return (FALSE)
 	}	
 	
 	if(class(data)!="data.frame")
 	{
-		message("The data must be data frame!")
+		if (!silent)
+			message("The data must be data frame!")
 		return (FALSE)
 	}	
 	
@@ -348,7 +351,8 @@ setMethod("bvl_validData", "bayesvl", function(dag, data) {
 	{
 		if (!(nodes[i] %in% names(data)))
 		{
-			message(paste0("The node '", nodes[i], "' is not existed in data!"))
+			if (!silent)
+				message(paste0("The node '", nodes[i], "' is not existed in data!"))
 			return (FALSE)
 		}
 
@@ -357,7 +361,8 @@ setMethod("bvl_validData", "bayesvl", function(dag, data) {
 		{
 			if (min(data[ ,node$name]) != 0)
 			{
-				message(paste0("The node '", nodes[i], "' values  must be (0, 1)!"))
+				if (!silent)
+					message(paste0("The node '", nodes[i], "' values  must be (0, 1)!"))
 				return (FALSE)
 			}
 		}
@@ -371,7 +376,7 @@ if (!isGeneric("bvl_bnScore"))
       setGeneric("bvl_bnScore", function(net, data = NULL, ...) standardGeneric("bvl_bnScore"))
 
 setMethod("bvl_bnScore", "bayesvl", function(net, data = NULL, ...) {			
-	if(!bvl_validModel(net))
+	if(!bvl_validModel(net, T))
 		return (NA)
 	
 	if (is.null(data))
@@ -407,7 +412,7 @@ if (!isGeneric("bvl_bnBayes"))
       setGeneric("bvl_bnBayes", function(net, data = NULL, method = "bayes", iss = 10, ...) standardGeneric("bvl_bnBayes"))
 
 setMethod("bvl_bnBayes", "bayesvl", function(net, data = NULL, method = "bayes", iss = 10, ...) {			
-	if(!bvl_validModel(net))
+	if(!bvl_validModel(net, T))
 	{
 		return (NA)
 	}
@@ -471,7 +476,7 @@ if (!isGeneric("bvl_bnStrength"))
       setGeneric("bvl_bnStrength", function(net, data = NULL, criterion = "x2", ...) standardGeneric("bvl_bnStrength"))
 
 setMethod("bvl_bnStrength", "bayesvl", function(net, data = NULL, criterion = "x2", ...) {			
-	if(!bvl_validModel(net))
+	if(!bvl_validModel(net, T))
 	{
 		return (NA)
 	}
@@ -486,7 +491,7 @@ setMethod("bvl_bnStrength", "bayesvl", function(net, data = NULL, criterion = "x
 	if (!setequal(names(dat), names(net@nodes)))
 		return (NA)
 
-	if(!bvl_validData(net, dat))
+	if(!bvl_validData(net, dat, T))
 	{
 		return (NA)
 	}
