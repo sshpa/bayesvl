@@ -886,6 +886,21 @@ stan_priors <- function(dag)
 	cat(stan_priorString(dag))
 }
 
+bvl_stanPriors <- function(dag)
+{
+	prior_string <- ""
+	params <- stan_params(dag)
+	for(i in 1:length(params))
+	{
+		if (params[[i]]$isParam && !is.null(params[[i]]$prior))
+		{
+			prior_string <- paste0(prior_string, params[[i]]$name, " ~ ", params[[i]]$prior, "\n")
+		}
+	}
+	
+	return(prior_string)
+}
+
 ############ MODEL BUILDING FUNCTIONS ##############
 # build RStan models from directed acyclic graph.
 bvl_model2Stan <- function(dag, ppc = "")
@@ -1160,18 +1175,18 @@ bvl_modelFix <- function(dag, data)
 	return(dag)
 }
 
-bvl_modelFit <- function(net, data, warmup = 1000, iter = 5000, chains = 4, cores = 1, writefile = F, ppc = "")
+bvl_modelFit <- function(dag, data, warmup = 1000, iter = 5000, chains = 2, cores = 1, writefile = F, ppc = "")
 {
-	if (!bvl_validModel(net))
+	if (!bvl_validModel(dag))
 		stop("Invalid model to estimate!")
 	
-	if (!bvl_validData(net, data))
+	if (!bvl_validData(dag, data))
 		stop("Invalid data to estimate!")
 	
-	dataList <- bvl_modelData(net, data)
+	dataList <- bvl_modelData(dag, data)
 	
-	net <- bvl_modelFix(net, data)
-	model_string <- bvl_model2Stan(net, ppc = ppc)
+	dag <- bvl_modelFix(dag, data)
+	model_string <- bvl_model2Stan(dag, ppc = ppc)
 
 	message("Compiling and producing posterior samples from the model...")
 	if (writefile)
@@ -1195,14 +1210,14 @@ bvl_modelFit <- function(net, data, warmup = 1000, iter = 5000, chains = 4, core
 	          		warmup=warmup , iter = iter, chains = chains, cores = cores, refresh=-1)
   }
   
-  net@stanfit <- mstan
-  net@standata <- dataList
-  net@posterior <- as.data.frame(net@stanfit)
+  dag@stanfit <- mstan
+  dag@standata <- dataList
+  dag@posterior <- as.data.frame(dag@stanfit)
 
-	return(net)
+	return(dag)
 }
 
-bvl_stanRun <- function(net, dataList, ...)
+bvl_stanRun <- function(dag, dataList, ...)
 {
-	return(bvl_modelFit(net, dataList, ...))
+	return(bvl_modelFit(dag, dataList, ...))
 }

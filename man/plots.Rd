@@ -19,7 +19,8 @@
 # Plots historgram of regression parameters computed from posterior draws in grid layout
 bvl_plotParams (dag, row = 2, col = 2, credMass = 0.89, params = NULL)
 
-# The interface to mcmc_intervals for plotting uncertainty intervals computed from posterior draws
+# The interface to mcmc_intervals for plotting uncertainty intervals
+# computed from posterior draws
 bvl_plotIntervals (dag, params = NULL, fun = "stat", stat = "mean", 
   prob = 0.8, prob_outer = 0.95, 
   color_scheme = "blue", labels = NULL)

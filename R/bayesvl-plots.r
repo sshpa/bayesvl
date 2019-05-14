@@ -2,20 +2,20 @@
 #------------------------------------------------------------------------------
 # Get regression parameter names
 
-bvl_getParams <- function(model)
+bvl_getParams <- function(dag)
 {
-	if (is.null(model@posterior))
+	if (is.null(dag@posterior))
 		stop("Model is not estimated!")
 	
 	params <- c()
-	model_params <- stan_params(model)
+	model_params <- stan_params(dag)
 	for(i in 1:length(model_params))
 	{
 		if (model_params[[i]]$isReg)
 		{
 			if (model_params[[i]]$isVar)
 			{
-				var <- names(model@posterior)[grep(paste0(model_params[[i]]$name, "\\["), names(model@posterior))]
+				var <- names(dag@posterior)[grep(paste0(model_params[[i]]$name, "\\["), names(dag@posterior))]
 				params <- c(params, var)
 			}
 			else
@@ -60,18 +60,18 @@ bvl_plotParams <- function(dag, row = 2, col = 2, credMass = 0.89, params = NULL
 #------------------------------------------------------------------------------
 # Plot log likelihood
 
-bvl_logLik <- function(model)
+bvl_logLik <- function(dag)
 {
 	require(loo)
 
-	leaves <- bvl_getLeaves(model)
+	leaves <- bvl_getLeaves(dag)
 	
 	for(i in length(leaves))
 	{
 		y_name <- leaves[[i]]$name
 		parName <- paste0("log_lik_",y_name)
 
-		log_lik_1 <- extract_log_lik(model@stanfit, parameter_name=parName, merge_chains = FALSE)
+		log_lik_1 <- extract_log_lik(dag@stanfit, parameter_name=parName, merge_chains = FALSE)
 		
 		return(log_lik_1)
 	}
@@ -92,19 +92,19 @@ plotPPC <- function(stanfit, data, y_name, fun = "stat", stat = "mean", color_sc
 	pp_check(as.numeric(data[y_name]), y_rep, fun = fun, stat = stat)
 }
 
-bvl_plotPPC <- function(model, fun = "stat", stat = "mean", color_scheme = "blue")
+bvl_plotPPC <- function(dag, fun = "stat", stat = "mean", color_scheme = "blue")
 {
 	require(bayesplot)
 	
-	leaves <- bvl_getLeaves(model)
+	leaves <- bvl_getLeaves(dag)
 	
 	for(i in length(leaves))
 	{
 		y_name <- leaves[[i]]$name
 		parName <- paste0("yrep_",y_name)
 
-		y_rep <- as.matrix(model@stanfit, pars = parName)
-		y <- model@standata[[y_name]]
+		y_rep <- as.matrix(dag@stanfit, pars = parName)
+		y <- dag@standata[[y_name]]
 			
 		bayesplot::color_scheme_set(color_scheme)
 		p <- pp_check(y, y_rep, fun = fun, stat = stat)
@@ -113,15 +113,15 @@ bvl_plotPPC <- function(model, fun = "stat", stat = "mean", color_scheme = "blue
 	}
 }
 
-bvl_plotTest <- function(model, y_name, test_name, n = 200, color_scheme = "blue")
+bvl_plotTest <- function(dag, y_name, test_name, n = 200, color_scheme = "blue")
 {
 	require(ggplot2)
 	#require(dplyr)
 	
 	parName <- paste0("yrep_",test_name)
 
-	y_rep <- as.matrix(model@stanfit, pars = parName)
-	y <- model@standata[[y_name]]
+	y_rep <- as.matrix(dag@stanfit, pars = parName)
+	y <- dag@standata[[y_name]]
 		
 	if (length(y_rep) < n)
 		n = length(y_rep)
@@ -138,7 +138,7 @@ bvl_plotTest <- function(model, y_name, test_name, n = 200, color_scheme = "blue
 	ppc_dens_overlay(y, y_rep[1:n, ])
 }
 
-bvl_plotTest1 <- function(model, y_name, test_name, n = 200, size = 0.25,
+bvl_plotTest1 <- function(dag, y_name, test_name, n = 200, size = 0.25,
        alpha = 0.7,
        trim = FALSE,
        bw = "nrd0",
@@ -149,12 +149,12 @@ bvl_plotTest1 <- function(model, y_name, test_name, n = 200, size = 0.25,
     require(ggplot2)
 
     parName <- paste0("yrep_",test_name)
-    y_rep <- as.matrix(model@stanfit, pars = parName)
+    y_rep <- as.matrix(dag@stanfit, pars = parName)
     if (length(y_rep) < n)
     	n = length(y_rep)
     data <- melt(y_rep[1:n, ])
     
-    y <- model@standata[[y_name]]
+    y <- dag@standata[[y_name]]
     
     ggplot(data) +
 	    aes_(x = ~ value) +
@@ -186,19 +186,19 @@ bvl_plotTest1 <- function(model, y_name, test_name, n = 200, size = 0.25,
 }
     
 
-bvl_plotDensOverlay <- function(model, n = 200, color_scheme = "blue")
+bvl_plotDensOverlay <- function(dag, n = 200, color_scheme = "blue")
 {
 	require(bayesplot)
 	
-	leaves <- bvl_getLeaves(model)
+	leaves <- bvl_getLeaves(dag)
 	
 	for(i in length(leaves))
 	{
 		y_name <- leaves[[i]]$name
 		parName <- paste0("yrep_",y_name)
 		
-		y_rep <- as.matrix(model@stanfit, pars = parName)
-		y <- model@standata[[y_name]]
+		y_rep <- as.matrix(dag@stanfit, pars = parName)
+		y <- dag@standata[[y_name]]
 		#dim(y_rep)
 		
 		if (length(y_rep) < n)
@@ -211,16 +211,16 @@ bvl_plotDensOverlay <- function(model, n = 200, color_scheme = "blue")
 	}
 }
 
-bvl_plotTest <- function(model, y_name, test_name, n = 200, color_scheme = "blue")
+bvl_plotTest <- function(dag, y_name, test_name, n = 200, color_scheme = "blue")
 {
 	require(bayesplot)
 	
-	leaves <- bvl_getLeaves(model)
+	leaves <- bvl_getLeaves(dag)
 	
 	parName <- paste0("yrep_",test_name)
 	
-	y_rep <- as.matrix(model@stanfit, pars = parName)
-	y <- model@standata[[y_name]]
+	y_rep <- as.matrix(dag@stanfit, pars = parName)
+	y <- dag@standata[[y_name]]
 	#dim(y_rep)
 	
 	if (length(y_rep) < n)
@@ -235,55 +235,55 @@ bvl_plotTest <- function(model, y_name, test_name, n = 200, color_scheme = "blue
 #------------------------------------------------------------------------------
 # Plot mcmc trace
 
-bvl_trace <- function(model, params = NULL)
+bvl_trace <- function(dag, params = NULL)
 {
 	if (is.null(params))
-		params <- stan_paramNames(model, T)
+		params <- stan_paramNames(dag, T)
 
-	#coda <- stan2coda(model@stanfit)
-	rstan::traceplot(model@stanfit, pars = params)
+	#coda <- stan2coda(dag@stanfit)
+	rstan::traceplot(dag@stanfit, pars = params)
 }
 
-bvl_plotTrace <- function(model, params = NULL)
+bvl_plotTrace <- function(dag, params = NULL)
 {
-	bvl_trace(model, params)
+	bvl_trace(dag, params)
 }
 
 #------------------------------------------------------------------------------
 # Plot diagnostics
 
-bvl_diag <- function(model)
+bvl_diag <- function(dag)
 {
-	rstan::stan_diag(model@stanfit)
+	rstan::stan_diag(dag@stanfit)
 }
 
-bvl_plotDiag <- function(model)
+bvl_plotDiag <- function(dag)
 {
-	bvl_diag(model)
+	bvl_diag(dag)
 }
 
-#bvl_plotDiag <- function(model, params = NULL)
+#bvl_plotDiag <- function(dag, params = NULL)
 #{
 #	require(bayesplot)
 #	
-#	coda <- stan2coda(model@stanfit)
+#	coda <- stan2coda(dag@stanfit)
 #	
 #	if (is.null(params))
-#		params <- bvl_getParams(model)
+#		params <- bvl_getParams(dag)
 #
-#	diagMCMC(model@posterior, parName = params)
+#	diagMCMC(dag@posterior, parName = params)
 #}
 
-bvl_plotGelman <- function( model, params = NULL) {
+bvl_plotGelman <- function( dag, params = NULL) {
   DBDAplColors = c("skyblue","black","royalblue","steelblue")
 
-	if (is.null(model@stanfit))
+	if (is.null(dag@stanfit))
 		stop("Model is not estimated!")
 
-	codaObject <- stan2coda(model@stanfit)
+	codaObject <- stan2coda(dag@stanfit)
 	
 	if (is.null(params))
-		params <- bvl_getParams(model)
+		params <- bvl_getParams(dag)
 
   tryVal = try(
     coda::gelman.plot( codaObject[,params] , main="" , auto.layout=TRUE , 
@@ -291,18 +291,18 @@ bvl_plotGelman <- function( model, params = NULL) {
   )  
 }
 
-bvl_plotGelmans <- function( model, params = NULL, row = 2, col = 2) {
+bvl_plotGelmans <- function( dag, params = NULL, row = 2, col = 2) {
 	par(mfrow=c(row,col))
 
   DBDAplColors = c("skyblue","black","royalblue","steelblue")
 
-	if (is.null(model@stanfit))
+	if (is.null(dag@stanfit))
 		stop("Model is not estimated!")
 
-	codaObject <- stan2coda(model@stanfit)
+	codaObject <- stan2coda(dag@stanfit)
 	
 	if (is.null(params))
-		params <- bvl_getParams(model)
+		params <- bvl_getParams(dag)
 
   tryVal = try(
     coda::gelman.plot( codaObject[,params] , main="" , auto.layout=FALSE , 
@@ -310,34 +310,34 @@ bvl_plotGelmans <- function( model, params = NULL, row = 2, col = 2) {
   )  
 }
 
-bvl_plotAcf <- function( model, params = NULL) {
+bvl_plotAcf <- function( dag, params = NULL) {
   DBDAplColors = c("skyblue","black","royalblue","steelblue")
 
-	if (is.null(model@stanfit))
+	if (is.null(dag@stanfit))
 		stop("Model is not estimated!")
 
-	codaObject <- stan2coda(model@stanfit)
+	codaObject <- stan2coda(dag@stanfit)
 	
 	if (is.null(params))
-		params <- bvl_getParams(model)
+		params <- bvl_getParams(dag)
 
   tryVal = try(
     DbdaAcfPlot(codaObject, params)
   )  
 }
 
-bvl_plotAcfs <- function( model, params = NULL, row = 2, col = 2) {
+bvl_plotAcfs <- function( dag, params = NULL, row = 2, col = 2) {
 	par(mfrow=c(row,col))
 
   DBDAplColors = c("skyblue","black","royalblue","steelblue")
 
-	if (is.null(model@stanfit))
+	if (is.null(dag@stanfit))
 		stop("Model is not estimated!")
 
-	codaObject <- stan2coda(model@stanfit)
+	codaObject <- stan2coda(dag@stanfit)
 	
 	if (is.null(params))
-		params <- bvl_getParams(model)
+		params <- bvl_getParams(dag)
 
   for(i in 1:length(params))
   {

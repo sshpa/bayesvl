@@ -2,8 +2,8 @@
 \alias{bayesvl stan utilities}
 \alias{bvl_model2Stan}
 \alias{bvl_modelFit}
-\alias{stan_priors}
-\alias{stan_params}
+\alias{bvl_stanPriors}
+\alias{bvl_stanParams}
 \title{Build RStan models from directed acyclic graph}
 \description{
 
@@ -12,13 +12,14 @@
 }
 \usage{
 # build RStan models from directed acyclic graph.
-bvl_model2Stan(dag)
+bvl_model2Stan(dag, ppc = "")
 
 # compile and simulate samples from the model.
-bvl_modelFit(dag, data, warmup = 1000, iter = 5000, chains = 2, cores = 1, writefile = F, ppc = "")
+bvl_modelFit(dag, data, warmup = 1000, iter = 5000, chains = 2, cores = 1, 
+  writefile = F, ppc = "")
 
 # summarize the stan priors used for the model.
-stan_priors(dag)
+bvl_stanPriors(dag)
 
 # summarize the stan parameters used for the model.
 bvl_stanParams(dag)
@@ -29,7 +30,7 @@ bvl_stanParams(dag)
 
   \item{warmup}{Optional: Number of warmup iterations. By default, half of iter}
   \item{iter}{Optional: Number of iterations of sampling. Default is 5000}
-  \item{chains}{Optional: Number of independent chains to sample from. Default is 4}
+  \item{chains}{Optional: Number of independent chains to sample from. Default is 2}
   \item{cores}{Optional: Number of processor cores to distribute chains over, using parallel. Default is 1}
   \item{writefile}{Optional: Write the stan code to temporary file when compiling. Default is FALSE}  
   \item{ppc}{Optional: a character string contains posterior check scripts}
@@ -44,6 +45,10 @@ bvl_stanParams(dag)
     \item{standata}{The data}
     \item{pars}{Parameter names monitored in samples}
     \item{formula}{Generated formula from the model}
+
+  \code{bvl_stanPriors()} return character string of rstan priors generated from the model. \cr
+
+  \code{bvl_stanParams()} return character string of rstan parameters generated from the model. \cr
 }
 \references{
 
