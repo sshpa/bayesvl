@@ -73,25 +73,25 @@ bvl_getLeaves <- function(dag) {
 	return(nodes)
 } 
 
-bvl_getNext <- function(dag, nextNodes) {
-	if (is.null(dag))
+bvl_getParents <- function(dag, startNodes) {
+	if (is.empty(dag))
 		return (NULL)
 		
-	if (is.null(dag@nodes))
+	if (is.empty(dag@nodes))
 		return (NULL)
 	
-	if (is.null(nextNodes))
+	if (is.empty(startNodes))
 		return (NULL)
 
-	if (is.null(dag@arcs) || length(dag@arcs) == 0)
+	if (is.empty(dag@arcs))
 		return (NULL)
 
 	nodes = list()
 	for(n in 1:length(dag@arcs))
 	{
-		for(p in 1:length(nextNodes))
+		for(p in 1:length(startNodes))
 		{
-			if (dag@arcs[[n]]$to == nextNodes[[p]]$name)
+			if (dag@arcs[[n]]$to == startNodes[[p]]$name)
 			{
 				nodes[[dag@arcs[[n]]$from]] = dag@nodes[[dag@arcs[[n]]$from]]
 			}
@@ -100,6 +100,86 @@ bvl_getNext <- function(dag, nextNodes) {
 	
 	return(nodes)
 } 
+
+bvl_getChildren <- function(dag, startNodes) {
+	if (is.empty(dag))
+		return (NULL)
+		
+	if (is.empty(dag@nodes))
+		return (NULL)
+	
+	if (is.empty(startNodes))
+		return (NULL)
+
+	if (is.empty(dag@arcs))
+		return (NULL)
+
+	nodes = list()
+	for(n in 1:length(dag@arcs))
+	{
+		for(p in 1:length(startNodes))
+		{
+			if (dag@arcs[[n]]$from == startNodes[[p]]$name)
+			{
+				nodes[[dag@arcs[[n]]$to]] = dag@nodes[[dag@arcs[[n]]$to]]
+			}
+		}
+	}
+	
+	return(nodes)
+} 
+
+bvl_getNodes <- function(dag, nodeNames) {
+	if (is.null(dag))
+		return (NULL)
+		
+	if (is.null(dag@nodes))
+		return (NULL)
+
+	if (is.null(nodeNames))
+		return (NULL)
+	
+	if (length(nodeNames) < 1)
+		return (NULL)
+
+	nodes = dag@nodes[nodeNames]
+	
+	return(nodes)
+}
+
+bvl_hasCircleAt <- function(object, nodeName) {		
+	if (is.null(object@nodes))
+		return (FALSE)
+	
+	if(length(object@nodes)==0)
+		return (FALSE)
+
+	if(length(object@arcs)==0)
+		return (FALSE)
+
+	startNodes <- c(object@nodes[[nodeName]])
+
+	if (is.empty(startNodes))
+		return (FALSE)
+	
+	checked <- c()
+	while (!is.null(nextNodes) && length(nextNodes) > 0)
+	{
+		print(checked)
+		print(names(nextNodes))
+		print("++++++++++")
+			
+		checked <- c(checked, names(nextNodes))
+		
+		nextNodes <- bvl_getParents(object, nextNodes)
+
+		if (!is.null(nextNodes) && length(nextNodes) > 0)
+			if (nodeName %in% names(nextNodes))
+				return (TRUE)
+	}
+
+	return(FALSE)
+}
 
 bvl_isLeaf <- function(node) {
 	if (is.null(node))
