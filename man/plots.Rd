@@ -69,7 +69,7 @@ bvl_plotTest (dag, y_name, test_name, n = 200, color_scheme = "blue")
 
 }
 \references{
-
+	reserved for manual link
 }
 \examples{
 # create the data and build model for plot functions test

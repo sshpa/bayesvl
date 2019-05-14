@@ -37,7 +37,7 @@ bvl_addArc(dag, from, to, type = "slope", priors = NULL, fun = NULL)
 
 }
 \references{
-
+	reserved for manual link
 }
 \examples{
 dag = bayesvl()

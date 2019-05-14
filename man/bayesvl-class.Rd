@@ -30,6 +30,7 @@
   }
 }
 \references{
+	reserved for manual link
 }
 \seealso{
   \code{\link{bayesvl}} 

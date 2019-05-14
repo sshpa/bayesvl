@@ -64,7 +64,6 @@ bvl_getLeaves <- function(dag) {
 	nodes = list()
 	for(n in 1:length(dag@nodes))
 	{
-	print(n)
 		if (length(dag@nodes[[n]]$children) == 0)
 		{
 			nodes[[dag@nodes[[n]]$name]] = dag@nodes[[n]]
@@ -131,10 +130,10 @@ bvl_getChildren <- function(dag, startNodes) {
 } 
 
 bvl_getNodes <- function(dag, nodeNames) {
-	if (is.null(dag))
+	if (is.empty(dag))
 		return (NULL)
 		
-	if (is.null(dag@nodes))
+	if (is.empty(dag@nodes))
 		return (NULL)
 
 	if (is.null(nodeNames))
@@ -149,10 +148,10 @@ bvl_getNodes <- function(dag, nodeNames) {
 }
 
 bvl_hasCircleAt <- function(object, nodeName) {		
-	if (is.null(object@nodes))
+	if (is.empty(object))
 		return (FALSE)
-	
-	if(length(object@nodes)==0)
+		
+	if (is.empty(object@nodes))
 		return (FALSE)
 
 	if(length(object@arcs)==0)

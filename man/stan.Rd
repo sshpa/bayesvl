@@ -51,7 +51,7 @@ bvl_stanParams(dag)
   \code{bvl_stanParams()} return character string of rstan parameters generated from the model. \cr
 }
 \references{
-
+	reserved for manual link
 }
 \examples{
 dag <- bayesvl()

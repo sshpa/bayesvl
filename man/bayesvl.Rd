@@ -21,7 +21,7 @@
   Quan-Hoang Vuong, Viet-Phuong La
 }
 \references{
-  
+  reserved for manual link
 }
 
 \seealso{
