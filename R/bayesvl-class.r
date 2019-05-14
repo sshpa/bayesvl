@@ -60,7 +60,7 @@ setMethod("summary", "bayesvl", function(object){
 	cat("Estimates:\n")	
   if (!is.null(object@stanfit) && length(object@stanfit@model_name))
   {
-  	params = bvl_params(object)
+  	params = bvl_getParams(object)
   	print(object@stanfit, pars = params)
   }
   else
@@ -71,7 +71,7 @@ setMethod("summary", "bayesvl", function(object){
 
 
 if (!isGeneric("bvl_nodeExists"))
-      setGeneric("bvl_nodeExists", function(object, name, ...) standardGeneric("bvl_nodeExists"))
+      setGeneric("bvl_nodeExists", function(object, name) standardGeneric("bvl_nodeExists"))
 
 setMethod("bvl_nodeExists", "bayesvl", function(object, name) {		
 	if (is.null(object@nodes))
@@ -91,7 +91,7 @@ setMethod("bvl_nodeExists", "bayesvl", function(object, name) {
 })
 
 if (!isGeneric("bvl_hasArc"))
-      setGeneric("bvl_hasArc", function(object, from, to, ...) standardGeneric("bvl_hasArc"))
+      setGeneric("bvl_hasArc", function(object, from, to) standardGeneric("bvl_hasArc"))
 
 setMethod("bvl_hasArc", "bayesvl", function(object, from, to) {		
 	if (!bvl_nodeExists(object,to))
@@ -107,9 +107,9 @@ setMethod("bvl_hasArc", "bayesvl", function(object, from, to) {
 })
 
 if (!isGeneric("bvl_addNode"))
-      setGeneric("bvl_addNode", function(dag, name, dist = "norm", priors = NULL, fun = NULL, out_type = NULL, lower = NULL, upper=NULL, test = NULL, ...) standardGeneric("bvl_addNode"))
+      setGeneric("bvl_addNode", function(dag, name, dist = "norm", priors = NULL, fun = NULL, out_type = NULL, lower = NULL, upper=NULL, test = NULL) standardGeneric("bvl_addNode"))
       
-setMethod("bvl_addNode", "bayesvl", function(dag, name, dist = "norm", priors = NULL, out_type = NULL, lower = lower, upper=upper, test = NULL, ...) {
+setMethod("bvl_addNode", "bayesvl", function(dag, name, dist = "norm", priors = NULL, fun = NULL, out_type = NULL, lower = NULL, upper=NULL, test = NULL) {
 	if (is.null(dag) || missing(dag))
 		dag = bayesvl()
 		
@@ -162,7 +162,7 @@ setMethod("bvl_hasCircle", "bayesvl", function(object) {
 
 
 if (!isGeneric("bvl_addArc"))
-      setGeneric("bvl_addArc", function(dag, from, to, type = "slope", priors = NULL, ...) standardGeneric("bvl_addArc"))
+      setGeneric("bvl_addArc", function(dag, from, to, type = "slope", priors = NULL, fun = NULL) standardGeneric("bvl_addArc"))
 
 setMethod("bvl_addArc", "bayesvl", function(dag, from, to, type = "slope", priors = NULL, fun = NULL) {
 	if (!bvl_nodeExists(dag, from))
@@ -257,7 +257,7 @@ setMethod("bvl_vl2bn", "bayesvl", function(dag) {
 })
 
 if (!isGeneric("bvl_bn2vl"))
-      setGeneric("bvl_bn2vl", function(dag, ...) standardGeneric("bvl_bn2vl"))
+      setGeneric("bvl_bn2vl", function(dag) standardGeneric("bvl_bn2vl"))
 
 setMethod("bvl_bn2vl", "bayesvl", function(dag) {
 	require(bnlearn)
@@ -321,7 +321,7 @@ bvl_load <- function(nodefile, graphfile) {
 }
 
 if (!isGeneric("bvl_validModel"))
-      setGeneric("bvl_validModel", function(dag, ...) standardGeneric("bvl_validModel"))
+      setGeneric("bvl_validModel", function(dag) standardGeneric("bvl_validModel"))
 
 setMethod("bvl_validModel", "bayesvl", function(dag) {
 	if (is.null(dag))
@@ -361,9 +361,9 @@ setMethod("bvl_validModel", "bayesvl", function(dag) {
 
 
 if (!isGeneric("bvl_validData"))
-      setGeneric("bvl_validData", function(dag, data, ...) standardGeneric("bvl_validData"))
+      setGeneric("bvl_validData", function(dag, data) standardGeneric("bvl_validData"))
 
-setMethod("bvl_validData", "bayesvl", function(dag, data, ...) {
+setMethod("bvl_validData", "bayesvl", function(dag, data) {
 	if (is.null(data))
 	{
 		message("The data is null!")

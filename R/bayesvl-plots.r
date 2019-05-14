@@ -1,10 +1,8 @@
-library(bayesplot)
-library(ggplot2)
 
 #------------------------------------------------------------------------------
 # Get regression parameter names
 
-bvl_params <- function(model)
+bvl_getParams <- function(model)
 {
 	if (is.null(model@posterior))
 		stop("Model is not estimated!")
@@ -42,16 +40,16 @@ plotParams <- function(post, row = 2, col = 2, credMass) {
 	}
 }
 
-bvl_plotParams <- function(model, row = 2, col = 2, credMass = 0.89, params = NULL) {
+bvl_plotParams <- function(dag, row = 2, col = 2, credMass = 0.89, params = NULL) {
 	par(mfrow=c(row,col))
 	
-	if (is.null(model@posterior))
+	if (is.null(dag@posterior))
 		stop("Model is not estimated!")
 	
 	if (is.null(params))
-		params <- bvl_params(model)
+		params <- bvl_getParams(dag)
 
-	mcmcMat = as.matrix(model@posterior[params], chains=TRUE)
+	mcmcMat = as.matrix(dag@posterior[params], chains=TRUE)
 	
 	cols = colnames(mcmcMat)
 	for ( i in 1:length(cols) ) {
@@ -271,7 +269,7 @@ bvl_plotDiag <- function(model)
 #	coda <- stan2coda(model@stanfit)
 #	
 #	if (is.null(params))
-#		params <- bvl_params(model)
+#		params <- bvl_getParams(model)
 #
 #	diagMCMC(model@posterior, parName = params)
 #}
@@ -285,7 +283,7 @@ bvl_plotGelman <- function( model, params = NULL) {
 	codaObject <- stan2coda(model@stanfit)
 	
 	if (is.null(params))
-		params <- bvl_params(model)
+		params <- bvl_getParams(model)
 
   tryVal = try(
     coda::gelman.plot( codaObject[,params] , main="" , auto.layout=TRUE , 
@@ -304,7 +302,7 @@ bvl_plotGelmans <- function( model, params = NULL, row = 2, col = 2) {
 	codaObject <- stan2coda(model@stanfit)
 	
 	if (is.null(params))
-		params <- bvl_params(model)
+		params <- bvl_getParams(model)
 
   tryVal = try(
     coda::gelman.plot( codaObject[,params] , main="" , auto.layout=FALSE , 
@@ -321,7 +319,7 @@ bvl_plotAcf <- function( model, params = NULL) {
 	codaObject <- stan2coda(model@stanfit)
 	
 	if (is.null(params))
-		params <- bvl_params(model)
+		params <- bvl_getParams(model)
 
   tryVal = try(
     DbdaAcfPlot(codaObject, params)
@@ -339,7 +337,7 @@ bvl_plotAcfs <- function( model, params = NULL, row = 2, col = 2) {
 	codaObject <- stan2coda(model@stanfit)
 	
 	if (is.null(params))
-		params <- bvl_params(model)
+		params <- bvl_getParams(model)
 
   for(i in 1:length(params))
   {
@@ -352,82 +350,86 @@ bvl_plotAcfs <- function( model, params = NULL, row = 2, col = 2) {
 #------------------------------------------------------------------------------
 # Plot intervals
 
-bvl_plotIntervals <- function(model, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
+bvl_plotIntervals <- function(dag, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
 {
 	require(bayesplot)
 	
-	if (is.null(model@posterior))
+	if (is.null(dag@posterior))
 		stop("Model is not estimated!")
 	
 	if (is.null(params))
-		params <- bvl_params(model)
+		params <- bvl_getParams(dag)
 		
 	bayesplot::color_scheme_set(color_scheme)
 	
 	if (!is.null(labels) && length(labels) == length(params))
 	{
-		dat <- model@posterior[params]
+		dat <- dag@posterior[params]
 		colnames(dat) <- labels
 		bayesplot::mcmc_intervals(dat, pars = labels, point_est = "mean", prob = prob, prob_outer = prob_outer)
 	}
 	else
-		bayesplot::mcmc_intervals(model@posterior, pars = params, point_est = "mean", prob = prob, prob_outer = prob_outer)	
+		bayesplot::mcmc_intervals(dag@posterior, pars = params, point_est = "mean", prob = prob, prob_outer = prob_outer)	
 }
 
-bvl_plotAreas <- function(model, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
+bvl_plotAreas <- function(dag, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
 {
 	require(bayesplot)
 	
-	if (is.null(model@posterior))
+	if (is.null(dag@posterior))
 		stop("Model is not estimated!")
 	
 	if (is.null(params))
-		params <- bvl_params(model)
+		params <- bvl_getParams(dag)
 
 	bayesplot::color_scheme_set(color_scheme)
 
 	if (!is.null(labels) && length(labels) == length(params))
 	{
-		dat <- model@posterior[params]
+		dat <- dag@posterior[params]
 		colnames(dat) <- labels
 		bayesplot::mcmc_intervals(dat, pars = labels, point_est = "mean", prob = prob, prob_outer = prob_outer)
 	}
 	else
-		bayesplot::mcmc_areas(model@posterior, pars = params, point_est = "mean", prob = prob, prob_outer = prob_outer)
+		bayesplot::mcmc_areas(dag@posterior, pars = params, point_est = "mean", prob = prob, prob_outer = prob_outer)
 }
 
 #------------------------------------------------------------------------------
 # Plot pairs
 
-bvl_plotPairs <- function(model, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
+bvl_plotPairs <- function(dag, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
 {
 	require(bayesplot)
 	
-	if (is.null(model@posterior))
+	if (is.null(dag@posterior))
 		stop("Model is not estimated!")
 	
 	if (is.null(params))
-		params <- bvl_params(model)
+		params <- bvl_getParams(dag)
 
 	bayesplot::color_scheme_set(color_scheme)
 
 	if (!is.null(labels) && length(labels) == length(params))
 	{
-		dat <- model@posterior[params]
+		dat <- dag@posterior[params]
 		colnames(dat) <- labels
 		bayesplot::mcmc_intervals(dat, pars = labels, point_est = "mean", prob = prob, prob_outer = prob_outer)
 	}
 	else
-		bayesplot::mcmc_pairs(model@posterior, pars = params, off_diag_args = list(size = 1.5))
+		bayesplot::mcmc_pairs(dag@posterior, pars = params, off_diag_args = list(size = 1.5))
 }
 
 #------------------------------------------------------------------------------
 # Plot density
 
-bvl_plotDensity2d <- function(model, x, y, color = NULL, color_scheme = "red", labels = NULL)
+bvl_plotDensity2d <- function(dag, x, y, color = NULL, color_scheme = "red", labels = NULL)
 {
 	require(viridis)
+	require(ggplot2)
 	
+	if (is.null(dag@stanfit))
+		stop("Model is not estimated!")
+
 	if (!is.null(labels))
 	{
 		labx = labels[1]
@@ -441,7 +443,7 @@ bvl_plotDensity2d <- function(model, x, y, color = NULL, color_scheme = "red", l
 	
 	if (is.null(color))
 	{
-		ggplot(model@posterior, aes(x=model@posterior[[x]], y=model@posterior[[y]])) +
+		ggplot(dag@posterior, aes(x=dag@posterior[[x]], y=dag@posterior[[y]])) +
 			geom_point(alpha = 0.3, color = color_scheme)+
 			geom_density2d(color = "gray30")+
 			scale_color_viridis(option = "C")+ 
@@ -450,7 +452,7 @@ bvl_plotDensity2d <- function(model, x, y, color = NULL, color_scheme = "red", l
 	}
 	else
 	{
-		ggplot(model@posterior, aes(x=model@posterior[[x]], y=model@posterior[[y]], color = model@posterior[[color]]))+
+		ggplot(dag@posterior, aes(x=dag@posterior[[x]], y=dag@posterior[[y]], color = dag@posterior[[color]]))+
 			geom_point(alpha = 0.3)+
 			geom_density2d(color = "gray30")+
 			scale_color_viridis(option = "C")+ 
@@ -459,19 +461,19 @@ bvl_plotDensity2d <- function(model, x, y, color = NULL, color_scheme = "red", l
 	}
 }
 
-bvl_plotDensity <- function(model, params = NULL, size = 1, labels = NULL)
+bvl_plotDensity <- function(dag, params = NULL, size = 1, labels = NULL)
 {
 	require(viridis)
 	require(ggplot2)
 	require(reshape2)
 	
-	if (is.null(model@stanfit))
+	if (is.null(dag@stanfit))
 		stop("Model is not estimated!")
 	
 	if (is.null(params))
-		params <- bvl_params(model)
+		params <- bvl_getParams(dag)
 
-	postParams <- rstan::extract(model@stanfit, pars = params)
+	postParams <- rstan::extract(dag@stanfit, pars = params)
 	
 	if (!is.null(labels) && length(labels) == length(names(postParams)))
 		names(postParams) <- labels

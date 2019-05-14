@@ -194,6 +194,8 @@ stan_likelihoodParams <- function(dag, node)
 	  varlen <- ""
 	  isParam = T
 	  isTransParam = F
+	  isReg = F
+	  
 	  # is main regression parameter?
 	  if (pars[p] == template$par_reg)
 	  {
@@ -207,6 +209,7 @@ stan_likelihoodParams <- function(dag, node)
 		varprior = NULL
 		if (bvl_isRoot(node))
 		{
+			# single node
 			if (length(bvl_getArcs(dag, from = node$name))==0)
 			{
 			  if (is.null(node$prior))
@@ -221,10 +224,11 @@ stan_likelihoodParams <- function(dag, node)
 				varlen <- ""
 				isParam = T
 				isTransParam = F
+				isReg = T
 			}
 		}
 	
-		param = stan_newParam(name = varname, type = vartype, length = varlen, prior = varprior, isParam = isParam, isTransParam = isTransParam)
+		param = stan_newParam(name = varname, type = vartype, length = varlen, prior = varprior, isParam = isParam, isTransParam = isTransParam, isReg = isReg)
 		params = stan_addParamToList(params, param)
 	}
 
