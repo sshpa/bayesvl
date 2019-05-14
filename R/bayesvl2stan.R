@@ -217,6 +217,10 @@ stan_likelihoodParams <- function(dag, node)
 				{
 				  varprior = stan_replaceNode(node$prior, node)
 				}
+				
+				varlen <- ""
+				isParam = T
+				isTransParam = F
 			}
 		}
 	
@@ -472,7 +476,7 @@ stan_transParamCode <- function(dag)
 			transparam_code = paste0(stan_paramAtNode(dag, node, getCode = T), transparam_code)
 		}
 		
-		nextNodes <- bvl_getNext(dag, nextNodes)
+		nextNodes <- bvl_getParents(dag, nextNodes)
 		level = level + 1
 	}
 	
@@ -669,7 +673,7 @@ stan_transDataCode <- function(dag)
 
 		}
 		
-		nextNodes <- bvl_getNext(dag, nextNodes)
+		nextNodes <- bvl_getParents(dag, nextNodes)
 		level = level + 1
 	}
 	

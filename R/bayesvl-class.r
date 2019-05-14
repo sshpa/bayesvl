@@ -128,6 +128,38 @@ setMethod("bvl_addNode", "bayesvl", function(dag, name, dist = "norm", priors = 
 	return(dag)
 })
 
+if (!isGeneric("bvl_hasCircle"))
+      setGeneric("bvl_hasCircle", function(object) standardGeneric("bvl_hasCircle"))
+
+setMethod("bvl_hasCircle", "bayesvl", function(object) {		
+	if (is.null(object@nodes))
+		return (FALSE)
+	
+	if(length(object@nodes)==0)
+		return (FALSE)
+
+	if(length(object@arcs)==0)
+		return (FALSE)
+
+	nextNodes <- bvl_getLeaves(object)
+	
+	checked <- c()
+	while (!is.null(nextNodes) && length(nextNodes) > 0)
+	{
+		print(checked)
+		print(names(nextNodes))
+		print("++++++++++")
+		if (T %in% (names(nextNodes) %in% checked))
+			return (TRUE)
+			
+		checked <- c(checked, names(nextNodes))
+		
+		nextNodes <- bvl_getParents(object, nextNodes)
+	}
+
+	return(FALSE)
+})
+
 
 if (!isGeneric("bvl_addArc"))
       setGeneric("bvl_addArc", function(dag, from, to, type = "slope", priors = NULL, ...) standardGeneric("bvl_addArc"))
@@ -287,20 +319,6 @@ bvl_load <- function(nodefile, graphfile) {
 	
 	return(vlDag)
 }
-
-
-if (!isGeneric("bvl_estModel"))
-      setGeneric("bvl_estModel", function(net, dataList, ...) standardGeneric("bvl_estModel"))
-
-setMethod("bvl_estModel", "bayesvl", function(net, dataList, ...) {			
-	if(length(object@nodes)==0)
-		return (NULL)
-	
-	fit <- bvl_modelFit(net, dataList, ...)
-	
-	return(fit)
-})
-
 
 if (!isGeneric("bvl_validModel"))
       setGeneric("bvl_validModel", function(dag, ...) standardGeneric("bvl_validModel"))
@@ -515,6 +533,13 @@ setMethod("bvl_bnStrength", "bayesvl", function(net, data = NULL, criterion = "x
 })
 
 
+#------------------------------------------------------------------------------
+# Get regression parameter names
+# Arguments:
+#   object model
+#     is object of class bayesvl.
+# Value:
+#   vector charactor of parameter names
 
 if (!isGeneric("bvl_stanParams"))
       setGeneric("bvl_stanParams", function(net) standardGeneric("bvl_stanParams"))
