@@ -47,11 +47,19 @@ bvl_plotTest (dag, y_name, test_name, n = 200, color_scheme = "blue")
 \arguments{
   \item{dag}{an object of class \code{bayesvl}}
   \item{params}{Optional: character vector of parameter names.}
+  \item{fun}{Optional: statistic function.}
+  \item{stat}{Optional: the plotting function to call.}
+  \item{prob}{Optional: the probability mass to include in the inner interval. Default is 0.8.}
+  \item{prob_outer}{Optional: the probability mass to include in the outer interval. Default is 0.95.}
   \item{row}{Optional: number of rows of grid layout.}
   \item{col}{Optional: number of columns of grid layout.}
   \item{credMass}{Optional: specifying the mass within the credible interval. Default is 0.89. }
   \item{size}{Optional: the size of line width. }
   \item{color_scheme}{Optional: color scheme. Default is "blue" }
+
+  \item{y_name}{a character string. Name of outcome variable }
+  \item{test_name}{a character string. Name of test variable and test value }
+  \item{n}{number of yrep values to plot }
 
   \item{labels}{Optional: character vector of parameter labels.}
 }
