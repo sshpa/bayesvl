@@ -262,18 +262,6 @@ bvl_plotDiag <- function(dag)
 	bvl_diag(dag)
 }
 
-#bvl_plotDiag <- function(dag, params = NULL)
-#{
-#	require(bayesplot)
-#	
-#	coda <- stan2coda(dag@stanfit)
-#	
-#	if (is.null(params))
-#		params <- bvl_getParams(dag)
-#
-#	diagMCMC(dag@posterior, parName = params)
-#}
-
 bvl_plotGelman <- function( dag, params = NULL) {
   DBDAplColors = c("skyblue","black","royalblue","steelblue")
 
@@ -322,7 +310,7 @@ bvl_plotAcf <- function( dag, params = NULL) {
 		params <- bvl_getParams(dag)
 
   tryVal = try(
-    DbdaAcfPlot(codaObject, params)
+    plotAcf(codaObject, params)
   )  
 }
 
@@ -342,7 +330,7 @@ bvl_plotAcfs <- function( dag, params = NULL, row = 2, col = 2) {
   for(i in 1:length(params))
   {
 	  tryVal = try(
-	    DbdaAcfPlot(codaObject, params[i], main = params[i])
+	    plotAcf(codaObject, params[i], main = params[i])
 	  )
   }  
 }
@@ -494,7 +482,7 @@ plotPost = function( paramSampleVec , cenTend=c("mode","median","mean")[1] ,
                      main=NULL , cex=NULL , cex.lab=NULL ,
                      col=NULL , border=NULL , showCurve=FALSE , breaks=NULL , 
                      ... ) {
-  require(coda)
+  # require(coda)
   
   # Override defaults of hist function, if not specified by user:
   # (additional arguments "..." are passed to the hist function)
@@ -528,7 +516,7 @@ plotPost = function( paramSampleVec , cenTend=c("mode","median","mean")[1] ,
   mcmcDensity = density(paramSampleVec)
   postSummary[,"mode"] = mcmcDensity$x[which.max(mcmcDensity$y)]
   
-  HDI = HDIofMCMC( paramSampleVec , credMass )
+  HDI = bvl_getHDI( paramSampleVec , credMass )
   postSummary[,"hdiMass"]=credMass
   postSummary[,"hdiLow"]=HDI[1]
   postSummary[,"hdiHigh"]=HDI[2]
@@ -635,17 +623,7 @@ plotPost = function( paramSampleVec , cenTend=c("mode","median","mean")[1] ,
 #------------------------------------------------------------------------------
 # Functions for computing limits of HDI's:
 
-HDIofMCMC = function( sampleVec , credMass=0.95 ) {
-  # Computes highest density interval from a sample of representative values,
-  #   estimated as shortest credible interval.
-  # Arguments:
-  #   sampleVec
-  #     is a vector of representative values from a probability distribution.
-  #   credMass
-  #     is a scalar between 0 and 1, indicating the mass within the credible
-  #     interval that is to be estimated.
-  # Value:
-  #   HDIlim is a vector containing the limits of the HDI
+bvl_getHDI = function( sampleVec , credMass=0.95 ) {
   sortedPts = sort( sampleVec )
   ciIdxInc = ceiling( credMass * length( sortedPts ) )
   nCIs = length( sortedPts ) - ciIdxInc
@@ -659,59 +637,11 @@ HDIofMCMC = function( sampleVec , credMass=0.95 ) {
   return( HDIlim )
 }
 
-HDIofICDF = function( ICDFname , credMass=0.95 , tol=1e-8 , ... ) {
-  # Arguments:
-  #   ICDFname is R's name for the inverse cumulative density function
-  #     of the distribution.
-  #   credMass is the desired mass of the HDI region.
-  #   tol is passed to R's optimize function.
-  # Return value:
-  #   Highest density iterval (HDI) limits in a vector.
-  # Example of use: For determining HDI of a beta(30,12) distribution, type
-  #   HDIofICDF( qbeta , shape1 = 30 , shape2 = 12 )
-  #   Notice that the parameters of the ICDFname must be explicitly named;
-  #   e.g., HDIofICDF( qbeta , 30 , 12 ) does not work.
-  # Adapted and corrected from Greg Snow's TeachingDemos package.
-  incredMass =  1.0 - credMass
-  intervalWidth = function( lowTailPr , ICDFname , credMass , ... ) {
-    ICDFname( credMass + lowTailPr , ... ) - ICDFname( lowTailPr , ... )
-  }
-  optInfo = optimize( intervalWidth , c( 0 , incredMass ) , ICDFname=ICDFname ,
-                      credMass=credMass , tol=tol , ... )
-  HDIlowTailPr = optInfo$minimum
-  return( c( ICDFname( HDIlowTailPr , ... ) ,
-             ICDFname( credMass + HDIlowTailPr , ... ) ) )
-}
-
-HDIofGrid = function( probMassVec , credMass=0.95 ) {
-  # Arguments:
-  #   probMassVec is a vector of probability masses at each grid point.
-  #   credMass is the desired mass of the HDI region.
-  # Return value:
-  #   A list with components:
-  #   indices is a vector of indices that are in the HDI
-  #   mass is the total mass of the included indices
-  #   height is the smallest component probability mass in the HDI
-  # Example of use: For determining HDI of a beta(30,12) distribution
-  #   approximated on a grid:
-  #   > probDensityVec = dbeta( seq(0,1,length=201) , 30 , 12 )
-  #   > probMassVec = probDensityVec / sum( probDensityVec )
-  #   > HDIinfo = HDIofGrid( probMassVec )
-  #   > show( HDIinfo )
-  sortedProbMass = sort( probMassVec , decreasing=TRUE )
-  HDIheightIdx = min( which( cumsum( sortedProbMass ) >= credMass ) )
-  HDIheight = sortedProbMass[ HDIheightIdx ]
-  HDImass = sum( probMassVec[ probMassVec >= HDIheight ] )
-  return( list( indices = which( probMassVec >= HDIheight ) ,
-                mass = HDImass , height = HDIheight ) )
-}
-
-
 #------------------------------------------------------------------------------
 # Function(s) for plotting properties of mcmc coda objects.
 
-DbdaAcfPlot = function( codaObject , parName=varnames(codaObject)[1] , plColors=NULL, main = "" ) {
-  if ( all( parName != varnames(codaObject) ) ) { 
+plotAcf = function( codaObject , parName=coda::varnames(codaObject)[1] , plColors=NULL, main = "" ) {
+  if ( all( parName != coda::varnames(codaObject) ) ) { 
     stop("parName must be a column name of coda object")
   }
   nChain = length(codaObject)
@@ -731,8 +661,11 @@ DbdaAcfPlot = function( codaObject , parName=varnames(codaObject)[1] , plColors=
         labels=paste("ESS =",round(EffChnLngth,1)) )
 }
 
-DbdaDensPlot = function( codaObject , parName=varnames(codaObject)[1] , plColors=NULL ) {
-  if ( all( parName != varnames(codaObject) ) ) { 
+#------------------------------------------------------------------------------
+# Function(s) for plotting properties of mcmc coda objects.
+
+plotDens = function( codaObject , parName=coda::varnames(codaObject)[1] , plColors=NULL ) {
+  if ( all( parName != coda::varnames(codaObject) ) ) { 
     stop("parName must be a column name of coda object")
   }
   nChain = length(codaObject) # or nchain(codaObject)
@@ -744,7 +677,7 @@ DbdaDensPlot = function( codaObject , parName=varnames(codaObject)[1] , plColors
     densInfo = density(codaObject[,c(parName)][[cIdx]]) 
     xMat = cbind(xMat,densInfo$x)
     yMat = cbind(yMat,densInfo$y)
-    hdiLims = cbind(hdiLims,HDIofMCMC(codaObject[,c(parName)][[cIdx]]))
+    hdiLims = cbind(hdiLims,bvl_getHDI(codaObject[,c(parName)][[cIdx]]))
   }
   matplot( xMat , yMat , type="l" , col=plColors , 
            main="" , xlab="Param. Value" , ylab="Density" )
@@ -758,39 +691,6 @@ DbdaDensPlot = function( codaObject , parName=varnames(codaObject)[1] , plColors
         paste("MCSE =\n",signif(MCSE,3)) )
 }
 
-diagMCMC = function( codaObject , parName=varnames(codaObject)[1] ,
-                     saveName=NULL , saveType="jpg" ) {
-  DBDAplColors = c("skyblue","black","royalblue","steelblue")
-  #openGraph(height=5,width=7)
-  par( mar=0.5+c(3,4,1,0) , oma=0.1+c(0,0,2,0) , mgp=c(2.25,0.7,0) , 
-       cex.lab=1.5 )
-  layout(matrix(1:4,nrow=2))
-  # traceplot and gelman.plot are from CODA package:
-  require(coda)
-  coda::traceplot( codaObject[,c(parName)] , main="" , ylab="Param. Value" ,
-                   col=DBDAplColors ) 
-  tryVal = try(
-    coda::gelman.plot( codaObject[,c(parName)] , main="" , auto.layout=FALSE , 
-                       col=DBDAplColors )
-  )  
-  # if it runs, gelman.plot returns a list with finite shrink values:
-  if ( class(tryVal)=="try-error" ) {
-    plot.new() 
-    print(paste0("Warning: coda::gelman.plot fails for ",parName))
-  } else { 
-    if ( class(tryVal)=="list" & !is.finite(tryVal$shrink[1]) ) {
-      plot.new() 
-      print(paste0("Warning: coda::gelman.plot fails for ",parName))
-    }
-  }
-  DbdaAcfPlot(codaObject,parName,plColors=DBDAplColors)
-  DbdaDensPlot(codaObject,parName,plColors=DBDAplColors)
-  mtext( text=parName , outer=TRUE , adj=c(0.5,0.5) , cex=2.0 )
-  #if ( !is.null(saveName) ) {
-  #  saveGraph( file=paste0(saveName,"Diag",parName), type=saveType)
-  #}
-}
-
 ############################
 ppc_dens_over <- function(y, yrep, ...,
                              size = 0.25,
@@ -802,7 +702,7 @@ ppc_dens_over <- function(y, yrep, ...,
                              n_dens = 1024) {
 
   #check_ignored_arguments(...)
-  data <- ppc_data(y, yrep)
+  data <- bayesplot::ppc_data(y, yrep)
 
   ggplot(data) +
     aes_(x = ~ value) +

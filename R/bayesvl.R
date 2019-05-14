@@ -55,15 +55,16 @@ bvl_getArcs <- function(dag, from = NULL, to = NULL, type = NULL) {
 } 
 
 bvl_getLeaves <- function(dag) {
-	if (is.null(dag))
+	if (is.empty(dag))
 		return (NULL)
 		
-	if (is.null(dag@nodes))
+	if (is.empty(dag@nodes))
 		return (NULL)
 	
 	nodes = list()
 	for(n in 1:length(dag@nodes))
 	{
+	print(n)
 		if (length(dag@nodes[[n]]$children) == 0)
 		{
 			nodes[[dag@nodes[[n]]$name]] = dag@nodes[[n]]

@@ -841,12 +841,15 @@ stan_formula <- function(dag, loopForI = "", outcome = T)
 	formula_string <- ""
 	nextNodes <- bvl_getLeaves(dag)	
 
-	for(n in 1:length(nextNodes))
+	if (length(nextNodes) > 0)
 	{
-		nodeName <- nextNodes[[n]]$name
-		template <- bvl_loadTemplate( nextNodes[[n]]$dist )
-
-		formula_string = paste0(formula_string, stan_formulaAtNode(dag, nextNodes[[n]], loopForI, outcome), "\n")
+		for(n in 1:length(nextNodes))
+		{
+			nodeName <- nextNodes[[n]]$name
+			template <- bvl_loadTemplate( nextNodes[[n]]$dist )
+	
+			formula_string = paste0(formula_string, stan_formulaAtNode(dag, nextNodes[[n]], loopForI, outcome), "\n")
+		}
 	}
 	
 	return(formula_string)
@@ -1089,8 +1092,9 @@ stan_extractData <- function(net, data, all=F)
 }
 
 stan2coda <- function(fit) {
-		require(coda)
-		mcmc.list(lapply(1:ncol(fit), function(x) mcmc(as.array(fit)[,x,])))
+		# require(coda)
+		
+		coda::mcmc.list(lapply(1:ncol(fit), function(x) coda::mcmc(as.array(fit)[,x,])))
 }
 
 stanPars <- function(fit) {
@@ -1211,6 +1215,7 @@ bvl_modelFit <- function(dag, data, warmup = 1000, iter = 5000, chains = 2, core
   }
   
   dag@stanfit <- mstan
+  dag@rawdata <- data
   dag@standata <- dataList
   dag@posterior <- as.data.frame(dag@stanfit)
 
