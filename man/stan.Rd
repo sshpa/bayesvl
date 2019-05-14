@@ -33,7 +33,7 @@ bvl_stanParams(dag)
   \item{chains}{Optional: Number of independent chains to sample from. Default is 2}
   \item{cores}{Optional: Number of processor cores to distribute chains over, using parallel. Default is 1}
   \item{writefile}{Optional: Write the stan code to temporary file when compiling. Default is FALSE}  
-  \item{ppc}{Optional: a character string contains posterior check scripts}
+  \item{ppc}{Optional: a character string contains posterior predictive check scripts}
 }
 \value{
 

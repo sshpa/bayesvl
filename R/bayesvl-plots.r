@@ -62,7 +62,7 @@ bvl_plotParams <- function(dag, row = 2, col = 2, credMass = 0.89, params = NULL
 
 bvl_logLik <- function(dag)
 {
-	require(loo)
+	#require(loo)
 
 	leaves <- bvl_getLeaves(dag)
 	
@@ -71,7 +71,7 @@ bvl_logLik <- function(dag)
 		y_name <- leaves[[i]]$name
 		parName <- paste0("log_lik_",y_name)
 
-		log_lik_1 <- extract_log_lik(dag@stanfit, parameter_name=parName, merge_chains = FALSE)
+		log_lik_1 <- loo::extract_log_lik(dag@stanfit, parameter_name=parName, merge_chains = FALSE)
 		
 		return(log_lik_1)
 	}
@@ -82,7 +82,7 @@ bvl_logLik <- function(dag)
 
 plotPPC <- function(stanfit, data, y_name, fun = "stat", stat = "mean", color_scheme = "blue")
 {
-	require(bayesplot)
+	#require(bayesplot)
 	
 	parName <- paste0("yrep_",y_name)
 
@@ -94,7 +94,7 @@ plotPPC <- function(stanfit, data, y_name, fun = "stat", stat = "mean", color_sc
 
 bvl_plotPPC <- function(dag, fun = "stat", stat = "mean", color_scheme = "blue")
 {
-	require(bayesplot)
+	#require(bayesplot)
 	
 	leaves <- bvl_getLeaves(dag)
 	
@@ -115,7 +115,7 @@ bvl_plotPPC <- function(dag, fun = "stat", stat = "mean", color_scheme = "blue")
 
 bvl_plotTest <- function(dag, y_name, test_name, n = 200, color_scheme = "blue")
 {
-	require(ggplot2)
+	#require(ggplot2)
 	#require(dplyr)
 	
 	parName <- paste0("yrep_",test_name)
@@ -146,7 +146,7 @@ bvl_plotTest1 <- function(dag, y_name, test_name, n = 200, size = 0.25,
        kernel = "gaussian",
        n_dens = 1024) {
     
-    require(ggplot2)
+    # require(ggplot2)
 
     parName <- paste0("yrep_",test_name)
     y_rep <- as.matrix(dag@stanfit, pars = parName)
@@ -156,7 +156,7 @@ bvl_plotTest1 <- function(dag, y_name, test_name, n = 200, size = 0.25,
     
     y <- dag@standata[[y_name]]
     
-    ggplot(data) +
+    ggplot2::ggplot(data) +
 	    aes_(x = ~ value) +
 	    stat_density(
 	      aes_(group = ~ parameters, color = "yrep"),
@@ -188,7 +188,7 @@ bvl_plotTest1 <- function(dag, y_name, test_name, n = 200, size = 0.25,
 
 bvl_plotDensOverlay <- function(dag, n = 200, color_scheme = "blue")
 {
-	require(bayesplot)
+	# require(bayesplot)
 	
 	leaves <- bvl_getLeaves(dag)
 	
@@ -213,7 +213,7 @@ bvl_plotDensOverlay <- function(dag, n = 200, color_scheme = "blue")
 
 bvl_plotTest <- function(dag, y_name, test_name, n = 200, color_scheme = "blue")
 {
-	require(bayesplot)
+	# require(bayesplot)
 	
 	leaves <- bvl_getLeaves(dag)
 	
@@ -352,7 +352,7 @@ bvl_plotAcfs <- function( dag, params = NULL, row = 2, col = 2) {
 
 bvl_plotIntervals <- function(dag, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
 {
-	require(bayesplot)
+	# require(bayesplot)
 	
 	if (is.null(dag@posterior))
 		stop("Model is not estimated!")
@@ -374,7 +374,7 @@ bvl_plotIntervals <- function(dag, params = NULL, fun = "stat", stat = "mean", p
 
 bvl_plotAreas <- function(dag, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
 {
-	require(bayesplot)
+	# require(bayesplot)
 	
 	if (is.null(dag@posterior))
 		stop("Model is not estimated!")
@@ -399,7 +399,7 @@ bvl_plotAreas <- function(dag, params = NULL, fun = "stat", stat = "mean", prob 
 
 bvl_plotPairs <- function(dag, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
 {
-	require(bayesplot)
+	# require(bayesplot)
 	
 	if (is.null(dag@posterior))
 		stop("Model is not estimated!")
@@ -424,8 +424,8 @@ bvl_plotPairs <- function(dag, params = NULL, fun = "stat", stat = "mean", prob 
 
 bvl_plotDensity2d <- function(dag, x, y, color = NULL, color_scheme = "red", labels = NULL)
 {
-	require(viridis)
-	require(ggplot2)
+	# require(viridis)
+	# require(ggplot2)
 	
 	if (is.null(dag@stanfit))
 		stop("Model is not estimated!")
@@ -443,19 +443,19 @@ bvl_plotDensity2d <- function(dag, x, y, color = NULL, color_scheme = "red", lab
 	
 	if (is.null(color))
 	{
-		ggplot(dag@posterior, aes(x=dag@posterior[[x]], y=dag@posterior[[y]])) +
+		ggplot2::ggplot(dag@posterior, aes(x=dag@posterior[[x]], y=dag@posterior[[y]])) +
 			geom_point(alpha = 0.3, color = color_scheme)+
 			geom_density2d(color = "gray30")+
-			scale_color_viridis(option = "C")+ 
+			viridis::scale_color_viridis(option = "C")+ 
 			geom_abline(intercept=0,slope=1) +
 			labs(x = labx, y = laby, color = color)
 	}
 	else
 	{
-		ggplot(dag@posterior, aes(x=dag@posterior[[x]], y=dag@posterior[[y]], color = dag@posterior[[color]]))+
+		ggplot2::ggplot(dag@posterior, aes(x=dag@posterior[[x]], y=dag@posterior[[y]], color = dag@posterior[[color]]))+
 			geom_point(alpha = 0.3)+
 			geom_density2d(color = "gray30")+
-			scale_color_viridis(option = "C")+ 
+			viridis::scale_color_viridis(option = "C")+ 
 			geom_abline(intercept=0,slope=1) +
 			labs(x = labx, y = laby, color = color)
 	}
@@ -463,9 +463,9 @@ bvl_plotDensity2d <- function(dag, x, y, color = NULL, color_scheme = "red", lab
 
 bvl_plotDensity <- function(dag, params = NULL, size = 1, labels = NULL)
 {
-	require(viridis)
-	require(ggplot2)
-	require(reshape2)
+	# require(viridis)
+	# require(ggplot2)
+	# require(reshape2)
 	
 	if (is.null(dag@stanfit))
 		stop("Model is not estimated!")
@@ -478,9 +478,9 @@ bvl_plotDensity <- function(dag, params = NULL, size = 1, labels = NULL)
 	if (!is.null(labels) && length(labels) == length(names(postParams)))
 		names(postParams) <- labels
 
-	ref <- melt(postParams)
+	ref <- reshape2::melt(postParams)
 	colnames(ref)[2:3] <- c("value","Params")
-	ggplot(data=ref,aes(x=value, color=Params))+geom_density(size=size)
+	ggplot2::ggplot(data=ref,aes(x=value, color=Params))+geom_density(size=size)
 }
 
 
@@ -790,46 +790,6 @@ diagMCMC = function( codaObject , parName=varnames(codaObject)[1] ,
   #  saveGraph( file=paste0(saveName,"Diag",parName), type=saveType)
   #}
 }
-
-diagStanFit = function( stanFit , parName ,
-                        saveName=NULL , saveType="jpg" ) {
-  codaFit = mcmc.list( lapply( 1:ncol(stanFit) , 
-                               function(x) { mcmc(as.array(stanFit)[,x,]) } ) )
-  DBDAplColors = c("skyblue","black","royalblue","steelblue")
-  #openGraph(height=5,width=7)
-  par( mar=0.5+c(3,4,1,0) , oma=0.1+c(0,0,2,0) , mgp=c(2.25,0.7,0) , cex.lab=1.5 )
-  layout(matrix(1:4,nrow=2))
-	#par(mfrow=c(2,2))
-
-  # traceplot is from rstan package
-  require(rstan)
-  rstan::traceplot(stanFit,pars=parName,nrow=1,ncol=1) #,main="",ylab="Param. Value",col=DBDAplColors) 
-  
-  # gelman.plot are from CODA package:
-  require(coda)
-  tryVal = try(
-    coda::gelman.plot( codaFit[,c(parName)] , main="" , auto.layout=FALSE , 
-                       col=DBDAplColors )
-  )
-  # if it runs, gelman.plot returns a list with finite shrink values:
-  if ( class(tryVal)=="try-error" ) {
-    plot.new() 
-    print(paste0("Warning: coda::gelman.plot fails for ",parName))
-  } else { 
-    if ( class(tryVal)=="list" & !is.finite(tryVal$shrink[1]) ) {
-      plot.new() 
-      print(paste0("Warning: coda::gelman.plot fails for ",parName))
-    }
-  }
-  DbdaAcfPlot(codaFit,parName,plColors=DBDAplColors)
-  DbdaDensPlot(codaFit,parName,plColors=DBDAplColors)
-  #print(p)
-  mtext( text=parName , outer=TRUE , adj=c(0.5,0.5) , cex=2.0 )
-  #if ( !is.null(saveName) ) {
-  #  saveGraph( file=paste0(saveName,"Diag",parName), type=saveType)
-  #}
-}
-
 
 ############################
 ppc_dens_over <- function(y, yrep, ...,

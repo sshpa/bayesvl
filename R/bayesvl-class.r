@@ -237,9 +237,9 @@ if (!isGeneric("bvl_vl2bn"))
       setGeneric("bvl_vl2bn", function(dag, ...) standardGeneric("bvl_vl2bn"))
 
 setMethod("bvl_vl2bn", "bayesvl", function(dag) {
-	require(bnlearn)
+	# require(bnlearn)
 	
-	bnDag = empty.graph(nodes=bvl_getNodeNames(dag))
+	bnDag = bnlearn::empty.graph(nodes=bvl_getNodeNames(dag))
 	
 	for(n in 1:length(dag@nodes))
 	{
@@ -248,7 +248,7 @@ setMethod("bvl_vl2bn", "bayesvl", function(dag) {
 		{
 			for(i in 1:length(dag@nodes[[n]]$children))
 			{
-				bnDag = set.arc(bnDag, from = dag@nodes[[n]]$name, to = dag@nodes[[n]]$children[[i]])
+				bnDag = bnlearn::set.arc(bnDag, from = dag@nodes[[n]]$name, to = dag@nodes[[n]]$children[[i]])
 			}
 		}
 	}
@@ -260,7 +260,7 @@ if (!isGeneric("bvl_bn2vl"))
       setGeneric("bvl_bn2vl", function(dag) standardGeneric("bvl_bn2vl"))
 
 setMethod("bvl_bn2vl", "bayesvl", function(dag) {
-	require(bnlearn)
+	# require(bnlearn)
 	
 	vlDag = network_init()
 	
@@ -286,39 +286,6 @@ setMethod("bvl_bn2vl", "bayesvl", function(dag) {
 
 	return(vlDag)
 })
-
-bvl_save <- function(filename) {
-	nodes <- read.csv(nodefile, stringsAsFactors=F, header = T)
-
-	for(n in 1:length(dag@nodes))
-	{
-		if (length(dag@nodes[[n]]@children) > 0)
-		{
-			nodeName <- names(dag@nodes)[n]
-			for(i in 1:length(dag@nodes[[n]]@children))
-			{
-				vlDag = network_addArc(vlDag, from = nodeName, to = dag@nodes[[n]]@children[[i]])
-			}
-		}
-	}
-	
-	return(vlDag)
-}
-
-bvl_load <- function(nodefile, graphfile) {
-	nodes <- read.csv(nodefile, stringsAsFactors=F, header = T)
-
-	vlDag = bayesvl()
-	
-	for(n in 1:length(nodes))
-	{
-		nodeName <- nodes["name"]
-		
-		vlDag = network_addNode(vlDag, name = nodeName)
-	}
-	
-	return(vlDag)
-}
 
 if (!isGeneric("bvl_validModel"))
       setGeneric("bvl_validModel", function(dag) standardGeneric("bvl_validModel"))
