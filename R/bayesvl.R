@@ -212,6 +212,8 @@ bvl_isBranch <- function(node) {
 }
 
 bnBayes <- function(dag, data, method = "bayes", iss = 10, ...) {
+	require(bnlearn)
+
 	bnDag <- bvl_vl2bn(dag)
 	
 	bn.bayes <- bn.fit(bnDag, data = data, method = method, iss = iss)
@@ -220,6 +222,8 @@ bnBayes <- function(dag, data, method = "bayes", iss = 10, ...) {
 }
 
 bnStrength <- function(dag, data = NULL, criterion = "x2", ...) {
+	require(bnlearn)
+
 	if (length(dag@arcs) < 1)
 		return(NA)
 		
@@ -231,6 +235,8 @@ bnStrength <- function(dag, data = NULL, criterion = "x2", ...) {
 }
 
 bnScore <- function(dag, data = NULL, type = "bic", ...) {
+	require(bnlearn)
+
 	bnDag <- bvl_vl2bn(dag)
 	
 	score = score(bnDag, data = data, type = type, ...)
@@ -239,6 +245,7 @@ bnScore <- function(dag, data = NULL, type = "bic", ...) {
 }
 
 bnBarchart <- function(dag, data, method = "bayes", iss = 10, ...) {
+	require(bnlearn)
 
 	bn.bayes <- bvl_bnBayes(dag, data = data, method = method, iss = iss)
 	

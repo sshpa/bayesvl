@@ -12,26 +12,27 @@
 }
 \usage{
 # build RStan models from directed acyclic graph.
-bvl_model2Stan(dag, pcc = "")
+bvl_model2Stan(dag)
 
 # compile and simulate samples from the model.
-bvl_modelFit(dag, data, warmup = 1000, iter = 5000, chains = 4, cores = 1, writefile = F, ppc = "")
+bvl_modelFit(dag, data, warmup = 1000, iter = 5000, chains = 2, cores = 1, writefile = F, ppc = "")
 
 # summarize the stan priors used for the model.
 stan_priors(dag)
 
 # summarize the stan parameters used for the model.
-stan_params(dag)
+bvl_stanParams(dag)
 }
 \arguments{
   \item{dag}{an object of class \code{bayesvl}}
-  \item{pcc}{Optional: a character string contains posterior check scripts}
   \item{data}{a data frame or list containing the data}
 
   \item{warmup}{Optional: Number of warmup iterations. By default, half of iter}
   \item{iter}{Optional: Number of iterations of sampling. Default is 5000}
   \item{chains}{Optional: Number of independent chains to sample from. Default is 4}
   \item{cores}{Optional: Number of processor cores to distribute chains over, using parallel. Default is 1}
+  \item{writefile}{Optional: Write the stan code to temporary file when compiling. Default is FALSE}  
+  \item{ppc}{Optional: a character string contains posterior check scripts}
 }
 \value{
 
@@ -48,13 +49,16 @@ stan_params(dag)
 
 }
 \examples{
+dag <- bayesvl()
+dag <- bvl_addNode(dag, "y", "bern","beta(1, 1)")
+dataTrails <- c(1,0,1,1,0,1,0,0,0,0) # the trials of bias coin
 
 # build RStan model
 stancode_string = bvl_model2Stan(dag)
 cat(stancode_string)
 
 # compile and simulate samples from the model
-dag = bvl_modelFit(dag, data1)
+dag = bvl_modelFit(dag, data.frame(y=dataTrails))
 }
 \author{La Viet-Phuong, Vuong Quan-Hoang}
 \keyword{directed acyclic graphs, bayesvl}

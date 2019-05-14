@@ -20,12 +20,18 @@
 bvl_plotParams (dag, row = 2, col = 2, credMass = 0.89, params = NULL)
 
 # The interface to mcmc_intervals for plotting uncertainty intervals computed from posterior draws
-bvl_plotIntervals (dag, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
+bvl_plotIntervals (dag, params = NULL, fun = "stat", stat = "mean", 
+  prob = 0.8, prob_outer = 0.95, 
+  color_scheme = "blue", labels = NULL)
 
 # The interface to mcmc_intervals for plotting density computed from posterior draws
-bvl_plotAreas (dag, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
+bvl_plotAreas (dag, params = NULL, fun = "stat", stat = "mean", 
+  prob = 0.8, prob_outer = 0.95, 
+  color_scheme = "blue", labels = NULL)
 
-bvl_plotPairs (dag, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
+bvl_plotPairs (dag, params = NULL, fun = "stat", stat = "mean", 
+  prob = 0.8, prob_outer = 0.95, 
+  color_scheme = "blue", labels = NULL)
 
 bvl_plotDensity (dag, params = NULL, size = 1, labels = NULL)
 
@@ -40,6 +46,12 @@ bvl_plotTest (dag, y_name, test_name, n = 200, color_scheme = "blue")
 \arguments{
   \item{dag}{an object of class \code{bayesvl}}
   \item{params}{Optional: character vector of parameter names.}
+  \item{row}{Optional: number of rows of grid layout.}
+  \item{col}{Optional: number of columns of grid layout.}
+  \item{credMass}{Optional: specifying the mass within the credible interval. Default is 0.89. }
+  \item{size}{Optional: the size of line width. }
+  \item{color_scheme}{Optional: color scheme. Default is "blue" }
+
   \item{labels}{Optional: character vector of parameter labels.}
 }
 \value{
@@ -51,9 +63,17 @@ bvl_plotTest (dag, y_name, test_name, n = 200, color_scheme = "blue")
 
 }
 \examples{
+# create the data and build model for plot functions test
+dag <- bayesvl()
+dag <- bvl_addNode(dag, "y", "bern","beta(1, 1)")
+dataTrails <- c(1,0,1,1,0,1,0,0,0,0) # the trials of bias coin
+dag <- bvl_modelFit(dag, data.frame(y=dataTrails), warmup = 200, iter = 1000, chains = 2)
 
+####### plot functions ########
 # plot uncertainty intervals of all paramaters
 bvl_plotIntervals(dag)
+
+bvl_plotDensity(dag)
 
 }
 \author{La Viet-Phuong, Vuong Quan-Hoang}
