@@ -1,6 +1,9 @@
 
 #------------------------------------------------------------------------------
 # Get regression parameter names
+#
+#' @rdname plots
+#' @export
 
 bvl_getParams <- function(dag)
 {
@@ -89,7 +92,7 @@ plotPPC <- function(stanfit, data, y_name, fun = "stat", stat = "mean", color_sc
 	y_rep <- as.matrix(stanfit, pars = parName)
 
 	bayesplot::color_scheme_set(color_scheme)
-	pp_check(as.numeric(data[y_name]), y_rep, fun = fun, stat = stat)
+	bayesplot::pp_check(as.numeric(data[y_name]), y_rep, fun = fun, stat = stat)
 }
 
 bvl_plotPPC <- function(dag, fun = "stat", stat = "mean", color_scheme = "blue")
@@ -107,7 +110,7 @@ bvl_plotPPC <- function(dag, fun = "stat", stat = "mean", color_scheme = "blue")
 		y <- dag@standata[[y_name]]
 			
 		bayesplot::color_scheme_set(color_scheme)
-		p <- pp_check(y, y_rep, fun = fun, stat = stat)
+		p <- bayesplot::pp_check(y, y_rep, fun = fun, stat = stat)
 		
 		print(p)
 	}
@@ -125,15 +128,7 @@ bvl_plotTest <- function(dag, y_name, test_name, n = 200, color_scheme = "blue")
 		
 	if (length(y_rep) < n)
 		n = length(y_rep)
-	
-	#for(i in 1:n)
-	#{
-	#	lines(density(y_rep[i,]), col=alpha("red", 0.4), type='l', ylim=10)
-		#data_frame(value = y_rep[i, ]) %>%
-    #      ggplot(., aes(value)) + 
-    #            geom_density(alpha = 0.1)
-	#}
-	
+		
 	bayesplot::color_scheme_set(color_scheme)
 	ppc_dens_overlay(y, y_rep[1:n, ])
 }
