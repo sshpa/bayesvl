@@ -1,5 +1,6 @@
 \name{bayesvl graph utilities}
 \alias{bayesvl graph utilities}
+\alias{bayesvl graphs}
 \alias{bvl_addNode}
 \alias{bvl_addArc}
 \title{Utilities to manipulate graphs}

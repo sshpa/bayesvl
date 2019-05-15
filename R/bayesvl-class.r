@@ -29,7 +29,7 @@ setMethod("show", "bayesvl", function(object){
 	    chaintxt <- " chain\n"
 	    if ( chains>1 ) chaintxt <- " chains\n"
 	    tot_samples <- (iter-warm)*chains
-	    cat(concat( tot_samples , " samples from " , chains , chaintxt ))
+	    cat(paste0( tot_samples , " samples from " , chains , chaintxt ))
     }
     
   	if (!is.null(object@nodes) && length(object@nodes)>0)
@@ -267,7 +267,7 @@ if (!isGeneric("bvl_bn2vl"))
 setMethod("bvl_bn2vl", "bayesvl", function(dag) {
 	# require(bnlearn)
 	
-	vlDag = network_init()
+	vlDag = bayesvl()
 	
 	for(n in 1:length(dag@nodes))
 	{
@@ -378,61 +378,61 @@ setMethod("bvl_validData", "bayesvl", function(dag, data, silent = F) {
 
 
 if (!isGeneric("bvl_bnScore"))
-      setGeneric("bvl_bnScore", function(net, data = NULL, ...) standardGeneric("bvl_bnScore"))
+      setGeneric("bvl_bnScore", function(dag, data = NULL, ...) standardGeneric("bvl_bnScore"))
 
-setMethod("bvl_bnScore", "bayesvl", function(net, data = NULL, ...) {			
-	if(!bvl_validModel(net, T))
+setMethod("bvl_bnScore", "bayesvl", function(dag, data = NULL, ...) {			
+	if(!bvl_validModel(dag, T))
 		return (NA)
 	
 	if (is.null(data))
 	{
-		if (!setequal(names(net@standata), names(net@nodes)))
+		if (!setequal(names(dag@standata), names(dag@nodes)))
 			return (NA)
 
-		data <- as.data.frame(net@standata[names(net@nodes)])
+		data <- as.data.frame(dag@standata[names(dag@nodes)])
 	}
 		
-	#nodes <- stan_dataNodes(net)
+	#nodes <- stan_dataNodes(dag)
 	#if (length(nodes) != length(model@nodes))
 	#	return (NA)
 	
-	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(net)]
-	dat <- stan_extractData(model, data, T)
-	if (!setequal(names(dat), names(net@nodes)))
+	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(dag)]
+	dat <- stan_extractData(dag, data, T)
+	if (!setequal(names(dat), names(dag@nodes)))
 		return (NA)
 	
-	if(!bvl_validData(net, dat))
+	if(!bvl_validData(dag, dat))
 		return (NA)
 
 	cols <- sapply(dat, is.numeric)
 	dat[,cols] <- lapply(dat[,cols], as.factor)
 
-	score <- bnScore(net, dat, ...)
+	score <- bnScore(dag, dat, ...)
 	
 	return(score)
 })
 
 
 if (!isGeneric("bvl_bnBayes"))
-      setGeneric("bvl_bnBayes", function(net, data = NULL, method = "bayes", iss = 10, ...) standardGeneric("bvl_bnBayes"))
+      setGeneric("bvl_bnBayes", function(dag, data = NULL, method = "bayes", iss = 10, ...) standardGeneric("bvl_bnBayes"))
 
-setMethod("bvl_bnBayes", "bayesvl", function(net, data = NULL, method = "bayes", iss = 10, ...) {			
-	if(!bvl_validModel(net, T))
+setMethod("bvl_bnBayes", "bayesvl", function(dag, data = NULL, method = "bayes", iss = 10, ...) {			
+	if(!bvl_validModel(dag, T))
 	{
 		return (NA)
 	}
 	
 	if (length(data) == 0)
 	{
-		data = net@standata
+		data = dag@standata
 	}
 		
-	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(net)]
-	dat <- stan_extractData(model, data, T)
-	if (!setequal(names(dat), names(net@nodes)))
+	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(dag)]
+	dat <- stan_extractData(dag, data, T)
+	if (!setequal(names(dat), names(dag@nodes)))
 		return (NA)
 
-	if(!bvl_validData(net, dat))
+	if(!bvl_validData(dag, dat))
 	{
 		return (NA)
 	}
@@ -440,32 +440,32 @@ setMethod("bvl_bnBayes", "bayesvl", function(net, data = NULL, method = "bayes",
 	cols <- sapply(dat, is.numeric)
 	dat[,cols] <- lapply(dat[,cols], as.factor)
 
-	bn.bayes <- bnBayes(net, dat, method = method, iss = iss, ...)
+	bn.bayes <- bnBayes(dag, dat, method = method, iss = iss, ...)
 	
 	return(bn.bayes)
 })
 
 
 if (!isGeneric("bvl_bnBarchart"))
-      setGeneric("bvl_bnBarchart", function(net, data = NULL, method = "bayes", iss = 10, ...) standardGeneric("bvl_bnBarchart"))
+      setGeneric("bvl_bnBarchart", function(dag, data = NULL, method = "bayes", iss = 10, ...) standardGeneric("bvl_bnBarchart"))
 
-setMethod("bvl_bnBarchart", "bayesvl", function(net, data = NULL, method = "bayes", iss = 10, ...) {			
-	if(!bvl_validModel(net))
+setMethod("bvl_bnBarchart", "bayesvl", function(dag, data = NULL, method = "bayes", iss = 10, ...) {			
+	if(!bvl_validModel(dag))
 	{
 		return (NA)
 	}
 	
 	if (length(data) == 0)
 	{
-		data = net@standata
+		data = dag@standata
 	}
 		
-	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(net)]
-	dat <- stan_extractData(model, data, T)
-	if (!setequal(names(dat), names(net@nodes)))
+	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(dag)]
+	dat <- stan_extractData(dag, data, T)
+	if (!setequal(names(dat), names(dag@nodes)))
 		return (NA)
 
-	if(!bvl_validData(net, dat))
+	if(!bvl_validData(dag, dat))
 	{
 		return (NA)
 	}
@@ -473,30 +473,30 @@ setMethod("bvl_bnBarchart", "bayesvl", function(net, data = NULL, method = "baye
 	cols <- sapply(dat, is.numeric)
 	dat[,cols] <- lapply(dat[,cols], as.factor)
 
-	bnBarchart(net, dat, method = method, iss = iss, ...)
+	bnBarchart(dag, dat, method = method, iss = iss, ...)
 })
 
 
 if (!isGeneric("bvl_bnStrength"))
-      setGeneric("bvl_bnStrength", function(net, data = NULL, criterion = "x2", ...) standardGeneric("bvl_bnStrength"))
+      setGeneric("bvl_bnStrength", function(dag, data = NULL, criterion = "x2", ...) standardGeneric("bvl_bnStrength"))
 
-setMethod("bvl_bnStrength", "bayesvl", function(net, data = NULL, criterion = "x2", ...) {			
-	if(!bvl_validModel(net, T))
+setMethod("bvl_bnStrength", "bayesvl", function(dag, data = NULL, criterion = "x2", ...) {			
+	if(!bvl_validModel(dag, T))
 	{
 		return (NA)
 	}
 	
 	if (length(data) == 0)
 	{
-		data = net@standata
+		data = dag@standata
 	}
 		
-	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(net)]
-	dat <- stan_extractData(model, data, T)
-	if (!setequal(names(dat), names(net@nodes)))
+	#dat <- as.data.frame(data,stringsAsFactors=TRUE)[stan_dataNodes(dag)]
+	dat <- stan_extractData(dag, data, T)
+	if (!setequal(names(dat), names(dag@nodes)))
 		return (NA)
 
-	if(!bvl_validData(net, dat, T))
+	if(!bvl_validData(dag, dat, T))
 	{
 		return (NA)
 	}
@@ -504,7 +504,7 @@ setMethod("bvl_bnStrength", "bayesvl", function(net, data = NULL, criterion = "x
 	cols <- sapply(dat, is.numeric)
 	dat[,cols] <- lapply(dat[,cols], as.factor)
 
-	score <- bnStrength(net, dat, criterion = criterion, ...)
+	score <- bnStrength(dag, dat, criterion = criterion, ...)
 	
 	return(score)
 })

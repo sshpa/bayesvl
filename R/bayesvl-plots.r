@@ -116,71 +116,6 @@ bvl_plotPPC <- function(dag, fun = "stat", stat = "mean", color_scheme = "blue")
 	}
 }
 
-bvl_plotTest <- function(dag, y_name, test_name, n = 200, color_scheme = "blue")
-{
-	#require(ggplot2)
-	#require(dplyr)
-	
-	parName <- paste0("yrep_",test_name)
-
-	y_rep <- as.matrix(dag@stanfit, pars = parName)
-	y <- dag@standata[[y_name]]
-		
-	if (length(y_rep) < n)
-		n = length(y_rep)
-		
-	bayesplot::color_scheme_set(color_scheme)
-	ppc_dens_overlay(y, y_rep[1:n, ])
-}
-
-bvl_plotTest1 <- function(dag, y_name, test_name, n = 200, size = 0.25,
-       alpha = 0.7,
-       trim = FALSE,
-       bw = "nrd0",
-       adjust = 1,
-       kernel = "gaussian",
-       n_dens = 1024) {
-    
-    # require(ggplot2)
-
-    parName <- paste0("yrep_",test_name)
-    y_rep <- as.matrix(dag@stanfit, pars = parName)
-    if (length(y_rep) < n)
-    	n = length(y_rep)
-    data <- melt(y_rep[1:n, ])
-    
-    y <- dag@standata[[y_name]]
-    
-    ggplot2::ggplot(data) +
-	    aes_(x = ~ value) +
-	    stat_density(
-	      aes_(group = ~ parameters, color = "yrep"),
-	      geom = "line",
-	      position = "identity",
-	      size = size,
-	      alpha = alpha,
-	      trim = trim,
-	      bw = bw,
-	      adjust = adjust,
-	      kernel = kernel,
-	      n = n_dens
-	    ) +
-	    stat_density(
-	      aes_(color = "y"),
-	      data = melt(y),
-	      geom = "line",
-	      position = "identity",
-	      lineend = "round",
-	      size = 1,
-	      trim = trim,
-	      bw = bw,
-	      adjust = adjust,
-	      kernel = kernel,
-	      n = n_dens
-    	)
-}
-    
-
 bvl_plotDensOverlay <- function(dag, n = 200, color_scheme = "blue")
 {
 	# require(bayesplot)
@@ -200,7 +135,7 @@ bvl_plotDensOverlay <- function(dag, n = 200, color_scheme = "blue")
 			n = length(y_rep)
 		
 		bayesplot::color_scheme_set(color_scheme)
-		p <- ppc_dens_over(y, y_rep[1:n, ])
+		p <- bayesplot::ppc_dens_overlay(y, y_rep[1:n, ])
 		
 		print(p)
 	}
@@ -208,23 +143,19 @@ bvl_plotDensOverlay <- function(dag, n = 200, color_scheme = "blue")
 
 bvl_plotTest <- function(dag, y_name, test_name, n = 200, color_scheme = "blue")
 {
-	# require(bayesplot)
-	
-	leaves <- bvl_getLeaves(dag)
+	#require(ggplot2)
+	#require(dplyr)
 	
 	parName <- paste0("yrep_",test_name)
-	
+
 	y_rep <- as.matrix(dag@stanfit, pars = parName)
 	y <- dag@standata[[y_name]]
-	#dim(y_rep)
-	
+		
 	if (length(y_rep) < n)
 		n = length(y_rep)
-	
+		
 	bayesplot::color_scheme_set(color_scheme)
-	p <- ppc_dens_over(y, y_rep[1:n, ])
-	
-	print(p)
+	bayesplot::ppc_dens_overlay(y, y_rep[1:n, ])
 }
 
 #------------------------------------------------------------------------------
@@ -463,10 +394,9 @@ bvl_plotDensity <- function(dag, params = NULL, size = 1, labels = NULL)
 
 	ref <- reshape2::melt(postParams)
 	colnames(ref)[2:3] <- c("value","Params")
-	ggplot2::ggplot(data=ref,aes(x=value, color=Params))+geom_density(size=size)
+	
+	ggplot2::ggplot(data=ref,aes_string(x="value", color="Params"))+geom_density(size=size)
 }
-
-
 
 #------------------------------------------------------------------------------
 # Plot posterior historam
@@ -684,84 +614,4 @@ plotDens = function( codaObject , parName=coda::varnames(codaObject)[1] , plColo
   MCSE = sd(as.matrix(codaObject[,c(parName)]))/sqrt(EffChnLngth) 
   text( max(xMat) , max(yMat) , adj=c(1.0,1.0) , cex=1.25 ,
         paste("MCSE =\n",signif(MCSE,3)) )
-}
-
-############################
-ppc_dens_over <- function(y, yrep, ...,
-                             size = 0.25,
-                             alpha = 0.7,
-                             trim = FALSE,
-                             bw = "nrd0",
-                             adjust = 1,
-                             kernel = "gaussian",
-                             n_dens = 1024) {
-
-  #check_ignored_arguments(...)
-  data <- bayesplot::ppc_data(y, yrep)
-
-  ggplot(data) +
-    aes_(x = ~ value) +
-    stat_density(
-      aes_(group = ~ rep_id, color = "yrep"),
-      data = function(x) dplyr::filter(x, !.data$is_y),
-      geom = "line",
-      position = "identity",
-      size = size,
-      alpha = alpha,
-      trim = trim,
-      bw = bw,
-      adjust = adjust,
-      kernel = kernel,
-      n = n_dens
-    ) +
-    stat_density(
-      aes_(color = "y"),
-      data = function(x) dplyr::filter(x, .data$is_y),
-      geom = "line",
-      position = "identity",
-      lineend = "round",
-      size = 1,
-      trim = trim,
-      bw = bw,
-      adjust = adjust,
-      kernel = kernel,
-      n = n_dens
-    ) +
-    scale_color_manual(
-    values = get_color(c("dh", "lh")),
-    labels = c("y", "yrep")
- 		 ) +
-    yaxis_title(TRUE) +
-    xaxis_title(TRUE) +
-    yaxis_text(TRUE) +
-    yaxis_ticks(TRUE)
-}
-
-
-
-get_color <- function(levels) {
-  sel <- which(!levels %in% scheme_level_names())
-  if (length(sel))
-    levels[sel] <- sapply(levels[sel], full_level_name)
-  stopifnot(all(levels %in% scheme_level_names()))
-  color_vals <- color_scheme_get()[levels]
-  unlist(color_vals, use.names = FALSE)
-}
-full_level_name <- function(x) {
-  switch(x,
-         l = "light", lh = "light_highlight",
-         m = "mid", mh = "mid_highlight",
-         d = "dark", dh = "dark_highlight"
-         )
-}
-
-
-# Color scheme level names
-scheme_level_names <- function() {
-  c("light",
-    "light_highlight",
-    "mid",
-    "mid_highlight",
-    "dark",
-    "dark_highlight")
 }

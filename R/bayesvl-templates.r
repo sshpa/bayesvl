@@ -176,6 +176,26 @@ bvl2stan.arcTemplates <- list(
         par_trans = c(T,F,F,F),
         par_lik = c(T,F,F,F),
         stan_priors = c("","normal(0,10)","normal(0, sigma_{0})","normal(0,10)")
+    ),
+    VarSlope = list(
+        name = "varslope",
+        dist = "varslope",
+        par_names = c("b_{0}","b0_{0}","u_{0}","sigma_{0}"),
+        par_types = c("vector[N{0}]","real","vector[N{0}]","real<lower=0>"),
+        par_len = c("[N{0}]","","[N{0}]",""),
+        par_trans = c(T,F,F,F),
+        par_lik = c(T,F,F,F),
+        stan_priors = c("","normal(0,10)","normal(0, sigma_{0})","normal(0,10)")
+    ),
+    VarBoth = list(
+        name = "varboth",
+        dist = "varboth",
+        par_names = c("b_{0}","b0_{0}","ub_{0}","sigmab_{0}"),
+        par_types = c("vector[N{0}]","real","vector[N{0}]","real<lower=0>"),
+        par_len = c("[N{0}]","","[N{0}]",""),
+        par_trans = c(T,F,F,F),
+        par_lik = c(T,F,F,F),
+        stan_priors = c("","normal(0,10)","normal(0, sigma_{0})","normal(0,10)")
     )
 )
 
