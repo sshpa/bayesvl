@@ -194,6 +194,17 @@ setMethod("bvl_addArc", "bayesvl", function(dag, from, to, type = "slope", prior
 		return(dag)
 	}
 
+	if (type %in% c("varint", "varslope", "varboth"))
+	{
+		varparam <- bvl_getArcs(dag, to = to, type = c("varint", "varslope", "varboth"))
+		
+		if (length(varparam) > 0)
+		{
+			message(paste0("Only one arc of varying type is accepted to node ", to))
+			return(dag)
+		}
+	}
+	
 	dag@nodes[[from]]$children = c(dag@nodes[[from]]$children, to)
 	dag@nodes[[to]]$parents = c(dag@nodes[[to]]$parents, from)
 	
