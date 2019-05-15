@@ -6,6 +6,11 @@
 \alias{show,bayesvl-method}
 \alias{summary,bayesvl-method}
 
+\alias{bvl_addNode,bayesvl-method}
+\alias{bvl_addArc,bayesvl-method}
+\alias{bvl_modelFit,bayesvl-method}
+\alias{bvl_stanParams,bayesvl-method}
+
 \title{Class \code{bayesvl}: object class of bayesvl model}
 
 \description{

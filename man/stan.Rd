@@ -1,4 +1,5 @@
 \name{bayesvl stan utilities}
+\alias{bayesvl stan}
 \alias{bayesvl stan utilities}
 \alias{bvl_model2Stan}
 \alias{bvl_modelFit}
@@ -63,7 +64,7 @@ stancode_string = bvl_model2Stan(dag)
 cat(stancode_string)
 
 # compile and simulate samples from the model
-dag = bvl_modelFit(dag, data.frame(y=dataTrails))
+dag = bvl_modelFit(dag, data.frame(y=dataTrails), warmup = 100, iter = 500, chains = 2)
 }
 \author{La Viet-Phuong, Vuong Quan-Hoang}
 \keyword{directed acyclic graphs, bayesvl}

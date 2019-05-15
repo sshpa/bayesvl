@@ -545,7 +545,7 @@ stan_yrepTest <- function(dag, node, getCode = T)
 					val = dag@nodes[[i]]$test[[v]]
 					val = val + offset
 					
-					lik = stan_formulaAtNode(model, node, "[i]", re = F)
+					lik = stan_formulaAtNode(dag, node, "[i]", re = F)
 					lik = gsub(paste0(dag@nodes[[i]]$name,"\\[i\\]"), val, lik)
 					
 					new_parreg = stan_replaceFun(template$par_reg, paste0(dag@nodes[[i]]$name, "_", val))
