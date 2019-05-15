@@ -1,7 +1,7 @@
 bayesvl <- function(data = NULL, nodes = list(), arcs = list()) {
   ########################################
   # build bayesvl class
-  bvl <- new( "bayesvl" , 
+  bvl <- methods::new( "bayesvl" , 
           call = match.call(), 
           rawdata = as.data.frame(data),
 					nodes = nodes,
