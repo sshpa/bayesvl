@@ -714,6 +714,35 @@ isVarintTo <- function(dag, node)
 	return(hasVarint)
 }
 
+isVarSlopeFrom <- function(dag, node)
+{
+	#if (node$dist == "trans")
+	#	return(FALSE)
+		
+	varslope <- bvl_getArcs(dag, from = node$name, type = c("varslope"))
+	
+	arcs <- bvl_getArcs(dag, from = node$name)
+		
+	hasVarSlope = ((length(varslope) >0) & (length(varslope)==length(arcs)))
+	
+	return(hasVarSlope)
+}
+
+isVarSlopeTo <- function(dag, node)
+{
+	if (node$dist == "trans")
+		return(FALSE)
+		
+	varslope <- bvl_getArcs(dag, to = node$name, type = c("varslope"))
+	
+	#print(varslope)
+	arcs <- bvl_getArcs(dag, to = node$name)
+		
+	hasVarSlope = ((length(varslope) >0) & (length(varslope)==length(arcs)))
+	
+	return(hasVarSlope)
+}
+
 isSlopeTo <- function(dag, node)
 {
 	if (node$dist == "trans")
@@ -1159,21 +1188,29 @@ bvl_modelFix <- function(dag, data)
 	for(i in 1:length(dag@nodes))
 	{
 		node = dag@nodes[[i]]
-		if (node$dist %in% c("cat","binom","bern"))
-		{
-			node$labels <- unique(data[ , node$name])
-			node$levels <- unique(as.numeric(data[ , node$name]))
-		}
-	
-		if (isVarintFrom(dag, node) && (node$dist != "trans"))
-		{
-			minX = min(unique(as.numeric(data[ , node$name])))
-			#print(node$name)
-			if (minX < 1)
-				node$lower = minX
-		}
 		
-		dag@nodes[[i]] <- node
+		if(node$name %in% colnames(data) && (node$dist != "trans"))
+		{
+			if (node$dist %in% c("cat","binom","bern"))
+			{
+				node$labels <- unique(data[ , node$name])
+				node$levels <- unique(as.numeric(data[ , node$name]))
+			}
+		
+			if (isVarintFrom(dag, node) && (node$dist != "trans"))
+			{
+					minX = min(unique(as.numeric(data[ , node$name])))
+					#print(node$name)
+					if (minX < 1)
+						node$lower = minX			
+			}
+			
+			dag@nodes[[i]] <- node
+		}
+		else
+		{
+			message(paste0("There's no data of ", node$name))
+		}
 	}
 	
 	return(dag)
