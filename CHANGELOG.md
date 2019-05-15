@@ -1,5 +1,8 @@
 bayesvl ChangeLog
 -------------------------
+0.7.6
+ * fixed error of single node model
+ * updated document .Rd and other information
 0.7.0
  * fixed alpha intercept for varying intercept model
  * fixed lower=0 for varying intercept model
