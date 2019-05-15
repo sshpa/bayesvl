@@ -1204,13 +1204,13 @@ bvl_modelFit <- function(dag, data, warmup = 1000, iter = 5000, chains = 2, core
 		model_string <- readLines(modname)
 
 		# Compiling and producing posterior samples from the model.
-		mstan <- stan(file = modname, data = dataList, model_name=modname,
+		mstan <- rstan::stan(file = modname, data = dataList, model_name=modname,
 		            warmup=warmup , iter = iter, chains = chains, cores = cores, refresh=-1)
 	}
 	else
 	{
 		# Compiling and producing posterior samples from the model.
-		mstan <- stan(model_code = model_string, data = dataList,
+		mstan <- rstan::stan(model_code = model_string, data = dataList,
 	          		warmup=warmup , iter = iter, chains = chains, cores = cores, refresh=-1)
   }
   

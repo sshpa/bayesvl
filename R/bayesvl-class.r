@@ -2,6 +2,11 @@ creditInfo = "Vuong Quan Hoang - La Viet Phuong (2019).\nBayesVL package for Bay
 bannerBreak = "\n*********************************************************************\n"
 cat(paste0(bannerBreak,creditInfo,bannerBreak,"\n"))
 
+#------------------------------------------------------------------------------
+#' An S4 class to represent a bayesvl acyclic graph.
+#'
+#' @slot nodes
+#
 setClass("bayesvl", representation( call = "language",
                                 nodes = "list",
                                 arcs = "list",
