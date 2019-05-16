@@ -55,6 +55,7 @@ bvl_stanParams(dag)
 	reserved for manual link
 }
 \examples{
+# create the data and build model of flip coin trials for functions testing
 dag <- bayesvl()
 dag <- bvl_addNode(dag, "y", "bern","beta(1, 1)")
 dataTrails <- c(1,0,1,1,0,1,0,0,0,0) # the trials of bias coin
