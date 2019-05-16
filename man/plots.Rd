@@ -76,7 +76,7 @@ bvl_plotTest (dag, y_name, test_name, n = 200, color_scheme = "blue")
 dag <- bayesvl()
 dag <- bvl_addNode(dag, "y", "bern","beta(1, 1)")
 dataTrails <- c(1,0,1,1,0,1,0,0,0,0) # the trials of bias coin
-dag <- bvl_modelFit(dag, data.frame(y=dataTrails), warmup = 100, iter = 500, chains = 2)
+dag <- bvl_modelFit(dag, data.frame(y=dataTrails), warmup = 200, iter = 500, chains = 2)
 
 ####### plot functions ########
 # plot uncertainty intervals of all paramaters

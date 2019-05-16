@@ -65,7 +65,7 @@ stancode_string = bvl_model2Stan(dag)
 cat(stancode_string)
 
 # compile and simulate samples from the model
-dag = bvl_modelFit(dag, data.frame(y=dataTrails), warmup = 100, iter = 500, chains = 2)
+dag = bvl_modelFit(dag, data.frame(y=dataTrails), warmup = 200, iter = 500, chains = 2)
 }
 \author{La Viet-Phuong, Vuong Quan-Hoang}
 \keyword{directed acyclic graphs, bayesvl}
