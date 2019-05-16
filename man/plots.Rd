@@ -72,7 +72,7 @@ bvl_plotTest (dag, y_name, test_name, n = 200, color_scheme = "blue")
 	reserved for manual link
 }
 \examples{
-# create the data and build model for plot functions test
+# create the data and build model of flip coin for plot functions testing
 dag <- bayesvl()
 dag <- bvl_addNode(dag, "y", "bern","beta(1, 1)")
 dataTrails <- c(1,0,1,1,0,1,0,0,0,0) # the trials of bias coin
