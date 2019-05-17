@@ -15,6 +15,8 @@
         \item VT : Whether or not the main character behaves in accordance with the core values of Taoism
         \item Lie : Whether or not the main character tells lie
         \item Viol : Whether or not the main character commits acts of violence
+        \item Int1 : Whether there are interventions from the supernatural world
+        \item Int2 : Whether there are interventions from the human world
     }
 }
 \references{
