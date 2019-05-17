@@ -3,6 +3,7 @@
 \alias{bayesvl graphs}
 \alias{bvl_addNode}
 \alias{bvl_addArc}
+\alias{bvl_bnPlot}
 \title{Utilities to manipulate graphs}
 \description{
 
@@ -16,6 +17,12 @@ bvl_addNode(dag, name, dist = "norm", priors = NULL, fun = NULL, out_type = NULL
 
 # added a new path between nodes to the graph.
 bvl_addArc(dag, from, to, type = "slope", priors = NULL, fun = NULL)
+
+# added a new path between nodes to the graph.
+bvl_addArc(dag, from, to, type = "slope", priors = NULL, fun = NULL)
+
+# plot the graph diagram.
+bvl_bnPlot(dag, ...)
 }
 \arguments{
   \item{dag}{an object of class \code{bayesvl}}

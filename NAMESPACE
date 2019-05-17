@@ -15,6 +15,7 @@ export(bayesvl, bvl_model2Stan)
 export(bayesvl, bvl_modelFit)
 export(bayesvl, bvl_stanPriors)
 export(bayesvl, bvl_stanParams)
+export(bayesvl, bvl_bnPlot)
 #
 importFrom(rstan, extract)
 importFrom(rstan, sflist2stanfit)
