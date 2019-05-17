@@ -384,11 +384,20 @@ setMethod("bvl_validData", "bayesvl", function(dag, data, silent = F) {
 		node = dag@nodes[[nodes[i]]]
 		if (node$dist %in% c("binom","bern"))
 		{
-			if (min(data[ ,node$name]) != 0)
+			if (!any(is.na(data)))
 			{
-				if (!silent)
-					message(paste0("The node '", nodes[i], "' values  must be (0, 1)!"))
-				return (FALSE)
+				if (min(data[ ,node$name]) != 0)
+				{
+					if (!silent)
+						message(paste0("The node '", nodes[i], "' values  must be (0, 1)!"))
+					return (FALSE)
+				}
+			}
+			else
+			{
+					if (!silent)
+						message(paste0("The node '", nodes[i], "' contains NA value!"))
+					return (FALSE)
 			}
 		}
 	}
