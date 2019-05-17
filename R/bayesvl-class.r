@@ -14,7 +14,8 @@ setClass("bayesvl", representation( call = "language",
                                 standata = "list",
                                 rawdata = "data.frame",
                                 posterior = "data.frame",
-                                pars = "character"
+                                pars = "character",
+                                elapsed = "numeric"
                                  ))
 
 setMethod("show", "bayesvl", function(object){
@@ -67,6 +68,7 @@ setMethod("summary", "bayesvl", function(object){
   {
   	params = bvl_getParams(object)
   	print(object@stanfit, pars = params)
+  	cat(paste0("elapsed time: ", object@elapsed, " secs"))
   }
   else
   {

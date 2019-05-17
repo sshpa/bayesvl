@@ -26,6 +26,7 @@
     \item{\code{rawdata}:}{Observed data frame }
     \item{\code{standata}:}{Data used in sampling}
     \item{\code{posterior}:}{Coerce to a Data Frame of object of class \code{stanfit}}
+    \item{\code{elapsed}:}{Elapsed time of MCMC simulation}    
   }
 }
 \section{Methods}{

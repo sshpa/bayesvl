@@ -1269,6 +1269,8 @@ bvl_modelFit <- function(dag, data, warmup = 1000, iter = 5000, chains = 2, core
 	dag <- bvl_modelFix(dag, data)
 	model_string <- bvl_model2Stan(dag, ppc = ppc)
 
+	start_time <- Sys.time()
+
 	print("Compiling and producing posterior samples from the model...")
 	if (writefile)
 	{
@@ -1290,6 +1292,11 @@ bvl_modelFit <- function(dag, data, warmup = 1000, iter = 5000, chains = 2, core
 		mstan <- rstan::stan(model_code = model_string, data = dataList,
 	          		warmup=warmup , iter = iter, chains = chains, cores = cores, refresh=-1)
   }
+
+
+	end_time <- Sys.time()
+
+	dag@elapsed <- as.numeric((end_time - start_time), units = "secs")
   
   dag@stanfit <- mstan
   dag@rawdata <- data
