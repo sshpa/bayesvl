@@ -194,13 +194,22 @@ setMethod("bvl_addArc", "bayesvl", function(dag, from, to, type = "slope", prior
 		return(dag)
 	}
 
-	if (type %in% c("varint", "varslope", "varboth"))
+	if (type %in% c("varint", "varslope", "varpars"))
 	{
-		varparam <- bvl_getArcs(dag, to = to, type = c("varint", "varslope", "varboth"))
+		varparam <- bvl_getArcs(dag, to = to, type = c("varint", "varslope", "varpars"))
 		
 		if (length(varparam) > 0)
 		{
 			message(paste0("Only one arc of varying type is accepted to node ", to))
+			return(dag)
+		}
+	}
+	
+	if (dag@nodes[[to]]$dist == "trans")
+	{
+		if (type %in% bvl_arcTemplateName())
+		{
+			message(paste0("Can't add regression path to transform data node ", to))
 			return(dag)
 		}
 	}

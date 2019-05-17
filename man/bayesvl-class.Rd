@@ -35,7 +35,12 @@
   }
 }
 \references{
-	reserved for manual link
+For documentation, case studies and worked examples, and other
+  tutorial information visit the References section on our Github:
+  
+  \itemize{
+  \item \href{https://github.com/sshpa/bayesvl/raw/master/References/bvl_ug_en08.pdf}{github.com/sshpa/bayesvl/master/References/bvl_ug_en08.pdf}
+  }
 }
 \seealso{
   \code{\link{bayesvl}} 
