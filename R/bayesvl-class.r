@@ -68,7 +68,7 @@ setMethod("summary", "bayesvl", function(object){
   {
   	params = bvl_getParams(object)
   	print(object@stanfit, pars = params)
-  	cat(paste0("elapsed time: ", object@elapsed, " secs"))
+  	cat(paste0("elapsed time: ", object@elapsed, " secs\n"))
   }
   else
   {
