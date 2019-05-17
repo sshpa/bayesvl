@@ -5,6 +5,7 @@
 \alias{bvl_modelFit}
 \alias{bvl_stanPriors}
 \alias{bvl_stanParams}
+\alias{bvl_formula}
 \title{Build RStan models from directed acyclic graph}
 \description{
 
@@ -24,6 +25,9 @@ bvl_stanPriors(dag)
 
 # summarize the stan parameters used for the model.
 bvl_stanParams(dag)
+
+# summarize the generated formula at the node.
+bvl_formula(dag, nodeName, outcome = T, re = F)
 }
 \arguments{
   \item{dag}{an object of class \code{bayesvl}}
@@ -35,6 +39,10 @@ bvl_stanParams(dag)
   \item{cores}{Optional: Number of processor cores to distribute chains over, using parallel. Default is 1}
   \item{writefile}{Optional: Write the stan code to temporary file when compiling. Default is FALSE}  
   \item{ppc}{Optional: a character string contains posterior predictive check scripts}
+  
+  \item{nodeName}{A character string contains the node name}
+  \item{outcome}{Optional: Whether show out distribution}
+  \item{re}{Optional: Whether run recursive for all up-level nodes}
 }
 \value{
 
