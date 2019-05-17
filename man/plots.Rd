@@ -8,6 +8,8 @@
 \alias{bvl_plotDensity}
 \alias{bvl_plotTrace}
 \alias{bvl_plotGelman}
+\alias{bvl_plotGelmans}
+\alias{bvl_plotAcfs}
 \alias{bvl_plotTest}
 \alias{bvl_plotDiag}
 \title{Plot utilities for bayesvl objects}
@@ -42,6 +44,10 @@ bvl_plotTrace (dag, params = NULL)
 bvl_plotDiag (dag)
 
 bvl_plotGelman (dag, params = NULL)
+
+bvl_plotGelmans (dag, params = NULL, row = 2, col = 2)
+
+bvl_plotAcfs ( dag, params = NULL, row = 2, col = 2)
 
 bvl_plotTest (dag, y_name, test_name, n = 200, color_scheme = "blue")
 }
