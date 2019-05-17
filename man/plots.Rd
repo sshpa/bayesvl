@@ -39,6 +39,8 @@ bvl_plotPairs (dag, params = NULL, fun = "stat", stat = "mean",
 
 bvl_plotDensity (dag, params = NULL, size = 1, labels = NULL)
 
+bvl_plotDensity2d(dag, x, y, color = NULL, color_scheme = "red", labels = NULL)
+
 bvl_plotTrace (dag, params = NULL)
 
 bvl_plotDiag (dag)
@@ -67,6 +69,9 @@ bvl_plotTest (dag, y_name, test_name, n = 200, color_scheme = "blue")
   \item{y_name}{a character string. Name of outcome variable }
   \item{test_name}{a character string. Name of test variable and test value }
   \item{n}{number of yrep values to plot }
+
+	\item{x}{a character string. Name of x parameter to pair with }
+	\item{y}{a character string. Name of y parameter to pair with }
 
   \item{labels}{Optional: character vector of parameter labels.}
 }
