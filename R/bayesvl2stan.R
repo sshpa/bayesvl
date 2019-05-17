@@ -1270,26 +1270,26 @@ bvl_modelFit <- function(dag, data, warmup = 1000, iter = 5000, chains = 2, core
 	model_string <- bvl_model2Stan(dag, ppc = ppc)
 
 	print("Compiling and producing posterior samples from the model...")
-	#if (writefile)
-	#{
-	#	modname <- "model_temp.stan"
-  #
-	#	# write to file
-	#	writeLines(model_string, con=modname)
-  #
-	#	# The Stan logistic model as a string.
-	#	model_string <- readLines(modname)
-  #
-	#	# Compiling and producing posterior samples from the model.
-	#	mstan <- rstan::stan(file = modname, data = dataList, model_name=modname,
-	#	            warmup=warmup , iter = iter, chains = chains, cores = cores, refresh=-1)
-	#}
-	#else
-	#{
-	#	# Compiling and producing posterior samples from the model.
+	if (writefile)
+	{
+		modname <- "model_temp.stan"
+
+		# write to file
+		writeLines(model_string, con=modname)
+
+		# The Stan logistic model as a string.
+		model_string <- readLines(modname)
+
+		# Compiling and producing posterior samples from the model.
+		mstan <- rstan::stan(file = modname, data = dataList, model_name=modname,
+		            warmup=warmup , iter = iter, chains = chains, cores = cores, refresh=-1)
+	}
+	else
+	{
+		# Compiling and producing posterior samples from the model.
 		mstan <- rstan::stan(model_code = model_string, data = dataList,
 	          		warmup=warmup , iter = iter, chains = chains, cores = cores, refresh=-1)
-  #}
+  }
   
   dag@stanfit <- mstan
   dag@rawdata <- data
