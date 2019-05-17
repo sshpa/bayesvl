@@ -11,3 +11,5 @@ Suggests: loo (>= 2.0.0)
 Depends: R (>= 3.1.0), rstan (>= 2.10.0), stats, graphics, methods
 Description: Utilities for fitting and comparing models, and constructing useful graphics.
 License: GPL (>= 3)
+BugReports: https://github.com/sshpa/bayesvl/issues
+URL: https://github.com/sshpa/bayesvl
