@@ -71,7 +71,7 @@ stan_newParam <- function(name, type, length=NULL, prior = NULL, fun = NULL, low
 	return (param)
 }
 
-# Add parameter to list
+# Add single parameter to list
 stan_addParamToList <- function(list, param)
 {
 	# check if the param is added
@@ -130,13 +130,13 @@ stan_dataAtNode <- function(dag, node)
 	dataParams = stan_addParamToList(dataParams, param)
 		
 	# if there is varint arc from node, add number of levels
-	if (isVarintFrom(dag, node))
+	if (isVarIntFrom(dag, node) || isVarSlopeFrom(dag, node))
 	{
 		param = stan_newParam(name=paste0("N",nodeName), type="int", isData = T)
 		dataParams = stan_addParamToList(dataParams, param)
 	}
 
-	if (isVarintFrom(dag, node) && isVarintTo(dag, node))
+	if (isVarIntFrom(dag, node) && (isVarIntTo(dag, node) || isVarSlopeTo(dag, node)))
 	{
 		parentName = node$parents[[1]]
 		
@@ -259,8 +259,9 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 		transparam_code = paste0(transparam_code, stan_indent(8), stan_replaceNode(template$par_reg, node), loopForI, " = ")
 
 		# slope without varying intercept
-		hasVarintTo <- bvl_getArcs(dag, to = node$name, type = c("varint"))
-		if (length(hasVarintTo) < 1 && isSlopeTo(dag, node))
+		hasVarintTo <- bvl_getArcs(dag, to = node$name, type = c("varint", "varpars"))
+		hasVarslopeTo <- bvl_getArcs(dag, to = node$name, type = c("varslope", "varpars"))
+		if (is.empty(hasVarintTo) && (isSlopeTo(dag, node) || !is.empty(hasVarslopeTo)))
 		{
 			transparam_code = paste0(transparam_code, "a_", nodeName, " + ")
 
@@ -277,7 +278,7 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 
 			parent = dag@nodes[[parentName]]
 
-			if (arc$type == "varint")
+			if (arc$type %in% c("varint", "varpars"))
 			{
 				if (p > 1)
 					transparam_code = paste0(transparam_code, " + ")
@@ -286,7 +287,7 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 				#param = stan_newParam(name=paste0("a_", parentName), type = "vector", length=paste0("N",parentName), prior = bvl_arcPrior(arc, "a_{0}"), isTransParam = T, isReg = T, isVar = T)
 				#params = stan_addParamToList(params, param)
 			}
-			else if (arc$type == "slope")
+			else if (arc$type == "slope" && is.empty(hasVarslopeTo))
 			{
 				if (p > 1)
 					transparam_code = paste0(transparam_code, " + ")
@@ -294,6 +295,19 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 
 				param = stan_newParam(name=paste0("b_", arcName), type = "real", prior = bvl_arcPrior(arc, "b_{0}_{1}"), isParam = T, isReg = T)
 				params = stan_addParamToList(params, param)
+			}
+			else if (!(arc$type %in% c("varslope", "varpars")) && !is.empty(hasVarslopeTo))
+			{
+				parentVarSlope = dag@nodes[[hasVarslopeTo[[1]]$from]]
+				
+				if (p > 1)
+					transparam_code = paste0(transparam_code, " + ")
+				transparam_code = paste0(transparam_code, "b_", arc$name, "[", parentVarSlope$name, loopForI, stan_paramOffset(parentVarSlope$lower), "]  * ", 
+								parentName, loopForI)
+
+				#param = stan_newParam(name=paste0("b_", arc$name), type = "real", length=paste0("N",parentVarSlope$name), 
+				#										prior = bvl_arcPrior(arc, "b_{0}_{1}", "varslope"), isTransParam = T, isReg = T, isVar = T)
+				#params = stan_addParamToList(params, param)
 			}
 			else if (arc$type %in% ops)
 			{
@@ -310,7 +324,7 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 	else if ((bvl_isRoot(node) || node$dist == "trans") && length(node$children) > 0)
 	{
 		arcsFrom <- bvl_getArcs(dag, from = nodeName)
-
+		
 		# loop for each arc from the node
 		for(p in 1:length(arcsFrom))
 		{
@@ -340,12 +354,34 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 				param = stan_newParam(name=paste0("u_",nodeName), type = "vector", length=paste0("N",nodeName), prior = paste0("normal(0, sigma_",nodeName,")"), isVar = T, isParam = T)
 				params = stan_addParamToList(params, param)
 			}
+			else if (arc$type == "slope" && isVarSlopeTo(dag, child))
+			{
+				hasVarslopeTo <- bvl_getArcs(dag, to = child$name, type = c("varslope"))
+
+				transparam_code = paste0(transparam_code, stan_indent(5), "// Varying slope definition of ",arc$name,"\n")
+				transparam_code = paste0(transparam_code, stan_indent(5), "for(k in 1:N",hasVarslopeTo[[1]]$from,") {\n")				
+				transparam_code = paste0(transparam_code, stan_indent(8), "b_",arc$name,"[k] = b0_",nodeName," + u_",nodeName,"[k];\n")				
+				transparam_code = paste0(transparam_code, stan_indent(5), "}\n")
+				transparam_code = paste0(transparam_code, "\n")
+
+				param = stan_newParam(name=paste0("b_", arc$name), type = "vector", length=paste0("N",hasVarslopeTo[[1]]$from), prior = bvl_arcPrior(arc, "b_{0}", "varslope"), isTransParam = T, isReg = T, isVar = T)
+				params = stan_addParamToList(params, param)
+
+				param = stan_newParam(name=paste0("b0_",nodeName), type = "real", prior = bvl_arcPrior(arc, "b0_{0}", "varslope"), isParam = T, isReg = T)
+				params = stan_addParamToList(params, param)
+
+				param = stan_newParam(name=paste0("sigma_",nodeName), type = "real<lower=0>", prior = bvl_arcPrior(arc, "sigma_{0}", "varslope"), isParam = T, isReg = T)
+				params = stan_addParamToList(params, param)
+				
+				param = stan_newParam(name=paste0("u_",nodeName), type = "vector", length=paste0("N",nodeName), prior = paste0("normal(0, sigma_",nodeName,")"), isVar = T, isParam = T)
+				params = stan_addParamToList(params, param)
+			}			
 		}
 	}
 	# check if the node is the middle node with parent
 	else if (length(node$parents) > 0)
 	{
-		if (isVarintTo(dag, node))
+		if (isVarIntTo(dag, node))
 		{
 			arcsTo <- bvl_getArcs(dag, to = nodeName)
 
@@ -603,7 +639,7 @@ stan_transDataAtNode <- function(dag, node)
 		paramList <- stan_addParamToList(paramList, param)
 	}
 
-	if (isVarintFrom(dag, node))
+	if (isVarIntFrom(dag, node) || isVarSlopeFrom(dag, node))
 	{
 		param = stan_newParam(name=paste0("N", node$name), type = "int", isTransData = T)
 		paramList <- stan_addParamToList(paramList, param)
@@ -666,7 +702,7 @@ stan_transDataCode <- function(dag)
 				new_code = paste0(new_code, ";\n")
 				new_code = paste0(new_code, stan_indent(5), "}\n")
 				
-				if (isVarintFrom(dag, node))
+				if (isVarIntFrom(dag, node))
 				{
 					new_code = paste0(new_code, stan_indent(5), "N", node$name, " = numLevels(",node$name,");\n")
 				}
@@ -685,12 +721,12 @@ stan_transDataCode <- function(dag)
 }
 
 ############ ARC TYPE CHECKING FUNCTIONS ##############
-isVarintFrom <- function(dag, node)
+isVarIntFrom <- function(dag, node)
 {
 	#if (node$dist == "trans")
 	#	return(FALSE)
 		
-	varint <- bvl_getArcs(dag, from = node$name, type = c("varint"))
+	varint <- bvl_getArcs(dag, from = node$name, type = c("varint", "varpars"))
 	
 	arcs <- bvl_getArcs(dag, from = node$name)
 		
@@ -699,12 +735,12 @@ isVarintFrom <- function(dag, node)
 	return(hasVarint)
 }
 
-isVarintTo <- function(dag, node)
+isVarIntTo <- function(dag, node)
 {
 	if (node$dist == "trans")
 		return(FALSE)
 		
-	varint <- bvl_getArcs(dag, to = node$name, type = c("varint"))
+	varint <- bvl_getArcs(dag, to = node$name, type = c("varint", "varpars"))
 	
 	#print(varint)
 	arcs <- bvl_getArcs(dag, to = node$name)
@@ -715,15 +751,10 @@ isVarintTo <- function(dag, node)
 }
 
 isVarSlopeFrom <- function(dag, node)
-{
-	#if (node$dist == "trans")
-	#	return(FALSE)
-		
-	varslope <- bvl_getArcs(dag, from = node$name, type = c("varslope"))
-	
-	arcs <- bvl_getArcs(dag, from = node$name)
-		
-	hasVarSlope = ((length(varslope) >0) & (length(varslope)==length(arcs)))
+{		
+	varslope <- bvl_getArcs(dag, from = node$name, type = c("varslope", "varpars"))
+			
+	hasVarSlope = (length(varslope) >0)
 	
 	return(hasVarSlope)
 }
@@ -733,12 +764,9 @@ isVarSlopeTo <- function(dag, node)
 	if (node$dist == "trans")
 		return(FALSE)
 		
-	varslope <- bvl_getArcs(dag, to = node$name, type = c("varslope"))
-	
-	#print(varslope)
-	arcs <- bvl_getArcs(dag, to = node$name)
-		
-	hasVarSlope = ((length(varslope) >0) & (length(varslope)==length(arcs)))
+	varslope <- bvl_getArcs(dag, to = node$name, type = c("varslope", "varpars"))
+			
+	hasVarSlope = (length(varslope) >0)
 	
 	return(hasVarSlope)
 }
@@ -799,10 +827,12 @@ stan_formulaAtNode <- function(dag, node, loopForI = "", outcome = F, re = T)
 			#print(arc)
 	
 			parentName = arc$from
+			childName = arc$to
 			arcName = arc$name
 	
 			#print(parentName)
 			parent = dag@nodes[[parentName]]
+			child = dag@nodes[[childName]]
 	
 			varname = paste0(parentName, loopForI)
 			if (parent$dist == "trans")
@@ -815,12 +845,21 @@ stan_formulaAtNode <- function(dag, node, loopForI = "", outcome = F, re = T)
 					
 				formula_string = paste0(formula_string, "a_", parentName, "[", varname, "]")
 			}
-			else if (arc$type == "slope")
+			else if (arc$type == "slope" && !isVarSlopeTo(dag, child))
 			{
 				if (p > 1)
 					formula_string = paste0(formula_string, " + ")
 
 				formula_string = paste0(formula_string, "b_", arc$name, " * ", varname)
+			}
+			else if (arc$type == "slope" && isVarSlopeTo(dag, child))
+			{
+				varslope = bvl_getArcs(dag, to = arc$to)
+				
+				if (p > 1)
+					formula_string = paste0(formula_string, " + ")
+
+				formula_string = paste0(formula_string, "b_", varslope[[1]]$from, "_", arc$name, "[",varslope[[1]]$from,"]", " * ", varname)
 			}
 			else if (arc$type %in% ops)
 			{
@@ -930,7 +969,8 @@ bvl_stanPriors <- function(dag)
 		}
 	}
 	
-	return(prior_string)
+	cat(prior_string)
+	#return(prior_string)
 }
 
 ############ MODEL BUILDING FUNCTIONS ##############
@@ -1165,12 +1205,12 @@ bvl_modelData <- function(net, data)
 			dataList[[paste0("N",nodes[i])]] <- length(unique(data[ , nodes[i]]))
 		}
 
-		if (isVarintFrom(net, net@nodes[[nodes[i]]]) && !(paste0("N",nodes[i]) %in% names(dataList)))
+		if ((isVarIntFrom(net, net@nodes[[nodes[i]]]) || isVarSlopeFrom(net, net@nodes[[nodes[i]]])) && !(paste0("N",nodes[i]) %in% names(dataList)))
 		{
 			dataList[[paste0("N",nodes[i])]] <- length(unique(data[ , nodes[i]]))
 		}
 
-		if (isVarintFrom(net, node) && isVarintTo(net, node))
+		if (isVarIntFrom(net, node) && (isVarIntTo(net, node) || isVarSlopeTo(net, node)))
 		{
 			parentName = node$parents[[1]]
 			dataName = paste0(nodes[i],"2",parentName)
@@ -1197,7 +1237,7 @@ bvl_modelFix <- function(dag, data)
 				node$levels <- unique(as.numeric(data[ , node$name]))
 			}
 		
-			if (isVarintFrom(dag, node) && (node$dist != "trans"))
+			if (isVarIntFrom(dag, node) && (node$dist != "trans"))
 			{
 					minX = min(unique(as.numeric(data[ , node$name])))
 					#print(node$name)
@@ -1229,7 +1269,7 @@ bvl_modelFit <- function(dag, data, warmup = 1000, iter = 5000, chains = 2, core
 	dag <- bvl_modelFix(dag, data)
 	model_string <- bvl_model2Stan(dag, ppc = ppc)
 
-	message("Compiling and producing posterior samples from the model...")
+	print("Compiling and producing posterior samples from the model...")
 	if (writefile)
 	{
 		modname <- "model_temp.stan"

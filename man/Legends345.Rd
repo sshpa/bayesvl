@@ -9,16 +9,21 @@
 }
 \format{
     \enumerate{
-        \item O : Number of fish caught during visit
-        \item VB : Whether or not group used livebait to fish
-        \item VC : Whether or not group had a camper
-        \item VT : Number of adults in group
-        \item Lie : Number of children in group
-        \item Viol : Number of hours group spent in park
+        \item O : Whether or not happy ending for main character
+        \item VB : Whether or not the main character behaves in accordance with the core values of Buddhism
+        \item VC : Whether or not the main character behaves in accordance with the core values of Confucianism
+        \item VT : Whether or not the main character behaves in accordance with the core values of Taoism
+        \item Lie : Whether or not the main character tells lie
+        \item Viol : Whether or not the main character commits acts of violence
     }
 }
 \references{
-	reserved for manual link
+For documentation, case studies and worked examples, and other
+  tutorial information visit the References section on our Github:
+  
+  \itemize{
+  \item \href{https://github.com/sshpa/bayesvl/raw/master/References/bvl_ug_en08.pdf}{github.com/sshpa/bayesvl/master/References/bvl_ug_en08.pdf}
+  }
 }
 \examples{
 	data(Legends345)

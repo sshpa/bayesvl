@@ -187,15 +187,15 @@ bvl2stan.arcTemplates <- list(
         par_lik = c(T,F,F,F),
         stan_priors = c("","normal(0,10)","normal(0, sigma_{0}_{1})","normal(0,10)")
     ),
-    VarBoth = list(
-        name = "varboth",
-        dist = "varboth",
-        par_names = c("b_{0}","b0_{0}","ub_{0}","sigmab_{0}"),
+    VarPars = list(
+        name = "varpars",
+        dist = "varpars",
+        par_names = c("b_{0}_{1}","b0_{0}_{1}","u_{0}_{1}","sigma_{0}_{1}"),
         par_types = c("vector[N{0}]","real","vector[N{0}]","real<lower=0>"),
         par_len = c("[N{0}]","","[N{0}]",""),
         par_trans = c(T,F,F,F),
         par_lik = c(T,F,F,F),
-        stan_priors = c("","normal(0,10)","normal(0, sigma_{0})","normal(0,10)")
+        stan_priors = c("","normal(0,10)","normal(0, sigma_{0}_{1})","normal(0,10)")
     )
 )
 
@@ -224,6 +224,30 @@ bvl2stan.funTemplates <- list(
         par_types = c("int[]"),
         par_len = c(""),
         out_type = c("int")
+    )
+)
+
+bvl2stan.opsTemplates <- list(
+    Multiple = list(
+        name = "*",
+        stan_code = "{0} * {1}",
+        par_names = c("{0}","{1}"),
+        par_types = c("real","real"),
+        out_type = c("real")
+    ),
+    Add = list(
+        name = "+",
+        stan_code = "{0} + {1}",
+        par_names = c("{0}","{1}"),
+        par_types = c("real","real"),
+        out_type = c("real")
+    ),
+    Subtract = list(
+        name = "-",
+        stan_code = "{0} - {1}",
+        par_names = c("{0}","{1}"),
+        par_types = c("real","real"),
+        out_type = c("real")
     )
 )
 
@@ -337,9 +361,12 @@ bvl_nodeTemplateName <- function()
   return(tname)
 }
 
-bvl_arcPrior <- function(arc, pname)
+bvl_arcPrior <- function(arc, pname, type = NULL)
 {
-	tmp <- bvl_loadArcTemplate(arc$type)
+	if (is.null(type))
+		type = arc$type
+		
+	tmp <- bvl_loadArcTemplate(type)
 	
 	if (length(arc$priors) > 0)
 	{
