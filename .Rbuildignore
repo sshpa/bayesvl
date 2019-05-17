@@ -1,6 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^.*\.pdf$
+^.*\.csv$
 .gitignore
 .Rhistory
 .git
