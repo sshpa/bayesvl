@@ -1,6 +1,8 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^.*\.pdf$
 .gitignore
 .Rhistory
 .git
 LectureNotes
+References
