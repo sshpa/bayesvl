@@ -1229,7 +1229,7 @@ bvl_modelFix <- function(dag, data)
 	{
 		node = dag@nodes[[i]]
 		
-		if(node$name %in% colnames(data) && (node$dist != "trans"))
+		if((node$name %in% colnames(data)) && (node$dist != "trans"))
 		{
 			if (node$dist %in% c("cat","binom","bern"))
 			{
@@ -1247,7 +1247,7 @@ bvl_modelFix <- function(dag, data)
 			
 			dag@nodes[[i]] <- node
 		}
-		else
+		else if (node$dist != "trans")
 		{
 			message(paste0("There's no data of ", node$name))
 		}
