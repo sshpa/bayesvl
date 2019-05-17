@@ -111,7 +111,7 @@ model <- bvl_modelFit(model, Legends345, warmup = 2000, iter = 5000, chains = 4,
 
 bvl_bnPlot(model)
 
-bvl_trace(model)
+bvl_plotTrace(model)
 
 bvl_plotIntervals(model)
 
