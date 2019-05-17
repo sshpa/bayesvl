@@ -11,8 +11,6 @@
 \alias{bvl_modelFit,bayesvl-method}
 \alias{bvl_stanParams,bayesvl-method}
 
-\alias{bvl_bnPlot,bayesvl-method}
-
 \title{Class \code{bayesvl}: object class of bayesvl model}
 
 \description{
