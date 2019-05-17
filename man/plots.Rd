@@ -1,5 +1,6 @@
 \name{bayesvl plot utilities}
 \alias{bayesvl plot utilities}
+\alias{bayesvl plots}
 \alias{bvl_plotParams}
 \alias{bvl_plotIntervals}
 \alias{bvl_plotAreas}
