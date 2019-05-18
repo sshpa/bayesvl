@@ -55,7 +55,7 @@ stan_paramDeclare <- function(param)
 stan_paramOffset <- function(lower)
 {
 	offset = ""
-	if (!is.null(lower) && lower < 1)
+	if (!is.empty(lower) && lower < 1)
 		offset <- paste0("+", 1-lower)
 		
 	return(offset)
@@ -1256,7 +1256,7 @@ bvl_modelFix <- function(dag, data)
 	return(dag)
 }
 
-bvl_modelFit <- function(dag, data, warmup = 1000, iter = 5000, chains = 2, cores = 1, writefile = F, ppc = "")
+bvl_modelFit <- function(dag, data, warmup = 1000, iter = 5000, chains = 2, writefile = F, ppc = "", ...)
 {
 	if (!bvl_validModel(dag))
 		stop("Invalid model to estimate!")
@@ -1284,13 +1284,13 @@ bvl_modelFit <- function(dag, data, warmup = 1000, iter = 5000, chains = 2, core
 
 		# Compiling and producing posterior samples from the model.
 		mstan <- rstan::stan(file = modname, data = dataList, model_name=modname,
-		            warmup=warmup , iter = iter, chains = chains, cores = cores, refresh=-1)
+		            warmup=warmup , iter = iter, chains = chains, refresh=-1, ...)
 	}
 	else
 	{
 		# Compiling and producing posterior samples from the model.
 		mstan <- rstan::stan(model_code = model_string, data = dataList,
-	          		warmup=warmup , iter = iter, chains = chains, cores = cores, refresh=-1)
+	          		warmup=warmup , iter = iter, chains = chains, refresh=-1, ...)
   }
 
 
