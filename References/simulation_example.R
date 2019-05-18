@@ -63,6 +63,9 @@ model <- bvl_addArc(model, "Int2", "Int1_or_Int2", "+")
 
 model <- bvl_addArc(model, "Int1_or_Int2", "O", "varint", priors = c("a0_ ~ normal(0,5)", "sigma_ ~ normal(0,5)"))
 
+# review the model's diagram
+bvl_bnPlot(model)
+
 # check generated Stan model's code
 model <- bvl_modelFix(model, data1)
 model_string <- bvl_model2Stan(model)
@@ -76,18 +79,23 @@ model <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4)
 
 #############################
 # plots the result
+#############################
 
-bvl_bnPlot(model)
-
+# plot mcmc chains
 bvl_plotTrace(model)
 
+# plot uncertainty intervals computed from posterior draws
 bvl_plotIntervals(model)
 
+# plot the distributions of coefficients involved "Lie"
 bvl_plotDensity(model, c("b_B_and_Lie_O", "b_C_and_Lie_O", "b_T_and_Lie_O", "b_Lie_O"))
 
+# plot the distributions of coefficients involved violent actions
 bvl_plotDensity(model, c("b_B_and_Viol_O", "b_C_and_Viol_O", "b_T_and_Viol_O", "b_Viol_O"))
 
+# plot pair of coefficients
 bvl_plotDensity2d(model, "b_B_and_Viol_O", "b_C_and_Viol_O", color_scheme = "orange")
 bvl_plotDensity2d(model, "b_C_and_Viol_O", "b_T_and_Viol_O", color_scheme = "blue")
 
+# plot the distributions of coefficients a_Int1_or_Int2[1] and a_Int1_or_Int2[2]
 bvl_plotDensity(model, c("a_Int1_or_Int2[1]", "a_Int1_or_Int2[2]"))
