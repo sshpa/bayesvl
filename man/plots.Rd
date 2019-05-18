@@ -72,6 +72,7 @@ bvl_plotTest (dag, y_name, test_name, n = 200, color_scheme = "blue")
 
 	\item{x}{a character string. Name of x parameter to pair with }
 	\item{y}{a character string. Name of y parameter to pair with }
+	\item{color}{a character string. Variable for color of points on density plot }
 
   \item{labels}{Optional: character vector of parameter labels.}
 }
