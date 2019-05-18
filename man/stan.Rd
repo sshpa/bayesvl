@@ -17,8 +17,8 @@
 bvl_model2Stan(dag, ppc = "")
 
 # compile and simulate samples from the model.
-bvl_modelFit(dag, data, warmup = 1000, iter = 5000, chains = 2, cores = 1, 
-  writefile = F, ppc = "")
+bvl_modelFit(dag, data, warmup = 1000, iter = 5000, chains = 2, 
+  writefile = F, ppc = "", ...)
 
 # summarize the stan priors used for the model.
 bvl_stanPriors(dag)
@@ -36,9 +36,9 @@ bvl_formula(dag, nodeName, outcome = T, re = F)
   \item{warmup}{Optional: Number of warmup iterations. By default, half of iter}
   \item{iter}{Optional: Number of iterations of sampling. Default is 5000}
   \item{chains}{Optional: Number of independent chains to sample from. Default is 2}
-  \item{cores}{Optional: Number of processor cores to distribute chains over, using parallel. Default is 1}
   \item{writefile}{Optional: Write the stan code to temporary file when compiling. Default is FALSE}  
   \item{ppc}{Optional: a character string contains posterior predictive check scripts}
+  \item{...}{extra arguments from the generic method}
   
   \item{nodeName}{A character string contains the node name}
   \item{outcome}{Optional: Whether show out distribution}
