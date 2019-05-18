@@ -9,7 +9,7 @@ Features:
     * Creating one or more random Bayesian networks learned from dataset with customized constraints
     * Generating JAGS/STAN code for structures of Bayesian networks for sampling and parameter learning
     * Plotting the network graphs and MCMC
-    * Compatibility with R 2.x or newer version
+    * Compatibility with R 3.4 or newer versions
 
 Here is the [CHANGELOG](https://github.com/sshpa/baysvl/blob/master/CHANGELOG.md)
 
