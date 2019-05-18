@@ -1,11 +1,22 @@
+# rstan is required.
+# if rstan package is not installed, please uncomment and run the folowings: 
+# install.packages("rstan", dependencies=TRUE)
+# install.packages("ggplot2", dependencies=TRUE)
 
 # load bayesvl package
 library(bayesvl)
+
+###############################
+# feed example dataset
+data("Legends345")
+data1 <- Legends345
+str(Legends345)
 
 ###########################
 # Design the model
 ###########################
 model <- bayesvl()
+## add the observed data nodes
 model <- bvl_addNode(model, "O", "binom")
 model <- bvl_addNode(model, "Lie", "binom")
 model <- bvl_addNode(model, "Viol", "binom")
@@ -15,6 +26,7 @@ model <- bvl_addNode(model, "VT", "binom")
 model <- bvl_addNode(model, "Int1", "binom")
 model <- bvl_addNode(model, "Int2", "binom")
 
+## add the tranform data nodes and arcs
 model <- bvl_addNode(model, "B_and_Viol", "trans")
 model <- bvl_addNode(model, "C_and_Viol", "trans")
 model <- bvl_addNode(model, "T_and_Viol", "trans")
@@ -51,25 +63,19 @@ model <- bvl_addArc(model, "Int2", "Int1_or_Int2", "+")
 
 model <- bvl_addArc(model, "Int1_or_Int2", "O", "varint", priors = c("a0_ ~ normal(0,5)", "sigma_ ~ normal(0,5)"))
 
-###############################
-# load example data
-data("Legends345")
-data1 <- Legends345
-str(Legends345)
-
-
+# check generated Stan model's code
 model <- bvl_modelFix(model, data1)
 model_string <- bvl_model2Stan(model)
 cat(model_string)
 
+# detect number of cores of your CPU
 options(mc.cores = parallel::detectCores())
 
 # Fit the model
-model <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4, cores = 4)
-
+model <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4)
 
 #############################
-# ploting
+# plots the result
 
 bvl_bnPlot(model)
 
