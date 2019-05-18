@@ -7,13 +7,13 @@
 library(bayesvl)
 
 ###############################
-# feed example dataset
+# feed the example dataset, provided alongside with this package
 data("Legends345")
 data1 <- Legends345
 str(Legends345)
 
 ###########################
-# Design the model
+# Design the model, and its flow of logic
 ###########################
 model <- bayesvl()
 ## add the observed data nodes
@@ -26,7 +26,7 @@ model <- bvl_addNode(model, "VT", "binom")
 model <- bvl_addNode(model, "Int1", "binom")
 model <- bvl_addNode(model, "Int2", "binom")
 
-## add the tranform data nodes and arcs
+## add the tranform data nodes and arcs as part of the model
 model <- bvl_addNode(model, "B_and_Viol", "trans")
 model <- bvl_addNode(model, "C_and_Viol", "trans")
 model <- bvl_addNode(model, "T_and_Viol", "trans")
@@ -63,28 +63,28 @@ model <- bvl_addArc(model, "Int2", "Int1_or_Int2", "+")
 
 model <- bvl_addArc(model, "Int1_or_Int2", "O", "varint", priors = c("a0_ ~ normal(0,5)", "sigma_ ~ normal(0,5)"))
 
-# review the model's diagram
+# review the model's diagram, that is a network of model components as declared above
 bvl_bnPlot(model)
 
-# check generated Stan model's code
+# check the generated Stan model's code
 model <- bvl_modelFix(model, data1)
 model_string <- bvl_model2Stan(model)
 cat(model_string)
 
-# detect number of cores of your CPU
+# detect the number of cores of your CPU
 options(mc.cores = parallel::detectCores())
 
-# Fit the model
+# fit the model using appropriate technical parameters
 model <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4)
 
 #############################
 # plots the result
 #############################
 
-# plot mcmc chains
+# plot the mcmc chains
 bvl_plotTrace(model)
 
-# plot uncertainty intervals computed from posterior draws
+# plot the uncertainty intervals computed from posterior draws
 bvl_plotIntervals(model)
 
 # plot the distributions of coefficients involved "Lie"
@@ -93,7 +93,7 @@ bvl_plotDensity(model, c("b_B_and_Lie_O", "b_C_and_Lie_O", "b_T_and_Lie_O", "b_L
 # plot the distributions of coefficients involved violent actions
 bvl_plotDensity(model, c("b_B_and_Viol_O", "b_C_and_Viol_O", "b_T_and_Viol_O", "b_Viol_O"))
 
-# plot pair of coefficients
+# plot specific pairs of coefficients
 bvl_plotDensity2d(model, "b_B_and_Viol_O", "b_C_and_Viol_O", color_scheme = "orange")
 bvl_plotDensity2d(model, "b_C_and_Viol_O", "b_T_and_Viol_O", color_scheme = "blue")
 
