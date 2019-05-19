@@ -10,7 +10,7 @@ library(bayesvl)
 # feed the example dataset, provided alongside with this package
 data("Legends345")
 data1 <- Legends345
-str(Legends345)
+str(data1)
 
 ###########################
 # Design the model, and its flow of logic
