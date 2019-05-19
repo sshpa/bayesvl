@@ -9,16 +9,15 @@
 \title{Build RStan models from directed acyclic graph}
 \description{
 
-  Build RStan models from directed acyclic graph of an object of class \code{bayesvl}.
+  Build Stan models from directed acyclic graph of an object of class \code{bayesvl}.
 
 }
 \usage{
-# build RStan models from directed acyclic graph.
+# build Stan models from directed acyclic graph.
 bvl_model2Stan(dag, ppc = "")
 
 # compile and simulate samples from the model.
-bvl_modelFit(dag, data, warmup = 1000, iter = 5000, chains = 2, 
-  writefile = F, ppc = "", ...)
+bvl_modelFit(dag, data, warmup = 1000, iter = 5000, chains = 2, ppc = "", ...)
 
 # summarize the stan priors used for the model.
 bvl_stanPriors(dag)
@@ -36,7 +35,6 @@ bvl_formula(dag, nodeName, outcome = T, re = F)
   \item{warmup}{Optional: Number of warmup iterations. By default, half of iter}
   \item{iter}{Optional: Number of iterations of sampling. Default is 5000}
   \item{chains}{Optional: Number of independent chains to sample from. Default is 2}
-  \item{writefile}{Optional: Write the stan code to temporary file when compiling. Default is FALSE}  
   \item{ppc}{Optional: a character string contains posterior predictive check scripts}
   \item{...}{extra arguments from the generic method}
   
@@ -68,17 +66,25 @@ For documentation, case studies and worked examples, and other
   }
 }
 \examples{
-# create the data and build model of flip coin trials for functions testing
-dag <- bayesvl()
-dag <- bvl_addNode(dag, "y", "bern","beta(1, 1)")
-dataTrails <- c(1,0,1,1,0,1,0,0,0,0) # the trials of bias coin
 
-# build RStan model
-stancode_string = bvl_model2Stan(dag)
-cat(stancode_string)
+# Design the model in directed acyclic graph
+model <- bayesvl()
+model <- bvl_addNode(model, "Lie", "binom")
+model <- bvl_addNode(model, "B", "binom")
+model <- bvl_addNode(model, "C", "binom")
+model <- bvl_addNode(model, "T", "binom")
 
-# compile and simulate samples from the model
-dag = bvl_modelFit(dag, data.frame(y=dataTrails), warmup = 200, iter = 500, chains = 2)
+model <- bvl_addArc(model, "B", "Lie", "slope")
+model <- bvl_addArc(model, "C", "Lie", "slope")
+model <- bvl_addArc(model, "T", "Lie", "slope")
+
+# Generate the Stan model's code
+model_string <- bvl_model2Stan(model)
+cat(model_string)
+
+# Show priors in generated Stan model
+bvl_stanPriors(model)
+
 }
 \author{La Viet-Phuong, Vuong Quan-Hoang}
 \keyword{directed acyclic graphs, bayesvl}

@@ -30,7 +30,23 @@ For documentation, case studies and worked examples, and other
   \item \href{https://github.com/sshpa/bayesvl/raw/master/References/bvl_ug_en08.pdf}{github.com/sshpa/bayesvl/master/References/bvl_ug_en08.pdf}
   }
 }
-
+\examples{
+	# Design the model in directed acyclic graph
+	model <- bayesvl()
+	
+	# add observed data nodes to the model
+	model <- bvl_addNode(model, "Lie", "binom")
+	model <- bvl_addNode(model, "B", "binom")
+	model <- bvl_addNode(model, "C", "binom")
+	model <- bvl_addNode(model, "T", "binom")
+	
+	# add path between nodes
+	model <- bvl_addArc(model, "B", "Lie", "slope")
+	model <- bvl_addArc(model, "C", "Lie", "slope")
+	model <- bvl_addArc(model, "T", "Lie", "slope")
+  
+  summary(model)
+}
 \seealso{
   \code{\link{bayesvl-class}}, \code{\link{bvl_modelFit}}, \code{\link{bvl_model2Stan}} 
 } 
