@@ -3,8 +3,8 @@ Type: Package
 Title: R Package for Visually Learning the Graphical Structure of Bayesian Networks and Performing MCMC with Stan
 Version: 0.8.1
 Date: 2019-05-19
-Authors@R: c(person("Viet-Phuong", "La", role = c("aut", "cre"), email = "phuong.laviet@phenikaa-uni.edu.vn"), person("Quan-Hoang", "Vuong", role = c("aut"), email = "hoang.vuongquan@phenikaa-uni.edu.vn"))
-Author: Viet-Phuong La, Quan-Hoang Vuong
+Authors@R: c(person("Viet-Phuong", "La", role = c("aut", "cre"), email = "lvphuong@gmail.com"), person("Quan-Hoang", "Vuong", role = c("aut"), email = "hoang.vuongquan@phenikaa-uni.edu.vn"))
+Author: Viet-Phuong La [aut, cre], Quan-Hoang Vuong [aut]
 Maintainer: Viet-Phuong La <lvphuong@gmail.com>
 Imports: coda, bnlearn, ggplot2, bayesplot, viridis, reshape2, dplyr
 Suggests: loo (>= 2.0.0)
