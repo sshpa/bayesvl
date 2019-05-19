@@ -9,7 +9,7 @@ Maintainer: Viet-Phuong La <lvphuong@gmail.com>
 Imports: coda, bnlearn, ggplot2, bayesplot, viridis, reshape2, dplyr
 Suggests: loo (>= 2.0.0)
 Depends: R (>= 3.4.0), rstan (>= 2.10.0), StanHeaders (>= 2.18.0), stats, graphics, methods
-Description: 
+Description: The bayesvl R package provides users with a program and its associated functions for pedagogical purposes in using Bayesian networks and MCMC computations. It enables users to: a) Create and examine the (starting) graphical structure of Bayesian networks; b) Create random Bayesian networks using a dataset with customized constraints; c) Generate Stan code for structures of Bayesian networks for sampling the data and learning parameters; d) Plot the network graphs; e) Perform MCMC computations and produce graphs for posteriors checks. The package refers to one reference item, which describes the methods and algorithms: Vuong, Quan-Hoang, and La Viet-Phuong. (2019). The bayesvl R package. Open Science Framework (May 18). DOI: https://doi.org/10.31219/osf.io/w5dx6
 License: GPL (>= 3)
 BugReports: https://github.com/sshpa/bayesvl/issues
 URL: https://github.com/sshpa/bayesvl
