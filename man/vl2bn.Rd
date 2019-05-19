@@ -11,7 +11,6 @@
 \alias{bvl_bnScore}
 \alias{bvl_bnStrength}
 \alias{bvl_bnBarchart}
-\alias{bvl_bnPlot}
 \title{bnlearn interface for bayesvl objects}
 \description{
 
@@ -19,8 +18,6 @@
 
 }
 \usage{
-# Interface to bnlearn plot function to plot network diagram
-bvl_bnPlot(dag, ...)
 
 # Interface to bn.fit function to fit the parameters of 
 # a Bayesian network conditional on its structure.

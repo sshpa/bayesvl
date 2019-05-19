@@ -50,6 +50,7 @@ For documentation, case studies and worked examples, and other
   }
 }
 \examples{
+
 dag = bayesvl()
 
 # add nodes to dag
@@ -58,6 +59,9 @@ dag = bvl_addNode(dag, "node2")
 
 # add the path between two nodes
 dag = bvl_addArc(dag, "node1", "node2")
+
+summary(dag)
+
 }
 \author{La Viet-Phuong, Vuong Quan-Hoang}
 \keyword{directed acyclic graphs, bayesvl}

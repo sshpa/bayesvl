@@ -6,12 +6,14 @@
 \alias{bvl_plotAreas}
 \alias{bvl_plotPairs}
 \alias{bvl_plotDensity}
+\alias{bvl_plotDensity2d}
 \alias{bvl_plotTrace}
 \alias{bvl_plotGelman}
 \alias{bvl_plotGelmans}
 \alias{bvl_plotAcfs}
 \alias{bvl_plotTest}
 \alias{bvl_plotDiag}
+\alias{bvl_bnPlot}
 \title{Plot utilities for bayesvl objects}
 \description{
 
@@ -19,6 +21,9 @@
 
 }
 \usage{
+# Plot network diagram to visualize the model
+bvl_bnPlot(dag, ...)
+
 # Plots historgram of regression parameters computed from posterior draws in grid layout
 bvl_plotParams (dag, row = 2, col = 2, credMass = 0.89, params = NULL)
 
@@ -65,6 +70,7 @@ bvl_plotTest (dag, y_name, test_name, n = 200, color_scheme = "blue")
   \item{credMass}{Optional: specifying the mass within the credible interval. Default is 0.89. }
   \item{size}{Optional: the size of line width. }
   \item{color_scheme}{Optional: color scheme. Default is "blue" }
+  \item{...}{extra arguments from the generic method}
 
   \item{y_name}{a character string. Name of outcome variable }
   \item{test_name}{a character string. Name of test variable and test value }
@@ -90,17 +96,58 @@ For documentation, case studies and worked examples, and other
   }
 }
 \examples{
-# create the data and build model of flip coin trials for plot functions testing
-dag <- bayesvl()
-dag <- bvl_addNode(dag, "y", "bern","beta(1, 1)")
-dataTrails <- c(1,0,1,1,0,1,0,0,0,0) # the trials of bias coin
-dag <- bvl_modelFit(dag, data.frame(y=dataTrails), warmup = 200, iter = 500, chains = 2)
 
-####### plot functions ########
-# plot uncertainty intervals of all paramaters
-bvl_plotIntervals(dag)
+## create network model
+model <- bayesvl()
+## add the observed data nodes
+model <- bvl_addNode(model, "O", "binom")
+model <- bvl_addNode(model, "Lie", "binom")
+model <- bvl_addNode(model, "Viol", "binom")
+model <- bvl_addNode(model, "VB", "binom")
+model <- bvl_addNode(model, "VC", "binom")
+model <- bvl_addNode(model, "VT", "binom")
+model <- bvl_addNode(model, "Int1", "binom")
+model <- bvl_addNode(model, "Int2", "binom")
 
-bvl_plotDensity(dag)
+## add the tranform data nodes and arcs as part of the model
+model <- bvl_addNode(model, "B_and_Viol", "trans")
+model <- bvl_addNode(model, "C_and_Viol", "trans")
+model <- bvl_addNode(model, "T_and_Viol", "trans")
+model <- bvl_addArc(model, "VB",        "B_and_Viol", "*")
+model <- bvl_addArc(model, "Viol",      "B_and_Viol", "*")
+model <- bvl_addArc(model, "VC",        "C_and_Viol", "*")
+model <- bvl_addArc(model, "Viol",      "C_and_Viol", "*")
+model <- bvl_addArc(model, "VT",        "T_and_Viol", "*")
+model <- bvl_addArc(model, "Viol",      "T_and_Viol", "*")
+model <- bvl_addArc(model, "B_and_Viol",  "O", "slope")
+model <- bvl_addArc(model, "C_and_Viol",  "O", "slope")
+model <- bvl_addArc(model, "T_and_Viol",  "O", "slope")
+
+model <- bvl_addArc(model, "Viol",   "O", "slope")
+
+model <- bvl_addNode(model, "B_and_Lie", "trans")
+model <- bvl_addNode(model, "C_and_Lie", "trans")
+model <- bvl_addNode(model, "T_and_Lie", "trans")
+model <- bvl_addArc(model, "VB",       "B_and_Lie", "*")
+model <- bvl_addArc(model, "Lie",      "B_and_Lie", "*")
+model <- bvl_addArc(model, "VC",       "C_and_Lie", "*")
+model <- bvl_addArc(model, "Lie",      "C_and_Lie", "*")
+model <- bvl_addArc(model, "VT",       "T_and_Lie", "*")
+model <- bvl_addArc(model, "Lie",      "T_and_Lie", "*")
+model <- bvl_addArc(model, "B_and_Lie",  "O", "slope")
+model <- bvl_addArc(model, "C_and_Lie",  "O", "slope")
+model <- bvl_addArc(model, "T_and_Lie",  "O", "slope")
+
+model <- bvl_addArc(model, "Lie",   "O", "slope")
+
+model <- bvl_addNode(model, "Int1_or_Int2", "trans")
+model <- bvl_addArc(model, "Int1", "Int1_or_Int2", "+")
+model <- bvl_addArc(model, "Int2", "Int1_or_Int2", "+")
+
+model <- bvl_addArc(model, "Int1_or_Int2", "O", "varint")
+
+## Plot network diagram to visualize the model
+bvl_bnPlot(model)
 
 }
 \author{La Viet-Phuong, Vuong Quan-Hoang}

@@ -47,16 +47,21 @@ For documentation, case studies and worked examples, and other
   \code{\link{bayesvl}} 
 }
 \examples{
-  dag <- bayesvl()
+	# Design the model in directed acyclic graph
+	model <- bayesvl()
 	
-	# add nodes to dag
-	dag <- bvl_addNode(dag, "node1")
-	dag <- bvl_addNode(dag, "node2")
+	# add observed data nodes to the model
+	model <- bvl_addNode(model, "Lie", "binom")
+	model <- bvl_addNode(model, "B", "binom")
+	model <- bvl_addNode(model, "C", "binom")
+	model <- bvl_addNode(model, "T", "binom")
 	
-	# add the path between two nodes
-	dag <- bvl_addArc(dag, "node1", "node2")
+	# add path between nodes
+	model <- bvl_addArc(model, "B", "Lie", "slope")
+	model <- bvl_addArc(model, "C", "Lie", "slope")
+	model <- bvl_addArc(model, "T", "Lie", "slope")
   
-  summary(dag)
+  summary(model)
 }
 
 \keyword{classes}
