@@ -1256,7 +1256,7 @@ bvl_modelFix <- function(dag, data)
 	return(dag)
 }
 
-bvl_modelFit <- function(dag, data, warmup = 1000, iter = 5000, chains = 2, writefile = F, ppc = "", ...)
+bvl_modelFit <- function(dag, data, warmup = 1000, iter = 5000, chains = 2, ppc = "", ...)
 {
 	if (!bvl_validModel(dag))
 		stop("Invalid model to estimate!")
@@ -1272,26 +1272,26 @@ bvl_modelFit <- function(dag, data, warmup = 1000, iter = 5000, chains = 2, writ
 	start_time <- Sys.time()
 
 	print("Compiling and producing posterior samples from the model...")
-	if (writefile)
-	{
-		modname <- "model_temp.stan"
-
-		# write to file
-		writeLines(model_string, con=modname)
-
-		# The Stan logistic model as a string.
-		model_string <- readLines(modname)
-
-		# Compiling and producing posterior samples from the model.
-		mstan <- rstan::stan(file = modname, data = dataList, model_name=modname,
-		            warmup=warmup , iter = iter, chains = chains, refresh=-1, ...)
-	}
-	else
-	{
+	#if (file != "")
+	#{
+	#	modname <- file
+	#
+	#	# write to file
+	#	writeLines(model_string, con=modname)
+	#
+	#	# The Stan logistic model as a string.
+	#	model_string <- readLines(modname)
+	#
+	#	# Compiling and producing posterior samples from the model.
+	#	mstan <- rstan::stan(file = modname, data = dataList, model_name=modname,
+	#	            warmup=warmup , iter = iter, chains = chains, refresh=-1, ...)
+	#}
+	#else
+	#{
 		# Compiling and producing posterior samples from the model.
 		mstan <- rstan::stan(model_code = model_string, data = dataList,
 	          		warmup=warmup , iter = iter, chains = chains, refresh=-1, ...)
-  }
+  #}
 
 
 	end_time <- Sys.time()
