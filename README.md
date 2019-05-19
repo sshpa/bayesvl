@@ -7,7 +7,7 @@ Features:
 
     * Creating the (starting) graphical structure of Bayesian networks
     * Creating one or more random Bayesian networks learned from dataset with customized constraints
-    * Generating JAGS/STAN code for structures of Bayesian networks for sampling and parameter learning
+    * Generating Stan code for structures of Bayesian networks for sampling and parameter learning
     * Plotting the network graphs 
     * Performing MCMC simulations and plotting various graphs for posteriors check
     * Compatibility with R 3.4 or newer versions
