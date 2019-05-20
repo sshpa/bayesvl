@@ -1,7 +1,7 @@
 Package: bayesvl
 Type: Package
 Title: Visually Learning the Graphical Structure of Bayesian Networks and Performing MCMC with 'Stan'
-Version: 0.8.2
+Version: 0.8.3
 Date: 2019-05-20
 Authors@R: c(person("Viet-Phuong", "La", role = c("aut", "cre"), email = "lvphuong@gmail.com"), person("Quan-Hoang", "Vuong", role = c("aut"), email = "hoang.vuongquan@phenikaa-uni.edu.vn"))
 Author: Viet-Phuong La [aut, cre], Quan-Hoang Vuong [aut]
