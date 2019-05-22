@@ -1,6 +1,7 @@
 Package: bayesvl
 Type: Package
-Title: Visually Learning the Graphical Structure of Bayesian Networks and Performing MCMC with 'Stan'
+Title: Visually Learning the Graphical Structure of Bayesian Networks
+        and Performing MCMC with 'Stan'
 Version: 0.8.4
 Date: 2019-05-20
 Authors@R: c(person("Viet-Phuong", "La", role = c("aut", "cre"), email = "lvphuong@gmail.com"), person("Quan-Hoang", "Vuong", role = c("aut"), email = "hoang.vuongquan@phenikaa-uni.edu.vn"))
@@ -8,8 +9,11 @@ Author: Viet-Phuong La [aut, cre], Quan-Hoang Vuong [aut]
 Maintainer: Viet-Phuong La <lvphuong@gmail.com>
 Imports: coda, bnlearn, ggplot2, bayesplot, viridis, reshape2, dplyr
 Suggests: loo (>= 2.0.0)
-Depends: R (>= 3.4.0), rstan (>= 2.10.0), StanHeaders (>= 2.18.0), stats, graphics, methods
+Depends: R (>= 3.4.0), rstan (>= 2.10.0), StanHeaders (>= 2.18.0),
+        stats, graphics, methods
 Description: Provides users with its associated functions for pedagogical purposes in visually learning Bayesian networks and Markov chain Monte Carlo (MCMC) computations. It enables users to: a) Create and examine the (starting) graphical structure of Bayesian networks; b) Create random Bayesian networks using a dataset with customized constraints; c) Generate Stan code for structures of Bayesian networks for sampling the data and learning parameters; d) Plot the network graphs; e) Perform Markov chain Monte Carlo computations and produce graphs for posteriors checks. The package refers to one reference item, which describes the methods and algorithms: Vuong, Quan-Hoang and La, Viet-Phuong (2019) <doi:10.31219/osf.io/w5dx6> The 'bayesvl' R package. Open Science Framework (May 18).
 License: GPL (>= 3)
 BugReports: https://github.com/sshpa/bayesvl/issues
 URL: https://github.com/sshpa/bayesvl
+NeedsCompilation: no
+Packaged: 2019-05-22 15:50:21 UTC; phuong
