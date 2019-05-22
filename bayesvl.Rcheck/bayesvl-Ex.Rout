@@ -1,0 +1,406 @@
+
+R version 3.4.3 (2017-11-30) -- "Kite-Eating Tree"
+Copyright (C) 2017 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> pkgname <- "bayesvl"
+> source(file.path(R.home("share"), "R", "examples-header.R"))
+> options(warn = 1)
+> base::assign(".ExTimings", "bayesvl-Ex.timings", pos = 'CheckExEnv')
+> base::cat("name\tuser\tsystem\telapsed\n", file=base::get(".ExTimings", pos = 'CheckExEnv'))
+> base::assign(".format_ptime",
++ function(x) {
++   if(!is.na(x[4L])) x[1L] <- x[1L] + x[4L]
++   if(!is.na(x[5L])) x[2L] <- x[2L] + x[5L]
++   options(OutDec = '.')
++   format(x[1L:3L], digits = 7L)
++ },
++ pos = 'CheckExEnv')
+> 
+> ### * </HEADER>
+> library('bayesvl')
+Loading required package: rstan
+Warning: package ‘rstan’ was built under R version 3.4.4
+Loading required package: ggplot2
+Loading required package: StanHeaders
+Warning: package ‘StanHeaders’ was built under R version 3.4.4
+rstan (Version 2.18.2, GitRev: 2e1f913d3ca3)
+For execution on a local, multicore CPU with excess RAM we recommend calling
+options(mc.cores = parallel::detectCores()).
+To avoid recompilation of unchanged Stan programs, we recommend calling
+rstan_options(auto_write = TRUE)
+> 
+> base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+> cleanEx()
+> nameEx("Legends345")
+> ### * Legends345
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: Legends345
+> ### Title: Legends345 data
+> ### Aliases: Legends345
+> ### Keywords: legends
+> 
+> ### ** Examples
+> 
+> 	data(Legends345)
+> 	
+> 	data1 <- Legends345
+> 	head(data1)
+  No Type O O1 O2 O3 O4 Real C T B P S Viol Lie VB VT VC VS VP AVB AVT AVC AVS
+1  1   CT 1  1  1  1  1    0 0 0 0 1 1    1   0  0  0  0  1  1   0   0   0   0
+2  2   CT 1  1  1  1  1    0 1 0 0 1 1    0   0  0  0  1  1  1   0   0   0   0
+3  3   ST 1  1  1  0  1    0 1 0 0 1 1    1   1  0  0  1  1  1   0   0   0   0
+4  4   ST 1  1  1  1  0    0 0 1 1 0 0    0   0  1  1  1  1  1   0   0   1   1
+5  5   CT 1  1  1  1  0    0 0 0 1 1 1    0   0  1  0  0  0  1   0   0   0   0
+6  6   CT 1  1  1  1  0    0 0 1 0 0 0    0   0  0  0  1  0  0   0   0   0   0
+  AVP Int1 Int2
+1   0    1    0
+2   0    1    0
+3   0    1    0
+4   0    1    1
+5   0    1    0
+6   0    1    0
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("Legends345", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("bayesvl-class")
+> ### * bayesvl-class
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: bayesvl-class
+> ### Title: Class 'bayesvl': object class of bayesvl model
+> ### Aliases: bayesvl-class show,bayesvl-method summary,bayesvl-method
+> ###   bvl_addNode,bayesvl-method bvl_addArc,bayesvl-method
+> ###   bvl_modelFit,bayesvl-method bvl_stanParams,bayesvl-method
+> ### Keywords: classes
+> 
+> ### ** Examples
+> 
+> 	# Design the model in directed acyclic graph
+> 	model <- bayesvl()
+> 	
+> 	# add observed data nodes to the model
+> 	model <- bvl_addNode(model, "Lie", "binom")
+> 	model <- bvl_addNode(model, "B", "binom")
+> 	model <- bvl_addNode(model, "C", "binom")
+> 	model <- bvl_addNode(model, "T", "binom")
+> 	
+> 	# add path between nodes
+> 	model <- bvl_addArc(model, "B", "Lie", "slope")
+> 	model <- bvl_addArc(model, "C", "Lie", "slope")
+> 	model <- bvl_addArc(model, "T", "Lie", "slope")
+>   
+>   summary(model)
+Model Info:
+  nodes:     4
+  arcs:      3
+  scores:    NA
+  formula:   Lie ~ a_Lie + b_B_Lie * B + b_C_Lie * C + b_T_Lie * T
+
+Estimates:
+  model is not estimated.
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("bayesvl-class", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("bayesvl")
+> ### * bayesvl
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: bayesvl-package
+> ### Title: BayesVL package for Bayesian statistical analyses in R
+> ### Aliases: bayesvl-package bayesvl
+> ### Keywords: bayesvl package
+> 
+> ### ** Examples
+> 
+> 	# Design the model in directed acyclic graph
+> 	model <- bayesvl()
+> 	
+> 	# add observed data nodes to the model
+> 	model <- bvl_addNode(model, "Lie", "binom")
+> 	model <- bvl_addNode(model, "B", "binom")
+> 	model <- bvl_addNode(model, "C", "binom")
+> 	model <- bvl_addNode(model, "T", "binom")
+> 	
+> 	# add path between nodes
+> 	model <- bvl_addArc(model, "B", "Lie", "slope")
+> 	model <- bvl_addArc(model, "C", "Lie", "slope")
+> 	model <- bvl_addArc(model, "T", "Lie", "slope")
+>   
+>   summary(model)
+Model Info:
+  nodes:     4
+  arcs:      3
+  scores:    NA
+  formula:   Lie ~ a_Lie + b_B_Lie * B + b_C_Lie * C + b_T_Lie * T
+
+Estimates:
+  model is not estimated.
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("bayesvl", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("graphs")
+> ### * graphs
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: bayesvl graph utilities
+> ### Title: Utilities to manipulate graphs
+> ### Aliases: 'bayesvl graph utilities' 'bayesvl graphs' bvl_addNode
+> ###   bvl_addArc
+> ### Keywords: directed acyclic graphs, bayesvl
+> 
+> ### ** Examples
+> 
+> 
+> dag = bayesvl()
+> 
+> # add nodes to dag
+> dag = bvl_addNode(dag, "node1")
+> dag = bvl_addNode(dag, "node2")
+> 
+> # add the path between two nodes
+> dag = bvl_addArc(dag, "node1", "node2")
+> 
+> summary(dag)
+Model Info:
+  nodes:     2
+  arcs:      1
+  scores:    NA
+  formula:   node2 ~ a_node2 + b_node1_node2 * node1
+
+Estimates:
+  model is not estimated.
+> 
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("graphs", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("plots")
+> ### * plots
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: bayesvl plot utilities
+> ### Title: Plot utilities for bayesvl objects
+> ### Aliases: 'bayesvl plot utilities' 'bayesvl plots' bvl_plotParams
+> ###   bvl_plotIntervals bvl_plotAreas bvl_plotPairs bvl_plotDensity
+> ###   bvl_plotDensity2d bvl_plotTrace bvl_plotGelman bvl_plotGelmans
+> ###   bvl_plotAcfs bvl_plotTest bvl_plotDiag bvl_bnPlot
+> ### Keywords: directed acyclic graphs, bayesvl, bayesvl plots
+> 
+> ### ** Examples
+> 
+> 
+> ## create network model
+> model <- bayesvl()
+> ## add the observed data nodes
+> model <- bvl_addNode(model, "O", "binom")
+> model <- bvl_addNode(model, "Lie", "binom")
+> model <- bvl_addNode(model, "Viol", "binom")
+> model <- bvl_addNode(model, "VB", "binom")
+> model <- bvl_addNode(model, "VC", "binom")
+> model <- bvl_addNode(model, "VT", "binom")
+> model <- bvl_addNode(model, "Int1", "binom")
+> model <- bvl_addNode(model, "Int2", "binom")
+> 
+> ## add the tranform data nodes and arcs as part of the model
+> model <- bvl_addNode(model, "B_and_Viol", "trans")
+> model <- bvl_addNode(model, "C_and_Viol", "trans")
+> model <- bvl_addNode(model, "T_and_Viol", "trans")
+> model <- bvl_addArc(model, "VB",        "B_and_Viol", "*")
+> model <- bvl_addArc(model, "Viol",      "B_and_Viol", "*")
+> model <- bvl_addArc(model, "VC",        "C_and_Viol", "*")
+> model <- bvl_addArc(model, "Viol",      "C_and_Viol", "*")
+> model <- bvl_addArc(model, "VT",        "T_and_Viol", "*")
+> model <- bvl_addArc(model, "Viol",      "T_and_Viol", "*")
+> model <- bvl_addArc(model, "B_and_Viol",  "O", "slope")
+> model <- bvl_addArc(model, "C_and_Viol",  "O", "slope")
+> model <- bvl_addArc(model, "T_and_Viol",  "O", "slope")
+> 
+> model <- bvl_addArc(model, "Viol",   "O", "slope")
+> 
+> model <- bvl_addNode(model, "B_and_Lie", "trans")
+> model <- bvl_addNode(model, "C_and_Lie", "trans")
+> model <- bvl_addNode(model, "T_and_Lie", "trans")
+> model <- bvl_addArc(model, "VB",       "B_and_Lie", "*")
+> model <- bvl_addArc(model, "Lie",      "B_and_Lie", "*")
+> model <- bvl_addArc(model, "VC",       "C_and_Lie", "*")
+> model <- bvl_addArc(model, "Lie",      "C_and_Lie", "*")
+> model <- bvl_addArc(model, "VT",       "T_and_Lie", "*")
+> model <- bvl_addArc(model, "Lie",      "T_and_Lie", "*")
+> model <- bvl_addArc(model, "B_and_Lie",  "O", "slope")
+> model <- bvl_addArc(model, "C_and_Lie",  "O", "slope")
+> model <- bvl_addArc(model, "T_and_Lie",  "O", "slope")
+> 
+> model <- bvl_addArc(model, "Lie",   "O", "slope")
+> 
+> model <- bvl_addNode(model, "Int1_or_Int2", "trans")
+> model <- bvl_addArc(model, "Int1", "Int1_or_Int2", "+")
+> model <- bvl_addArc(model, "Int2", "Int1_or_Int2", "+")
+> 
+> model <- bvl_addArc(model, "Int1_or_Int2", "O", "varint")
+> 
+> ## Plot network diagram to visualize the model
+> bvl_bnPlot(model)
+> 
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("plots", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("stan")
+> ### * stan
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: bayesvl stan utilities
+> ### Title: Build RStan models from directed acyclic graph
+> ### Aliases: 'bayesvl stan' 'bayesvl stan utilities' bvl_model2Stan
+> ###   bvl_modelFit bvl_stanPriors bvl_stanParams bvl_formula
+> ### Keywords: directed acyclic graphs, bayesvl
+> 
+> ### ** Examples
+> 
+> 
+> # Design the model in directed acyclic graph
+> model <- bayesvl()
+> model <- bvl_addNode(model, "Lie", "binom")
+> model <- bvl_addNode(model, "B", "binom")
+> model <- bvl_addNode(model, "C", "binom")
+> model <- bvl_addNode(model, "T", "binom")
+> 
+> model <- bvl_addArc(model, "B", "Lie", "slope")
+> model <- bvl_addArc(model, "C", "Lie", "slope")
+> model <- bvl_addArc(model, "T", "Lie", "slope")
+> 
+> # Generate the Stan model's code
+> model_string <- bvl_model2Stan(model)
+[1] "Generating stan model ..."
+Generating data block...
+Generating transformed parameters...
+Generating parameters...
+Generating priors...
+> cat(model_string)
+functions{
+     int numLevels(int[] m) {
+        int sorted[num_elements(m)];
+        int count = 1;
+        sorted = sort_asc(m);
+        for (i in 2:num_elements(sorted)) {
+          if (sorted[i] != sorted[i-1])
+             count = count + 1;
+        }
+        return(count);
+     }
+}
+data{
+     // Define variables in data
+     int<lower=1> Nobs;   // Number of observations (an integer)
+     int<lower=0,upper=1> Lie[Nobs];   // outcome variable
+     int<lower=0,upper=1> B[Nobs];
+     int<lower=0,upper=1> C[Nobs];
+     int<lower=0,upper=1> T[Nobs];
+}
+transformed data{
+     // Define transformed data
+}
+parameters{
+     // Define parameters to estimate
+     real a_Lie;
+     real b_B_Lie;
+     real b_C_Lie;
+     real b_T_Lie;
+}
+transformed parameters{
+     // Transform parameters
+     real theta_Lie[Nobs];
+     for (i in 1:Nobs) {
+        theta_Lie[i] = a_Lie + b_B_Lie * B[i] + b_C_Lie * C[i] + b_T_Lie * T[i];
+     }
+}
+model{
+     // Priors
+     a_Lie ~ normal(0,100);
+     b_B_Lie ~ normal( 0, 10 );
+     b_C_Lie ~ normal( 0, 10 );
+     b_T_Lie ~ normal( 0, 10 );
+
+     // Likelihoods
+     Lie ~ binomial_logit(1, theta_Lie);
+}
+generated quantities {
+     // simulate data from the posterior
+     int<lower=0,upper=1> yrep_Lie[Nobs];
+     // log-likelihood posterior
+     vector[Nobs] log_lik_Lie;
+     for (i in 1:num_elements(yrep_Lie)) {
+       yrep_Lie[i] = binomial_rng(Lie[i], inv_logit(theta_Lie[i]));
+     }
+     for (i in 1:Nobs) {
+       log_lik_Lie[i] = binomial_logit_lpmf(Lie[i] | 1, theta_Lie[i]);
+     }
+}
+> 
+> # Show priors in generated Stan model
+> bvl_stanPriors(model)
+a_Lie ~ normal(0,100)
+b_B_Lie ~ normal( 0, 10 )
+b_C_Lie ~ normal( 0, 10 )
+b_T_Lie ~ normal( 0, 10 )
+> 
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("stan", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> ### * <FOOTER>
+> ###
+> options(digits = 7L)
+> base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
+Time elapsed:  1.621 0.058 1.689 0 0 
+> grDevices::dev.off()
+null device 
+          1 
+> ###
+> ### Local variables: ***
+> ### mode: outline-minor ***
+> ### outline-regexp: "\\(> \\)?### [*]+" ***
+> ### End: ***
+> quit('no')

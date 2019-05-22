@@ -1,0 +1,12 @@
+Legends345              Legends345 data
+bayesvl bnlearn utilities
+                        bnlearn interface for bayesvl objects
+bayesvl graph utilities
+                        Utilities to manipulate graphs
+bayesvl plot utilities
+                        Plot utilities for bayesvl objects
+bayesvl stan utilities
+                        Build RStan models from directed acyclic graph
+bayesvl-class           Class 'bayesvl': object class of bayesvl model
+bayesvl-package         BayesVL package for Bayesian statistical
+                        analyses in R
