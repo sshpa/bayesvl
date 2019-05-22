@@ -1,5 +1,9 @@
+data("data1")
+head(data1)
+
 data("Legends345")
-head(Legends345)
+data1 <- Legends345
+str(data1)
 
 # Design the model
 model <- bayesvl()
@@ -12,10 +16,10 @@ model <- bvl_addArc(model, "B", "Lie", "slope")
 model <- bvl_addArc(model, "C", "Lie", "slope")
 model <- bvl_addArc(model, "T", "Lie", "slope")
 
-bvl_bnScore(model, Legends345)
-bvl_bnStrength(model, Legends345)
-bvl_bnBayes(model, Legends345)
-bvl_bnBarchart(model, Legends345)
+bvl_bnScore(model, data1)
+bvl_bnStrength(model, data1)
+bvl_bnBayes(model, data1)
+bvl_bnBarchart(model, data1)
 
 model_string <- bvl_model2Stan(model)
 cat(model_string)
@@ -23,7 +27,7 @@ cat(model_string)
 options(mc.cores = parallel::detectCores())
 
 # Fit the model
-model <- bvl_modelFit(model, Legends345, warmup = 2000, iter = 5000, chains = 4, cores = 4)
+model <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4, cores = 4)
 
 bvl_trace(model)
 
@@ -100,14 +104,14 @@ model <- bvl_addArc(model, "Int2", "Int1_or_Int2", "+")
 
 model <- bvl_addArc(model, "Int1_or_Int2", "O", "varint", priors = c("a0_ ~ normal(0,5)", "sigma_ ~ normal(0,5)"))
 
-model <- bvl_modelFix(model, Legends345)
+model <- bvl_modelFix(model, data1)
 model_string <- bvl_model2Stan(model)
 cat(model_string)
 
 options(mc.cores = parallel::detectCores())
 
 # Fit the model
-model <- bvl_modelFit(model, Legends345, warmup = 2000, iter = 5000, chains = 4, cores = 4)
+model <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4, cores = 4)
 
 bvl_bnPlot(model)
 
@@ -142,15 +146,15 @@ bvl_plotDensity(model, c("a_Int1_or_Int2[1]", "a_Int1_or_Int2[2]"))
 
 paramName <- "yrep_Int1_or_Int2_1"
 
-Legends345$B_and_Lie <- Legends345$VB * Legends345$Lie
-Legends345$C_and_Lie <- Legends345$VC * Legends345$Lie
-Legends345$T_and_Lie <- Legends345$VT * Legends345$Lie
+data1$B_and_Lie <- data1$VB * data1$Lie
+data1$C_and_Lie <- data1$VC * data1$Lie
+data1$T_and_Lie <- data1$VT * data1$Lie
 
-Legends345$B_and_Viol <- Legends345$VB * Legends345$Viol
-Legends345$C_and_Viol <- Legends345$VC * Legends345$Viol
-Legends345$T_and_Viol <- Legends345$VT * Legends345$Viol
+data1$B_and_Viol <- data1$VB * data1$Viol
+data1$C_and_Viol <- data1$VC * data1$Viol
+data1$T_and_Viol <- data1$VT * data1$Viol
 
-Legends345$Int1_or_Int2 <- (Legends345$Int1 | Legends345$Int2) * 1
+data1$Int1_or_Int2 <- (data1$Int1 | data1$Int2) * 1
 
 
 # Design the model
@@ -184,14 +188,14 @@ model <- bvl_addArc(model, "Int2", "Int1_or_Int2", "+")
 
 model <- bvl_addArc(model, "Int1_or_Int2", "O", "varint")
 
-model <- bvl_modelFix(model, Legends345)
+model <- bvl_modelFix(model, data1)
 model_string <- bvl_model2Stan(model)
 cat(model_string)
 
 options(mc.cores = parallel::detectCores())
 
 # Fit the model
-model <- bvl_modelFit(model, Legends345, warmup = 2000, iter = 5000, chains = 4, cores = 4)
+model <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4, cores = 4)
 
 bvl_trace(model)
 
@@ -228,13 +232,13 @@ model <- bvl_addArc(model, "Int2", "Int1_or_Int2", "+")
 
 model <- bvl_addArc(model, "Int1_or_Int2", "O", "varint")
 
-model <- bvl_modelFix(model, Legends345)
+model <- bvl_modelFix(model, data1)
 model_string <- bvl_model2Stan(model)
 cat(model_string)
 
 options(mc.cores = parallel::detectCores())
 
 # Fit the model
-model <- bvl_modelFit(model, Legends345, warmup = 2000, iter = 5000, chains = 4, cores = 4)
+model <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4, cores = 4)
 
 bvl_trace(model)
