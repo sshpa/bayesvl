@@ -1,7 +1,0 @@
-name	user	system	elapsed
-Legends345	0.009	0.001	0.010	
-bayesvl-class	0.073	0.001	0.074	
-bayesvl	0.079	0.001	0.080	
-graphs	0.002	0.000	0.003	
-plots	0.180	0.004	0.186	
-stan	0.282	0.005	0.287	
