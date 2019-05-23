@@ -1,7 +1,7 @@
 BayesVL
 ==========
 
-The R package for visually learning the graphical structures of Bayesian networks, and performing Hamiltonian MCMC with 'Stan'.
+The R package for visually learning the graphical structures of Bayesian networks, and performing Hamiltonian Markov chain Monte Carlo (MCMC) with 'Stan'.
 
 Features:
 
