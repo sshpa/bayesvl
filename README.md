@@ -1,15 +1,15 @@
 BayesVL
 ==========
 
-The R package for visually learning the graphical structures of Bayesian networks, and performing Hamiltonian MCMC with Stan.
+The R package for visually learning the graphical structures of Bayesian networks, and performing Hamiltonian MCMC with 'Stan'.
 
 Features:
 
     * Creating the (starting) graphical structure of Bayesian networks
     * Creating one or more random Bayesian networks learned from dataset with customized constraints
     * Generating Stan code for structures of Bayesian networks for sampling and parameter learning
-    * Plotting the network graphs 
-    * Performing MCMC simulations and plotting various graphs for posteriors check
+    * Plotting the Bayesian network graphs 
+    * Performing Markov chain Monte Carlo (MCMC) simulations and plotting various graphs for posteriors check
     * Compatibility with R 3.4 or newer versions
 
 Here is the [CHANGELOG](https://github.com/sshpa/baysvl/blob/master/CHANGELOG.md)
@@ -18,14 +18,14 @@ Here is the [CHANGELOG](https://github.com/sshpa/baysvl/blob/master/CHANGELOG.md
 
 ## Install
 
-Getting started and installing the latest snapshot type in R console:
+Getting started and installing the latest snapshot type in the R console:
 
 ```r
 > install.packages("devtools")
 > devtools::install_github("sshpa/bayesvl")
 ```
 
-## Create bayesian network structures
+## Create appropriate Bayesian network structures
 
 Creating a node for each variable in the proposed network
 
@@ -46,9 +46,9 @@ dag <- bvl_addArc(dag, "C", "DC")
 dag <- bvl_addArc(dag, "T", "DC")
 ```
 
-## Generate STAN code
+## Generate 'Stan' code
 
-Generating the STAN code required for building structures of Bayesian networks for sampling and parameter learning
+Generating the 'Stan' code required for building structures of the Bayesian networks required for sampling and parameter learning
 
 ```r
 stan_code <- bvl_model2Stan(dag)
@@ -61,9 +61,9 @@ Getting the model's parameters
 params <- bvl_stanParams(dag)
 params
 ```
-## Sample and fit the STAN model
+## Sample and fit the 'Stan' model
 
-Sampling the STAN model
+Sampling the predefined 'Stan' model
 
 ```r
 stan_fit <- bvl_modelFit(dag, data, iter=20000 , warmup=2000 , chains=4 , cores=4)
