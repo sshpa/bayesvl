@@ -1,13 +1,13 @@
-# rstan is required.
-# if rstan package is not installed, please uncomment and run the folowings: 
-# install.packages("rstan", dependencies=TRUE)
-# install.packages("ggplot2", dependencies=TRUE)
+# The 'rstan' R package is required.
+# if the 'rstan' R package is not installed, please uncomment and run the folowings: 
+### install.packages("rstan", dependencies=TRUE)
+### install.packages("ggplot2", dependencies=TRUE)
 
-# load bayesvl package
+# load the 'bayesvl' R package
 library(bayesvl)
 
 ###############################
-# feed the example dataset, provided alongside with this package
+# feed the example dataset, provided alongside with the 'bayesvl' R package
 data("Legends345")
 data1 <- Legends345
 str(data1)
@@ -26,7 +26,7 @@ model <- bvl_addNode(model, "VT", "binom")
 model <- bvl_addNode(model, "Int1", "binom")
 model <- bvl_addNode(model, "Int2", "binom")
 
-## add the tranform data nodes and arcs as part of the model
+## add the 'tranform data' nodes and arcs as part of the model
 model <- bvl_addNode(model, "B_and_Viol", "trans")
 model <- bvl_addNode(model, "C_and_Viol", "trans")
 model <- bvl_addNode(model, "T_and_Viol", "trans")
@@ -81,21 +81,21 @@ model <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4)
 # plots the result
 #############################
 
-# plot the mcmc chains
+# plot the Markov chain Monte Carlo (MCMC) chains
 bvl_plotTrace(model)
 
-# plot the uncertainty intervals computed from posterior draws
+# plot the uncertainty intervals computed from posteriors samples
 bvl_plotIntervals(model)
 
-# plot the distributions of coefficients involved "Lie"
+# plot the distributions of coefficients involving "Lie"
 bvl_plotDensity(model, c("b_B_and_Lie_O", "b_C_and_Lie_O", "b_T_and_Lie_O", "b_Lie_O"))
 
-# plot the distributions of coefficients involved violent actions
+# plot the distributions of coefficients involving violent actions "Viol"
 bvl_plotDensity(model, c("b_B_and_Viol_O", "b_C_and_Viol_O", "b_T_and_Viol_O", "b_Viol_O"))
 
 # plot specific pairs of coefficients
 bvl_plotDensity2d(model, "b_B_and_Viol_O", "b_C_and_Viol_O", color_scheme = "orange")
 bvl_plotDensity2d(model, "b_C_and_Viol_O", "b_T_and_Viol_O", color_scheme = "blue")
 
-# plot the distributions of coefficients a_Int1_or_Int2[1] and a_Int1_or_Int2[2]
+# plot the distributions of computed coefficients a_Int1_or_Int2[1] and a_Int1_or_Int2[2]
 bvl_plotDensity(model, c("a_Int1_or_Int2[1]", "a_Int1_or_Int2[2]"))
