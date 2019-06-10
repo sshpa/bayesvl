@@ -75,7 +75,7 @@ cat(model_string)
 options(mc.cores = parallel::detectCores())
 
 # fit the model using appropriate technical parameters
-model <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4)
+model <- bvl_modelFit(model, data1, warmup = 2000, iter = 10000, chains = 4)
 
 #############################
 # plots the result
@@ -97,5 +97,14 @@ bvl_plotDensity(model, c("b_B_and_Viol_O", "b_C_and_Viol_O", "b_T_and_Viol_O", "
 bvl_plotDensity2d(model, "b_B_and_Viol_O", "b_C_and_Viol_O", color_scheme = "orange")
 bvl_plotDensity2d(model, "b_C_and_Viol_O", "b_T_and_Viol_O", color_scheme = "blue")
 
+require(gridExtra)
+params <- c("b_B_and_Lie_O", "b_C_and_Lie_O", "b_T_and_Lie_O", "b_Lie_O")
+p1 <- bayesplot::mcmc_intervals(model@posterior, pars = params, point_est = "mean", prob = 0.8, prob_outer = 0.95)	
+params <- c("b_B_and_Viol_O", "b_C_and_Viol_O", "b_T_and_Viol_O", "b_Viol_O")
+p2 <- bayesplot::mcmc_intervals(model@posterior, pars = params, point_est = "mean", prob = 0.8, prob_outer = 0.95)	
+p3 <- bvl_plotDensity2d(model, "b_B_and_Lie_O", "b_C_and_Lie_O", color_scheme = "purple")
+p4 <- bvl_plotDensity2d(model, "b_B_and_Viol_O", "b_C_and_Viol_O", color_scheme = "orange")
+grid.arrange(p1, p2, p3, p4, ncol=2)
+
 # plot the distributions of coefficients a_Int1_or_Int2[1] and a_Int1_or_Int2[2]
-bvl_plotDensity(model, c("a_Int1_or_Int2[1]", "a_Int1_or_Int2[2]"))
+bvl_plotDensity(model, c("a_Int1_or_Int2[1]", "a_Int1_or_Int2[2]"), labels = c("a_Int1_or_Int2[0]", "a_Int1_or_Int2[1]"))
