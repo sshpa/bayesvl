@@ -8,6 +8,8 @@ data1$edumot <- as.numeric(data1$h2)
 data1$edufat <- as.numeric(data1$h3)
 data1$sex <- as.numeric(data1$f1)
 
+data1$dr <- as.numeric(data1$b12) + as.numeric(data1$b13) + as.numeric(data1$b14) - 3
+
 # Design the model
 model <- bayesvl()
 model <- bvl_addNode(model, "ict", "norm")
@@ -83,3 +85,26 @@ require(gridExtra)
 p1 <- bvl_plotDensity2d(model, "b_edumot_ict", "b_edufat_ict", color_scheme = "purple")
 p2 <- bvl_plotDensity2d(model, "b_edufat_ict", "b_ecostt_ict", color_scheme = "orange")
 grid.arrange(p1, p2, ncol=2)
+
+
+######################################
+# Design the model
+model <- bayesvl()
+model <- bvl_addNode(model, "dr", "norm")
+model <- bvl_addNode(model, "sex", "cat",test=c(1,2)) #Sex
+model <- bvl_addNode(model, "ict", "cat")
+model <- bvl_addNode(model, "schoolid", "cat") #school
+
+model <- bvl_addArc(model, "sex",  "dr", "slope")
+model <- bvl_addArc(model, "ict",  "dr", "slope")
+
+model <- bvl_addArc(model, "schoolid", "dr", "varint")
+
+model <- bvl_modelFix(model, data1)
+model_string <- bvl_model2Stan(model)
+cat(model_string)
+
+options(mc.cores = parallel::detectCores())
+
+# Fit the model
+model <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4, cores = 4)
