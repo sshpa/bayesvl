@@ -1,25 +1,28 @@
 data1 <- read.csv("/Statistics/DKAP/DKAP1061.csv", header = TRUE)
 head(data1)
 
-data1$domain1 <- as.numeric(data1$a1) + as.numeric(data1$a2) + as.numeric(data1$a3) + as.numeric(data1$a4) + as.numeric(data1$a5) + as.numeric(data1$a6) - 6
+data1$ict <- as.numeric(data1$a1) + as.numeric(data1$a2) + as.numeric(data1$a3) + as.numeric(data1$a4) + as.numeric(data1$a5) + as.numeric(data1$a6) + as.numeric(data1$a7) + as.numeric(data1$a8) + as.numeric(data1$a9) - 9
 data1$ecostt <- ifelse(as.numeric(data1$h4_1) + as.numeric(data1$h4_2) + as.numeric(data1$h4_3) > 3, 2, 1)
 data1$schoolid <- as.numeric(data1$schid)
+data1$edumot <- as.numeric(data1$h2)
+data1$edufat <- as.numeric(data1$h3)
+data1$sex <- as.numeric(data1$f1)
 
 # Design the model
 model <- bayesvl()
-model <- bvl_addNode(model, "domain1", "norm")
-model <- bvl_addNode(model, "f1", "cat") #Sex
+model <- bvl_addNode(model, "ict", "norm")
+model <- bvl_addNode(model, "sex", "cat",test=c(1,2)) #Sex
 model <- bvl_addNode(model, "ecostt", "cat")
-model <- bvl_addNode(model, "h2", "cat") #mothedu
-model <- bvl_addNode(model, "h3", "cat") #fartedu
+model <- bvl_addNode(model, "edumot", "cat") #edumot
+model <- bvl_addNode(model, "edufat", "cat") #edufat
 model <- bvl_addNode(model, "schoolid", "cat") #school
 
-model <- bvl_addArc(model, "f1",  "domain1", "slope")
-model <- bvl_addArc(model, "ecostt",  "domain1", "slope")
-model <- bvl_addArc(model, "h2",  "domain1", "slope")
-model <- bvl_addArc(model, "h3",  "domain1", "slope")
+model <- bvl_addArc(model, "sex",  "ict", "slope")
+model <- bvl_addArc(model, "ecostt",  "ict", "slope")
+model <- bvl_addArc(model, "edumot",  "ict", "slope")
+model <- bvl_addArc(model, "edufat",  "ict", "slope")
 
-model <- bvl_addArc(model, "schoolid", "domain1", "varint")
+model <- bvl_addArc(model, "schoolid", "ict", "varint")
 
 model <- bvl_modelFix(model, data1)
 model_string <- bvl_model2Stan(model)
@@ -75,3 +78,8 @@ ggplot(data = a_df,
              col = "red") +
   ylab("alpha_school") +
   scale_x_discrete(limits=a_df$school_names)
+
+require(gridExtra)
+p1 <- bvl_plotDensity2d(model, "b_edumot_ict", "b_edufat_ict", color_scheme = "purple")
+p2 <- bvl_plotDensity2d(model, "b_edufat_ict", "b_ecostt_ict", color_scheme = "orange")
+grid.arrange(p1, p2, ncol=2)
