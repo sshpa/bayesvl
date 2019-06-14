@@ -151,9 +151,3 @@ ggplot(data = a_df,
              col = "red") +
   ylab("alpha_school") +
   scale_x_discrete(limits=a_df$school_names)
-
-require(gridExtra)
-p1 <- bvl_plotDensity2d(model, "b_edumot_ict", "b_edufat_ict", color_scheme = "purple")
-p2 <- bvl_plotDensity2d(model, "b_edufat_ict", "b_ecostt_ict", color_scheme = "orange")
-grid.arrange(p1, p2, ncol=2)
-
