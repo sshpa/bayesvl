@@ -86,7 +86,7 @@ p1 <- bvl_plotDensity2d(model, "b_edumot_ict", "b_edufat_ict", color_scheme = "p
 p2 <- bvl_plotDensity2d(model, "b_edufat_ict", "b_ecostt_ict", color_scheme = "orange")
 grid.arrange(p1, p2, ncol=2)
 
-bvl_plotTest(model, "ict", "yrep_sex")
+bvl_plotTest(model, "ict", "sex_1")
 
 ######################################
 # Design the model
