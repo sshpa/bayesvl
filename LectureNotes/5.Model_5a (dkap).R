@@ -37,6 +37,7 @@ model <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4, core
 
 bvl_plotTrace(model)
 
+bvl_plotIntervals(model)
 
 school_names = c("Dai Cuong, Ha Noi","Hop Thanh, Ha Noi","Thang Long, Ha Noi","Nguyen Trai, Ha Noi","Lao Cai city no1, Lao Cai","Bao Thang, Lao Cai","Bac Ha no1, Lao Cai","Si Ma Cai no1, Lao Cai","Ong Ich Khiem, Da Nang","Tran Phu, Da Nang","Ngu Hanh Son, Da Nang","Thai Phien, Da Nang","Tran Phu, Lam Dong","Don Duong, Lam Dong","Duc Trong, Lam Dong","Lang Biang, Lam Dong","Tran Dai Nghia, Can Tho","Nguyen Viet Hong, Can Tho","Luu Huu Phuoc, Can Tho","Thuan Hung, Can Tho")
 fit_ss <- extract(model@stanfit, permuted = TRUE) # fit_ss is a list 
