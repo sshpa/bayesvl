@@ -386,7 +386,7 @@ setMethod("bvl_validData", "bayesvl", function(dag, data, silent = F) {
 		node = dag@nodes[[nodes[i]]]
 		if (node$dist %in% c("binom","bern"))
 		{
-			if (!any(is.na(data)))
+			if (!any(is.na(data[ ,node$name])))
 			{
 				if (min(data[ ,node$name]) != 0)
 				{
