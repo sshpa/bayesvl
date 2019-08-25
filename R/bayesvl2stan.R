@@ -1,6 +1,6 @@
-# Stan helper functions!
+# stan helper functions!
 #
-# various utility functions for generate Stan code from network graph
+# various utility functions for generate stan code from network graph
 #
 
 options(mc.cores = parallel::detectCores())
@@ -61,7 +61,7 @@ stan_paramOffset <- function(lower)
 	return(offset)
 }
 
-# Create new parameters
+# Create new parameter
 stan_newParam <- function(name, type, length=NULL, prior = NULL, fun = NULL, lower = NULL, 
 	isData = F, isTransData = F, isParam = F, isTransParam = F, isVar = F, isReg = F, comment = "")
 {	
@@ -71,7 +71,7 @@ stan_newParam <- function(name, type, length=NULL, prior = NULL, fun = NULL, low
 	return (param)
 }
 
-# Add a single parameter to list
+# Add single parameter to list
 stan_addParamToList <- function(list, param)
 {
 	# check if the param is added
@@ -129,7 +129,7 @@ stan_dataAtNode <- function(dag, node)
 	param = stan_newParam(name=varname, type=vartype, length=varlen, isData = T, comment = varcomment)
 	dataParams = stan_addParamToList(dataParams, param)
 		
-	# if there is a varint arc from a node, add the number of levels
+	# if there is varint arc from node, add number of levels
 	if (isVarIntFrom(dag, node) || isVarSlopeFrom(dag, node))
 	{
 		param = stan_newParam(name=paste0("N",nodeName), type="int", isData = T)
@@ -196,7 +196,7 @@ stan_likelihoodParams <- function(dag, node)
 	  isTransParam = F
 	  isReg = F
 	  
-	  # is a main regression parameter?
+	  # is main regression parameter?
 	  if (pars[p] == template$par_reg)
 	  {
 	  	varlen = "Nobs"
@@ -249,7 +249,7 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 	params = stan_addParamsToList(params, pars)
 
 	#### Regression parameters
-	# check if the node is a leaf with a parent??
+	# check if the node is leaf with parent??
 	if (bvl_isLeaf(node) && length(node$parents) > 0)
 	{
 		arcsTo <- bvl_getArcs(dag, to = nodeName)
@@ -258,7 +258,7 @@ stan_paramAtNode <- function(dag, node, getCode = F)
 		transparam_code = paste0(transparam_code, stan_indent(5), "for (i in 1:Nobs) {\n")
 		transparam_code = paste0(transparam_code, stan_indent(8), stan_replaceNode(template$par_reg, node), loopForI, " = ")
 
-		# slope without a varying intercept
+		# slope without varying intercept
 		hasVarintTo <- bvl_getArcs(dag, to = node$name, type = c("varint", "varpars"))
 		hasVarslopeTo <- bvl_getArcs(dag, to = node$name, type = c("varslope", "varpars"))
 		if (is.empty(hasVarintTo) && (isSlopeTo(dag, node) || !is.empty(hasVarslopeTo)))
@@ -1202,7 +1202,8 @@ bvl_modelData <- function(net, data)
 		dataList[[nodes[i]]] <- as.numeric(data[ , nodes[i]])
 		if (node$dist == "cat")
 		{
-			dataList[[paste0("N",nodes[i])]] <- length(unique(data[ , nodes[i]]))
+			#dataList[[paste0("N",nodes[i])]] <- length(unique(data[ , nodes[i]]))
+			dataList[[paste0("N",nodes[i])]] <- max(as.numeric(data[ , nodes[i]]))
 		}
 
 		if ((isVarIntFrom(net, net@nodes[[nodes[i]]]) || isVarSlopeFrom(net, net@nodes[[nodes[i]]])) && !(paste0("N",nodes[i]) %in% names(dataList)))

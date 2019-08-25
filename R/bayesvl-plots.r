@@ -1,3 +1,25 @@
+#------------------------------------------------------------------------------
+# Plot network diagram
+
+plotNetwork <- function(dag) {
+}
+
+bvl_plotParams <- function(dag, row = 2, col = 2, credMass = 0.89, params = NULL) {
+	par(mfrow=c(row,col))
+	
+	if (is.null(dag@posterior))
+		stop("Model is not estimated!")
+	
+	if (is.null(params))
+		params <- bvl_getParams(dag)
+
+	mcmcMat = as.matrix(dag@posterior[params], chains=TRUE)
+	
+	cols = colnames(mcmcMat)
+	for ( i in 1:length(cols) ) {
+			plotPost(mcmcMat[,cols[i]],xlab=cols[i], credMass=credMass)
+	}
+}
 
 #------------------------------------------------------------------------------
 # Get regression parameter names
@@ -264,7 +286,7 @@ bvl_plotAcfs <- function( dag, params = NULL, row = 2, col = 2) {
 #------------------------------------------------------------------------------
 # Plot intervals
 
-bvl_plotIntervals <- function(dag, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
+bvl_plotIntervals <- function(dag, params = NULL, fun = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
 {
 	# require(bayesplot)
 	
@@ -280,13 +302,13 @@ bvl_plotIntervals <- function(dag, params = NULL, fun = "stat", stat = "mean", p
 	{
 		dat <- dag@posterior[params]
 		colnames(dat) <- labels
-		bayesplot::mcmc_intervals(dat, pars = labels, point_est = "mean", prob = prob, prob_outer = prob_outer)
+		bayesplot::mcmc_intervals(dat, pars = labels, point_est = fun, prob = prob, prob_outer = prob_outer)
 	}
 	else
-		bayesplot::mcmc_intervals(dag@posterior, pars = params, point_est = "mean", prob = prob, prob_outer = prob_outer)	
+		bayesplot::mcmc_intervals(dag@posterior, pars = params, point_est = fun, prob = prob, prob_outer = prob_outer)	
 }
 
-bvl_plotAreas <- function(dag, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
+bvl_plotAreas <- function(dag, params = NULL, fun = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
 {
 	# require(bayesplot)
 	
@@ -302,16 +324,42 @@ bvl_plotAreas <- function(dag, params = NULL, fun = "stat", stat = "mean", prob 
 	{
 		dat <- dag@posterior[params]
 		colnames(dat) <- labels
-		bayesplot::mcmc_intervals(dat, pars = labels, point_est = "mean", prob = prob, prob_outer = prob_outer)
+		bayesplot::mcmc_intervals(dat, pars = labels, point_est = fun, prob = prob, prob_outer = prob_outer)
 	}
 	else
-		bayesplot::mcmc_areas(dag@posterior, pars = params, point_est = "mean", prob = prob, prob_outer = prob_outer)
+		bayesplot::mcmc_areas(dag@posterior, pars = params, point_est = fun, prob = prob, prob_outer = prob_outer)
 }
+
+#------------------------------------------------------------------------------
+# Plot scatter
+
+bvl_plotScatter <- function(dag, params = NULL, size = 1.5, alpha = 0.5, color_scheme = "blue", labels = NULL)
+{
+	# require(bayesplot)
+	
+	if (is.null(dag@posterior))
+		stop("Model is not estimated!")
+	
+	if (is.null(params))
+		params <- bvl_getParams(dag)
+
+	bayesplot::color_scheme_set(color_scheme)
+
+	if (!is.null(labels) && length(labels) == length(params))
+	{
+		dat <- dag@posterior[params]
+		colnames(dat) <- labels
+		bayesplot::mcmc_scatter(dat, pars = labels, size = size, alpha = alpha)
+	}
+	else
+		bayesplot::mcmc_scatter(dag@posterior, pars = params, size = size, alpha = alpha)
+}
+             
 
 #------------------------------------------------------------------------------
 # Plot pairs
 
-bvl_plotPairs <- function(dag, params = NULL, fun = "stat", stat = "mean", prob = 0.8, prob_outer = 0.95, color_scheme = "blue", labels = NULL)
+bvl_plotPairs <- function(dag, params = NULL, size = 1, color_scheme = "blue", labels = NULL)
 {
 	# require(bayesplot)
 	
@@ -327,10 +375,10 @@ bvl_plotPairs <- function(dag, params = NULL, fun = "stat", stat = "mean", prob 
 	{
 		dat <- dag@posterior[params]
 		colnames(dat) <- labels
-		bayesplot::mcmc_intervals(dat, pars = labels, point_est = "mean", prob = prob, prob_outer = prob_outer)
+		bayesplot::mcmc_pairs(dat, pars = labels, off_diag_args = list(size = size))
 	}
 	else
-		bayesplot::mcmc_pairs(dag@posterior, pars = params, off_diag_args = list(size = 1.5))
+		bayesplot::mcmc_pairs(dag@posterior, pars = params, off_diag_args = list(size = size))
 }
 
 #------------------------------------------------------------------------------
