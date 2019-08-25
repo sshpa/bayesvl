@@ -35,6 +35,7 @@ ggplot(data=dataAge,
        aes(x=age, y=article, fill=field)) +
        geom_bar(stat="identity", position=position_dodge()) +
        ylab("# Articles") +
+       xlab("Age") +
        scale_fill_discrete(name = "Fields", labels = c("Economics", "Education", "Medical", "Others")) +
        scale_x_discrete(limits=age_labs)
 
@@ -42,6 +43,7 @@ ggplot(data=dataAge,
        aes(x=age, y=article, color=field)) +
        geom_line() +
        ylab("# Articles") +
+       xlab("Age") +
        scale_color_discrete(name = "Fields", labels = c("Economics", "Education", "Medical", "Others")) +
        scale_x_discrete(limits=age_labs)
 
