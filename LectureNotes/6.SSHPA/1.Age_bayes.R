@@ -39,7 +39,7 @@ agenum2fieldnum <- unique(dataAge[c("agenum","fieldnum")])
 agenum2age <- unique(dataAge[c("agenum","age")])
 for(lookup_subj in 1:4)
 {
-	#png(paste0(modelName,"age_of_",lookup_subj,".png"),width=900,height=600)
+	png(paste0(modelName,"age_of_",lookup_subj,".png"),width=900,height=600)
 	
 	pars_subj = c()
 	for(i in 1:length(agenum2fieldnum[,"agenum"]))
@@ -62,7 +62,7 @@ for(lookup_subj in 1:4)
 		scale_color_discrete(name = "Fields", labels = age_labs)
 	print(plotSchool)
 	
-	#dev.off()
+	dev.off()
 }
 
 
