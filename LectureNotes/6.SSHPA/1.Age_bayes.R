@@ -69,7 +69,7 @@ for(lookup_subj in 1:4)
 age_labs = c("<25","25-29","30-34","35-39","40-44","45-49","50-54","55-59",">=60")
 for(lookup_subj in 1:4)
 {
-	#png(paste0(modelName,"age_of_",lookup_subj,".png"),width=900,height=600)
+	#png(paste0("age_of_",lookup_subj,".png"),width=900,height=600)
 	
 	pars_subj = c()
 	for(i in 1:length(agenum2fieldnum[,"agenum"]))
@@ -121,7 +121,7 @@ for(lookup_subj in 1:4)
 	a_df <- a_df[order(a_df$age_mean), ]
 	a_df$age_rank <- c(1 : dim(a_df)[1])
 	
-	ggplot(data = a_df, 
+	plotSchool <- ggplot(data = a_df, 
 	       aes(x = age_labs, 
 	           y = age_mean)) +
 	  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
@@ -133,6 +133,7 @@ for(lookup_subj in 1:4)
 	             col = "red") +
 	  ylab("alpha_age") +
 	  scale_x_discrete(name="Age", limits=a_df$age_labs)
+	print(plotSchool)
 	
 	#dev.off()
 }
