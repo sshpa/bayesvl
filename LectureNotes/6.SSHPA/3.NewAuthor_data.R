@@ -80,6 +80,22 @@ abline(h=mean(dataNewau[dataNewau$field=='edu',]$age), col="red", lwd=3, lty=2)
 
 text(0.2, y = mean(dataNewau[dataNewau$field=='edu',]$age) + 1.1, labels = floor(mean(dataNewau[dataNewau$field=='edu',]$age)), col="red")
 
+
+boxplot(age~pubyear, data=dataNewau[dataNewau$field=='med',], main="Year ~ Age of Authors", 
+   xlab="Year", ylab="Age")
+
+abline(h=mean(dataNewau[dataNewau$field=='med',]$age), col="red", lwd=3, lty=2)
+
+text(0.2, y = mean(dataNewau[dataNewau$field=='med',]$age) + 1.1, labels = floor(mean(dataNewau[dataNewau$field=='med',]$age)), col="red")
+
+
+boxplot(age~pubyear, data=dataNewau[dataNewau$field=='other',], main="Year ~ Age of Authors", 
+   xlab="Year", ylab="Age")
+
+abline(h=mean(dataNewau[dataNewau$field=='other',]$age), col="red", lwd=3, lty=2)
+
+text(0.2, y = mean(dataNewau[dataNewau$field=='other',]$age) + 1.1, labels = floor(mean(dataNewau[dataNewau$field=='other',]$age)), col="red")
+
 ##########
 dataNewau <- read.csv("/Statistics/sshpa/newau_avgage_sex.csv", header = TRUE)
 head(dataNewau)
