@@ -84,6 +84,15 @@ ggplot(data=dataJif,
        scale_x_discrete(limits=seq(0, 9, by = 1), labels=jif_labs) +
        geom_text(aes(label=avgage), position=position_dodge(width=0.9), vjust=-0.25)
 
+ggplot(data=dataJif,
+       aes(x=jif, y=avgage, color=field)) +
+       geom_line(stat="identity") +
+       ylab("Age") +
+       xlab("JIF") +
+       scale_color_discrete(name = "Fields", labels = c("Economics", "Education", "Medical", "Others")) +
+       scale_x_discrete(limits=seq(0, 9, by = 1), labels=jif_labs) +
+       geom_text(aes(label=avgage), position=position_dodge(width=0.9), vjust=-0.25)
+
 dataJif <- read.csv("/Statistics/sshpa/jif_grouped_leader.csv", header = TRUE)
 head(dataJif)
   
