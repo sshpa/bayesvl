@@ -108,3 +108,23 @@ grid.arrange(p1, p2, p3, p4, ncol=2)
 
 # plot the distributions of coefficients a_Int1_or_Int2[1] and a_Int1_or_Int2[2]
 bvl_plotDensity(model, c("a_Int1_or_Int2[1]", "a_Int1_or_Int2[2]"), labels = c("a_Int1_or_Int2[0]", "a_Int1_or_Int2[1]"))
+
+#######
+library("loo")
+
+# Extract pointwise log-likelihood
+log_lik <- extract_log_lik(model@stanfit, parameter_name = "log_lik_O", merge_chains = FALSE)
+
+# as of loo v2.0.0 we can optionally provide relative effective sample sizes
+# when calling loo, which allows for better estimates of the PSIS effective
+# sample sizes and Monte Carlo error
+r_eff <- relative_eff(exp(log_lik))
+
+loo_O <- loo(log_lik, r_eff = r_eff, cores = 2)
+print(loo_O)
+
+#(loo_O <- loo(model@stanfit, k_threshold=0.7, pars = "log_lik_O"))
+
+#plot(loo_O, diagnostic = c("k", "n_eff"), 
+#  label_points = FALSE, main = "PSIS diagnostic plot")
+ 
