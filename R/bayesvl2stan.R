@@ -1311,3 +1311,82 @@ bvl_stanRun <- function(dag, dataList, ...)
 {
 	return(bvl_modelFit(dag, dataList, ...))
 }
+
+bvl_stanLoo <- function(dag, ...)
+{
+  if (is.null(dag@stanfit) || length(dag@stanfit@model_name)<=0)
+		stop("The model is not estimated. Please run model fit before calculating loo!")
+
+	require("loo")
+	
+	leaves <- bvl_getLeaves(dag)
+
+	if (is.null(leaves) || length(leaves)==0)
+		stop("Invalid model to estimate!")
+	
+	parName <- paste0("log_lik_", leaves[[1]]$name)
+	
+	# Extract pointwise log-likelihood
+	log_lik <- extract_log_lik(dag@stanfit, parameter_name = parName, merge_chains = FALSE)
+	
+	# as of loo v2.0.0 we can optionally provide relative effective sample sizes
+	# when calling loo, which allows for better estimates of the PSIS effective
+	# sample sizes and Monte Carlo error
+	r_eff <- relative_eff(exp(log_lik))
+	
+	loo_O <- loo(log_lik, r_eff = r_eff, cores = 2, ...)
+
+	return(loo_O)
+}
+
+bvl_compareLoo <- function(dag1, dag2, ...)
+{
+  if (is.null(dag1@stanfit) || length(dag1@stanfit@model_name)<=0)
+		stop("The model is not estimated. Please run model fit before calculating loo!")
+
+  if (is.null(dag2@stanfit) || length(dag2@stanfit@model_name)<=0)
+		stop("The model is not estimated. Please run model fit before calculating loo!")
+	
+	loo1 <- bvl_stanLoo(dag1)
+	loo2 <- bvl_stanLoo(dag2)
+	comp <- loo_compare(loo1, loo2, ...)
+
+	return(comp)
+}
+
+bvl_stanWAIC <- function(dag, ...)
+{
+  if (is.null(dag@stanfit) || length(dag@stanfit@model_name)<=0)
+		stop("The model is not estimated. Please run model fit before calculating loo!")
+
+	require("loo")
+	
+	leaves <- bvl_getLeaves(dag)
+
+	if (is.null(leaves) || length(leaves)==0)
+		stop("Invalid model to estimate!")
+	
+	parName <- paste0("log_lik_", leaves[[1]]$name)
+	
+	# Extract pointwise log-likelihood
+	log_lik <- extract_log_lik(dag@stanfit, parameter_name = parName, merge_chains = FALSE)
+		
+	waic_O <- waic(log_lik, ...)
+
+	return(waic_O)
+}
+
+bvl_compareWAIC <- function(dag1, dag2, ...)
+{
+  if (is.null(dag1@stanfit) || length(dag1@stanfit@model_name)<=0)
+		stop("The model is not estimated. Please run model fit before calculating loo!")
+
+  if (is.null(dag2@stanfit) || length(dag2@stanfit@model_name)<=0)
+		stop("The model is not estimated. Please run model fit before calculating loo!")
+	
+	loo1 <- bvl_stanWAIC(dag1)
+	loo2 <- bvl_stanWAIC(dag2)
+	comp <- compare(loo1, loo2, ...)
+
+	return(comp)
+}

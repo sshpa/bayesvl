@@ -125,6 +125,9 @@ print(loo_O)
 
 #(loo_O <- loo(model@stanfit, k_threshold=0.7, pars = "log_lik_O"))
 
+# estimates waic
+#(waic_O <- waic(log_lik))
+
 #plot(loo_O, diagnostic = c("k", "n_eff"), 
 #  label_points = FALSE, main = "PSIS diagnostic plot")
  

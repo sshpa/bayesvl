@@ -54,6 +54,26 @@ bvl_getArcs <- function(dag, from = NULL, to = NULL, type = NULL) {
 	return(arcs)
 } 
 
+bvl_getRoots <- function(dag) {
+	if (is.empty(dag))
+		return (NULL)
+		
+	if (is.empty(dag@nodes))
+		return (NULL)
+	
+	nodes = list()
+	for(n in 1:length(dag@nodes))
+	{
+		if (bvl_isRoot(dag@nodes[[n]]))
+		{
+			print(dag@nodes[[n]]$name)
+			nodes[[dag@nodes[[n]]$name]] = dag@nodes[[n]]
+		}
+	}
+	
+	return(nodes)
+} 
+
 bvl_getLeaves <- function(dag) {
 	if (is.empty(dag))
 		return (NULL)
