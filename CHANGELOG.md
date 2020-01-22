@@ -1,8 +1,19 @@
 bayesvl ChangeLog
 -------------------------
+0.9.0
+ * add WAIC estimation functions
+ * add Loo 2.0 estimation functions
+ * add model comparing functions
+ * updated document .Rd and other information
+
+0.8.5
+ * updated document .Rd and other information
+ * fix bugs for CRAN submission
+
 0.7.6
  * fixed error of single node model
  * updated document .Rd and other information
+
 0.7.0
  * fixed alpha intercept for varying intercept model
  * fixed lower=0 for varying intercept model

@@ -76,6 +76,7 @@ options(mc.cores = parallel::detectCores())
 
 # fit the model using appropriate technical parameters
 model <- bvl_modelFit(model, data1, warmup = 2000, iter = 10000, chains = 4)
+#model <- bvl_modelFit(model, data1, warmup = 5000, iter = 10000, chains = 4, control = list(adapt_delta = 0.99, max_treedepth = 15))
 
 #############################
 # plots the result
@@ -130,4 +131,3 @@ print(loo_O)
 
 #plot(loo_O, diagnostic = c("k", "n_eff"), 
 #  label_points = FALSE, main = "PSIS diagnostic plot")
- 
