@@ -32,6 +32,7 @@ bvl_plotTrace(model)
 
 bvl_plotIntervals(model)
 
+stan_diag(model@stanfit)
 
 #lookup_subj = 1
 sex_labs = c("Male", "Female")

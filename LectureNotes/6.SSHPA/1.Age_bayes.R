@@ -33,6 +33,8 @@ bvl_plotTrace(model)
 
 bvl_plotIntervals(model)
 
+stan_diag(model@stanfit)
+
 #lookup_subj = 1
 age_labs = c("<25","25-29","30-34","35-39","40-44","45-49","50-54","55-59",">=60")
 agenum2fieldnum <- unique(dataAge[c("agenum","fieldnum")])
