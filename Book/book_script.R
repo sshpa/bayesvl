@@ -204,3 +204,19 @@ bayesplot::mcmc_areas(
   prob_outer = 0.99, # 99%
   point_est = "mean"
 )
+
+
+library(viridis)
+postsig <- rstan::extract(fit@stanfit, pars = c("a_dist","b_speed_dist"))
+ggplot(data = cars, 
+       aes(x = speed, y= dist)) + 
+  xlim(0, max(cars$speed)) +
+  ylim(0, max(cars$dist)) +
+  ylab("dist") +
+  xlab("speed") +
+  geom_abline(aes(intercept = mean(postsig$a_dist), slope = postsig$b_speed_dist), as.data.frame(postsig$b_speed_dist), 
+                alpha = 0.05, color = "gray50") +  
+  geom_point() +
+  geom_abline(intercept=mean(postsig$a_dist),slope=mean(postsig$b_speed_dist),colour = "blue", size=1) +
+	geom_vline(xintercept = 0) +
+	geom_hline(yintercept = 0)
