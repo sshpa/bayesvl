@@ -216,7 +216,8 @@ ggplot(data = cars,
   xlab("speed") +
   geom_abline(aes(intercept = mean(postsig$a_dist), slope = postsig$b_speed_dist), as.data.frame(postsig$b_speed_dist), 
                 alpha = 0.05, color = "gray50") +  
-  geom_point() +
+  geom_point(shape=1, color=2) +
   geom_abline(intercept=mean(postsig$a_dist),slope=mean(postsig$b_speed_dist),colour = "blue", size=1) +
 	geom_vline(xintercept = 0) +
 	geom_hline(yintercept = 0)
+	
