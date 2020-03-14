@@ -27,6 +27,9 @@ for (i in 1:Ntoss) {
 	print(paste0("Theta after ", i, " trials is ", trialTheta[i]))
 }
 
+setEPS()
+postscript("Fig2.2.eps",width=9.5,height=6.5)
+
 # Graph the running proportion
 plot( 1:Ntoss , trialTheta , type="o" , log="x" , col="skyblue" , xlim=c(1,Ntoss) , ylim=c(0.0,1.0) , cex.axis=1.5 ,
 xlab="Flip Number" , ylab="Proportion Heads" , cex.lab=1.5 , main="Running Proportion of Heads" , cex.main=1.5 )
@@ -34,6 +37,25 @@ xlab="Flip Number" , ylab="Proportion Heads" , cex.lab=1.5 , main="Running Propo
 # Plot a dotted horizontal reference line at theta
 abline( h=theta , lty="dotted" )
 text( 1 , theta, theta, adj=c(1,1.2) , cex=1.3 )
+
+dev.off()
+
+# Test likelihood
+nFlip = 20
+nToss = 11
+# generate the bag of coins
+theta = seq(0, 1, by=0.01)
+likelihood = c()
+for (i in 1:length(theta)) {	                
+  # Compute likelihood of coin
+	likelihood = c(likelihood, theta[i]^nHead * (1-theta[i])^(nToss-nHead) )
+	# Print proportion of heads	at step i
+	print(paste0("P(D | theta=", theta[i], ") = ", likelihood[i]))
+}
+
+plot(theta, likelihood, xlab=expression(theta), ylab=expression(paste("P(D | ", theta, ")")), type ="l", col="blue", xaxt="none", yaxt="none")
+axis(side=1, at=seq(0,1,by=0.1))
+
 
 ###################
 theta <- 0.5 # this is a fair coin
