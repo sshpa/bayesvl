@@ -53,8 +53,13 @@ for (i in 1:length(theta)) {
 	print(paste0("P(D | theta=", theta[i], ") = ", likelihood[i]))
 }
 
+setEPS()
+postscript("Fig2.3.eps",width=9.5,height=6.5)
+
 plot(theta, likelihood, xlab=expression(theta), ylab=expression(paste("P(D | ", theta, ")")), type ="l", col="blue", xaxt="none", yaxt="none")
 axis(side=1, at=seq(0,1,by=0.1))
+
+dev.off()
 
 
 ###################
@@ -91,7 +96,7 @@ plot(p, dbeta(p, 6, 5), xlab=expression(theta), ylab=expression(paste("P(D | ", 
 axis(side=1, at=seq(0,1,by=0.1))
 
 p = seq(0,1, length=100)
-plot(p, dbeta(p, 6, 5.5), xlab=expression(theta), ylab=expression(paste("P(", theta, " | D)")), type ="l", col="green", xaxt="none")
+plot(p, dbeta(p, 4.5, 6), xlab=expression(theta), ylab=expression(paste("P(", theta, " | D)")), type ="l", col="green", xaxt="none")
 axis(side=1, at=seq(0,1,by=0.1))
 
 p = seq(0,1, length=100)

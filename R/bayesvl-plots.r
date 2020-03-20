@@ -283,6 +283,16 @@ bvl_plotAcfs <- function( dag, params = NULL, row = 2, col = 2) {
   }  
 }
 
+bvl_plotMCMCDiag <- function( dag, parName, saveName=NULL , saveType="jpg") {
+
+	if (is.null(dag@stanfit))
+		stop("Model is not estimated!")
+
+	codaObject <- stan2coda(dag@stanfit)
+	
+  plotMCMCDiag(codaObject, parName, saveName=NULL , saveType="jpg")
+}
+
 #------------------------------------------------------------------------------
 # Plot intervals
 
@@ -662,4 +672,79 @@ plotDens = function( codaObject , parName=coda::varnames(codaObject)[1] , plColo
   MCSE = sd(as.matrix(codaObject[,c(parName)]))/sqrt(EffChnLngth) 
   text( max(xMat) , max(yMat) , adj=c(1.0,1.0) , cex=1.25 ,
         paste("MCSE =\n",signif(MCSE,3)) )
+}
+
+plotMCMCDiag = function( codaObject , parName=varnames(codaObject)[1] ,
+                     saveName=NULL , saveType="jpg" ) {
+  DBDAplColors = c("skyblue","black","royalblue","steelblue")
+  openGraph(height=5,width=7)
+  par( mar=0.5+c(3,4,1,0) , oma=0.1+c(0,0,2,0) , mgp=c(2.25,0.7,0) , 
+       cex.lab=1.5 )
+  layout(matrix(1:4,nrow=2))
+  # traceplot and gelman.plot are from CODA package:
+  require(coda)
+  coda::traceplot( codaObject[,c(parName)] , main="" , ylab="Param. Value" ,
+                   col=DBDAplColors ) 
+  tryVal = try(
+    coda::gelman.plot( codaObject[,c(parName)] , main="" , auto.layout=FALSE , 
+                       col=DBDAplColors )
+  )  
+  # if it runs, gelman.plot returns a list with finite shrink values:
+  if ( class(tryVal)=="try-error" ) {
+    plot.new() 
+    print(paste0("Warning: coda::gelman.plot fails for ",parName))
+  } else { 
+    if ( class(tryVal)=="list" & !is.finite(tryVal$shrink[1]) ) {
+      plot.new() 
+      print(paste0("Warning: coda::gelman.plot fails for ",parName))
+    }
+  }
+  plotAcf(codaObject,parName,plColors=DBDAplColors)
+  plotDens(codaObject,parName,plColors=DBDAplColors)
+  mtext( text=parName , outer=TRUE , adj=c(0.5,0.5) , cex=2.0 )
+  if ( !is.null(saveName) ) {
+    saveGraph( file=paste0(saveName,"Diag",parName), type=saveType)
+  }
+}
+
+#------------------------------------------------------------------------------
+# Functions for opening and saving graphics that operate the same for 
+# Windows and Macintosh and Linux operating systems. At least, that's the hope!
+
+openGraph = function( width=7 , height=7 , mag=1.0 , ... ) {
+  if ( .Platform$OS.type != "windows" ) { # Mac OS, Linux
+    tryInfo = try( X11( width=width*mag , height=height*mag , type="cairo" , 
+                        ... ) )
+    if ( class(tryInfo)=="try-error" ) {
+      lineInput = readline("WARNING: Previous graphics windows will be closed because of too many open windows.\nTO CONTINUE, PRESS <ENTER> IN R CONSOLE.\n")
+      graphics.off() 
+      X11( width=width*mag , height=height*mag , type="cairo" , ... )
+    }
+  } else { # Windows OS
+    tryInfo = try( windows( width=width*mag , height=height*mag , ... ) )
+    if ( class(tryInfo)=="try-error" ) {
+      lineInput = readline("WARNING: Previous graphics windows will be closed because of too many open windows.\nTO CONTINUE, PRESS <ENTER> IN R CONSOLE.\n")
+      graphics.off() 
+      windows( width=width*mag , height=height*mag , ... )    
+    }
+  }
+}
+
+saveGraph = function( file="saveGraphOutput" , type="pdf" , ... ) {
+  if ( .Platform$OS.type != "windows" ) { # Mac OS, Linux
+    if ( any( type == c("png","jpeg","jpg","tiff","bmp")) ) {
+      sptype = type
+      if ( type == "jpg" ) { sptype = "jpeg" }
+      savePlot( file=paste0(file,".",type) , type=sptype , ... )     
+    }
+    if ( type == "pdf" ) {
+      dev.copy2pdf(file=paste0(file,".",type) , ... )
+    }
+    if ( type == "eps" ) {
+      dev.copy2eps(file=paste0(file,".",type) , ... )
+    }
+  } else { # Windows OS
+    file=paste0(file,".",type) 
+    savePlot( file=file , type=type , ... )
+  }
 }
