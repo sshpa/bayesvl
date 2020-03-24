@@ -10,7 +10,7 @@ thetaTrial = Nheads / Ntoss
 thetaTrial
 
 
-
+#####################
 
 theta <- 0.5 # this is a fair coin
 Ntoss <- 500
@@ -41,8 +41,10 @@ text( 1 , theta, theta, adj=c(1,1.2) , cex=1.3 )
 dev.off()
 
 # Test likelihood
-nFlip = 20
-nToss = 11
+trials <- c(1,0,1,1,0,1,0,0,0,0,1,0,0,1,1,0,1,1,1,1)
+
+nToss = length(trials)
+nHead = length(trials[trials==1])
 # generate the bag of coins
 theta = seq(0, 1, by=0.01)
 likelihood = c()
