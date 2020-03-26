@@ -235,6 +235,49 @@ bayesplot::mcmc_areas(
 )
 
 
+############## Linear
+data <- mtcars
+fit <- lm(mpg ~ hp, data = data)
+summary(fit)  # Report the results
+
+data$predicted <- predict(fit)   # Save the predicted values
+data$residuals <- residuals(fit) # Save the residual values
+
+library(ggplot2)
+ggplot(data, aes(x = hp, y = mpg)) +
+  geom_smooth(method = "lm", se = FALSE, color = "lightgrey") +  # Plot regression slope
+  geom_segment(aes(xend = hp, yend = predicted), alpha = .2) +  # alpha to fade lines
+  geom_point() +
+  geom_point(aes(y = predicted), shape = 1) +
+  theme_bw()  # Add theme for cleaner look
+
+
+#############
+ds <- cars
+fit <- lm(dist ~ speed, data = ds)
+summary(fit)  # Report the results
+
+library(ggplot2)
+ggplot(ds, aes(x = speed, y = dist)) +  # Set up canvas with outcome variable on y-axis
+  geom_point()  # Plot the actual points
+
+ds$predicted <- predict(fit)   # Save the predicted values
+ds$residuals <- residuals(fit) # Save the residual values
+
+ggplot(ds, aes(x = dist, y = speed)) +
+  geom_point() +
+  geom_point(aes(y = predicted), shape = 1)  # Add the predicted values
+
+library(ggplot2)
+ggplot(ds, aes(x = speed, y = dist)) +
+  geom_abline(intercept=fit$coefficients[1],slope=fit$coefficients[2],colour = "blue", size=1) +
+  geom_segment(aes(xend = speed, yend = predicted), alpha = .2) +  # alpha to fade lines
+  geom_point() +
+  geom_point(aes(y = predicted), shape = 15, color="red") +
+  theme_bw()  # Add theme for cleaner look
+
+######  
+
 library(viridis)
 postsig <- rstan::extract(fit@stanfit, pars = c("a_dist","b_speed_dist"))
 ggplot(data = cars, 
@@ -243,7 +286,24 @@ ggplot(data = cars,
   ylim(0, max(cars$dist)) +
   ylab("dist") +
   xlab("speed") +
+  theme_minimal(base_size=15) +
+  theme(axis.text.x = element_text(size=15), axis.text.y = element_text(size=15), plot.margin = margin(0, 0, 0, 0)) +
   geom_abline(aes(intercept = mean(postsig$a_dist), slope = postsig$b_speed_dist), as.data.frame(postsig$b_speed_dist), 
+                alpha = 0.05, color = "gray50") +  
+  geom_point(shape=1, color=2) +
+  geom_abline(intercept=mean(postsig$a_dist),slope=mean(postsig$b_speed_dist),colour = "blue", size=1) +
+	geom_vline(xintercept = 0) +
+	geom_hline(yintercept = 0)
+	
+ggplot(data = cars, 
+       aes(x = speed, y= dist)) + 
+  xlim(0, max(cars$speed)) +
+  ylim(0, max(cars$dist)) +
+  ylab("dist") +
+  xlab("speed") +
+  theme_minimal(base_size=15) +
+  theme(axis.text.x = element_text(size=15), axis.text.y = element_text(size=15), plot.margin = margin(0, 0, 0, 0)) +
+  geom_abline(aes(intercept = postsig$a_dist, slope = mean(postsig$b_speed_dist)), as.data.frame(postsig$a_dist), 
                 alpha = 0.05, color = "gray50") +  
   geom_point(shape=1, color=2) +
   geom_abline(intercept=mean(postsig$a_dist),slope=mean(postsig$b_speed_dist),colour = "blue", size=1) +
