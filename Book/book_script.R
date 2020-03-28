@@ -276,6 +276,8 @@ ggplot(ds, aes(x = speed, y = dist)) +
   geom_point(aes(y = predicted), shape = 15, color="red") +
   theme_bw()  # Add theme for cleaner look
 
+summary(fit)$r.squared
+
 ######  
 
 library(viridis)
