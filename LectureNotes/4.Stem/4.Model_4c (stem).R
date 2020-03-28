@@ -4,16 +4,18 @@ head(data1)
 library(tidyr)
 data1 <- data1 %>% drop_na(TimeSoc, TimeSci)
 
+#data1$Sex_Grade <- factor(paste0(data1$Sex,"_",data1$Gradeid))
+
 # Design the model
 model <- bayesvl()
 model <- bvl_addNode(model, "APS45ID", "norm")
 model <- bvl_addNode(model, "TimeSci", "cat")
 model <- bvl_addNode(model, "Sex", "cat")
-#model <- bvl_addNode(model, "Gradeid", "cat")
+model <- bvl_addNode(model, "Gradeid", "cat")
 
 model <- bvl_addArc(model, "TimeSci",  "APS45ID", "slope")
+model <- bvl_addArc(model, "Sex", "Gradeid", "varint")
 model <- bvl_addArc(model, "Gradeid", "APS45ID", "varint")
-#model <- bvl_addArc(model, "Sex", "APS45ID", "varint")
 
 model <- bvl_modelFix(model, data1)
 model_string <- bvl_model2Stan(model)
