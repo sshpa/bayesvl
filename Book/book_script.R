@@ -312,3 +312,29 @@ ggplot(data = cars,
 	geom_vline(xintercept = 0) +
 	geom_hline(yintercept = 0)
 	
+#########
+stem <- read.csv(file="/Users/Shared/Previously Relocated Items/Security/Statistics/STEM/STEM_model1.csv",header=T)
+
+cols <- c("aps45", "timesci", "sex", "gradeid", "school")
+stem<-stem[ , names(stem) %in% cols]
+
+stem6 = stem[stem$gradeid ==6,]
+stem7 = stem[stem$gradeid ==7,]
+stem8 = stem[stem$gradeid ==8,]
+stem9 = stem[stem$gradeid ==9,]
+fit6 <- lm(aps45 ~ timesci, data = stem6)
+fit7 <- lm(aps45id ~ timesci, data = stem7)
+fit8 <- lm(aps45id ~ timesci, data = stem8)
+fit9 <- lm(aps45id ~ timesci, data = stem9)
+summary(fit6)  # Report the results
+summary(fit7)  # Report the results
+summary(fit8)  # Report the results
+summary(fit9)  # Report the results
+
+library(ggplot2)
+ggplot(stem, aes(x = timesci, y = aps45)) +
+  #geom_abline(intercept=fit6$coefficients[1],slope=fit6$coefficients[2],colour = "blue", size=1) +
+  stat_smooth(method = "lm", se = FALSE) +
+  geom_point() +
+  facet_wrap( ~ gradeid) +
+  theme_bw()  # Add theme for cleaner look
