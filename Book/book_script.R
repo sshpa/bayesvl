@@ -336,5 +336,12 @@ ggplot(stem, aes(x = timesci, y = aps45)) +
   #geom_abline(intercept=fit6$coefficients[1],slope=fit6$coefficients[2],colour = "blue", size=1) +
   stat_smooth(method = "lm", se = FALSE) +
   geom_point() +
+  scale_x_continuous(breaks = seq(0, 3, by = 1)) +
   facet_wrap( ~ gradeid) +
   theme_bw()  # Add theme for cleaner look
+
+#timesci ~ aps45 | school
+ggplot(stem, aes(x = timesci, y = aps45, group=school))+
+   xlab("Social Class")+
+   ylab("Math Score")+
+   geom_boxplot()
