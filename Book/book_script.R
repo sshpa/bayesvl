@@ -345,3 +345,25 @@ ggplot(stem, aes(x = timesci, y = aps45, group=school))+
    xlab("Social Class")+
    ylab("Math Score")+
    geom_boxplot()
+
+
+# Design the model
+model <- bayesvl()
+model <- bvl_addNode(model, "infectedChina", "binorm")
+model <- bvl_addNode(model, "infectedKorea", "binorm")
+
+model <- bvl_addArc(model, "sex",  "ict", "slope")
+model <- bvl_addArc(model, "ecostt",  "ict", "slope")
+model <- bvl_addArc(model, "edumot",  "ict", "slope")
+model <- bvl_addArc(model, "edufat",  "ict", "slope")
+
+model <- bvl_addArc(model, "schoolid", "ict", "varint")
+
+model <- bvl_modelFix(model, data1)
+model_string <- bvl_model2Stan(model)
+cat(model_string)
+
+options(mc.cores = parallel::detectCores())
+
+# Fit the model
+model <- bvl_modelFit(model, data1, warmup = 2000, iter = 5000, chains = 4, cores = 4)
