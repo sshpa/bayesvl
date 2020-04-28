@@ -47,6 +47,7 @@ bvl_plotDensity(model, c("a0_sexid", "a_sexid[1]", "a_sexid[2]"), labels = c("a0
 
 #compare school
 school_names =unique(data1$affil)
+school_names =c("FTU", "HCMOpenUni", "NEU", "TMU", "UOEH", "VASS", "VNUH", "VNUHCM")
 school_mean = c()
 school_sd = c()
 school_min = c()
@@ -91,5 +92,5 @@ ggplot(data = a_df,
              size = 0.5, 
              col = "red") +
   ylab("article") +
-  xlab("") +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+  xlab("")
+  #+ theme(axis.text.x = element_text(angle = 60, hjust = 1))
