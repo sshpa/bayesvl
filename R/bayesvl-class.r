@@ -402,6 +402,12 @@ setMethod("bvl_validData", "bayesvl", function(dag, data, silent = F) {
 					return (FALSE)
 			}
 		}
+		
+		#if (node$dist != "cat" && (class(data[ ,node$name]) == "factor"))
+		#{
+		#		message(paste0("The node '", node$name, "' with data of 'factor' must be 'cat' distribution!"))
+		#		return (FALSE)
+		#}
 	}
 
 	return(TRUE)

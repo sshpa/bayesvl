@@ -601,7 +601,8 @@ stan_yrepTest <- function(dag, node, getCode = T)
 				  yrepCode <- paste0(yrepCode, stan_indent(5), "}\n")
 				  
 				  #yrepVar <- paste0(yrepVar, stan_indent(5), "real ", new_parreg, ";\n")
-				  yrepVar <- paste0(yrepVar, stan_indent(5), template$out_type, " yrep_", paste0(dag@nodes[[i]]$name, "_", val), "[Nobs];\n")
+				  vartype = stan_replaceNode(template$out_type, dag@nodes[[i]])
+				  yrepVar <- paste0(yrepVar, stan_indent(5), vartype, " yrep_", paste0(dag@nodes[[i]]$name, "_", val), "[Nobs];\n")
 				}
 			}
 		}
@@ -1080,8 +1081,9 @@ bvl_model2Stan <- function(dag, ppc = "")
 		quantities_var <- ""
 	  if(stan_yrepString(nextNodes[[n]]) != "")
 	  {
+	  vartype = stan_replaceNode(template$out_type, nextNodes[[n]])
 		quantities_var <- paste0(quantities_var, stan_indent(5), "// simulate data from the posterior\n")
-		quantities_var <- paste0(quantities_var, stan_indent(5), template$out_type, " yrep_",nextNodes[[n]]$name,"[Nobs];\n")
+		quantities_var <- paste0(quantities_var, stan_indent(5), vartype, " yrep_",nextNodes[[n]]$name,"[Nobs];\n")
 		}
 		quantities_var <- paste0(quantities_var, stan_indent(5), "// log-likelihood posterior\n")
 		quantities_var <- paste0(quantities_var, stan_indent(5), "vector[Nobs] log_lik_",nextNodes[[n]]$name,";\n")
@@ -1202,8 +1204,8 @@ bvl_modelData <- function(net, data)
 		dataList[[nodes[i]]] <- as.numeric(data[ , nodes[i]])
 		if (node$dist == "cat")
 		{
-			#dataList[[paste0("N",nodes[i])]] <- length(unique(data[ , nodes[i]]))
-			dataList[[paste0("N",nodes[i])]] <- max(as.numeric(data[ , nodes[i]]))
+			dataList[[paste0("N",nodes[i])]] <- length(unique(data[ , nodes[i]]))
+			#dataList[[paste0("N",nodes[i])]] <- max(as.numeric(data[ , nodes[i]]))
 		}
 
 		if ((isVarIntFrom(net, net@nodes[[nodes[i]]]) || isVarSlopeFrom(net, net@nodes[[nodes[i]]])) && !(paste0("N",nodes[i]) %in% names(dataList)))
@@ -1290,8 +1292,10 @@ bvl_modelFit <- function(dag, data, warmup = 1000, iter = 5000, chains = 2, ppc 
 	#else
 	#{
 		# Compiling and producing posterior samples from the model.
+		#mstan <- rstan::stan(model_code = model_string, data = dataList,
+	  #        		warmup=warmup , iter = iter, chains = chains, refresh=-1, ...)
 		mstan <- rstan::stan(model_code = model_string, data = dataList,
-	          		warmup=warmup , iter = iter, chains = chains, refresh=-1, ...)
+	          		warmup=warmup , iter = iter, chains = chains, ...)
   #}
 
 

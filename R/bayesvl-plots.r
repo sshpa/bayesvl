@@ -290,7 +290,7 @@ bvl_plotMCMCDiag <- function( dag, parName, saveName=NULL , saveType="jpg") {
 
 	codaObject <- stan2coda(dag@stanfit)
 	
-  plotMCMCDiag(codaObject, parName, saveName=NULL , saveType="jpg")
+  plotMCMCDiag(codaObject, parName, saveName=saveName , saveType=saveType)
 }
 
 #------------------------------------------------------------------------------
@@ -455,6 +455,42 @@ bvl_plotDensity <- function(dag, params = NULL, size = 1, labels = NULL)
 	
 	ggplot2::ggplot(data=ref,aes_string(x="value", color="Params"))+geom_density(size=size)
 }
+
+#------------------------------------------------------------------------------
+# Plot pairs
+
+#bvl_plotVarying <- function(dag, paramName = NULL, size = 1, color_scheme = "blue", labels = NULL)
+#{
+#	# require(bayesplot)
+#	
+#	if (is.null(dag@posterior))
+#		stop("Model is not estimated!")
+#	
+#	if (is.null(params))
+#		params <- bvl_getParams(dag)
+#
+#for(lv in 1:levels)
+#{
+#	postGrade6 <- rstan::extract(dag@stanfit, pars = pars_grade6)
+#	ref_grade6 <- melt(postGrade6)
+#	colnames(ref_grade6)[2:3] <- c("beta_grade","colors")
+#	
+#	for(i in 1:length(gradeLookupVec$levind2))
+#	{
+#		ref_grade6[ref_grade6==paste0("beta_grade[",gradeLookupVec$levind2[i],"]")]<-school_names[gradeLookupVec$school[i]]
+#	}
+#	ggplot(data=ref_grade6,aes(x=beta_grade, color=colors),size=2)+geom_density()
+#}
+#
+#	if (!is.null(labels) && length(labels) == length(params))
+#	{
+#		dat <- dag@posterior[params]
+#		colnames(dat) <- labels
+#		bayesplot::mcmc_pairs(dat, pars = labels, off_diag_args = list(size = size))
+#	}
+#	else
+#		bayesplot::mcmc_pairs(dag@posterior, pars = params, off_diag_args = list(size = size))
+#}
 
 #------------------------------------------------------------------------------
 # Plot posterior historam
