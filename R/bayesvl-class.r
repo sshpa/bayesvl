@@ -398,7 +398,7 @@ setMethod("bvl_validData", "bayesvl", function(dag, data, silent = F) {
 			else
 			{
 					if (!silent)
-						message(paste0("The dataset contains NA value!"))
+						message(paste0("The dataset contains NA values in node '", node$name, "'!"))
 					return (FALSE)
 			}
 		}
