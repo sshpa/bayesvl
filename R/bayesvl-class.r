@@ -383,9 +383,9 @@ setMethod("bvl_validData", "bayesvl", function(dag, data, silent = F) {
 			return (FALSE)
 		}
 
-		if (!(class(data[ ,node$name]) %in% c("factor","numeric")))
+		if (!(class(data[ ,nodes[i]]) %in% c("factor","numeric")))
 		{
-				message(paste0("The node '", node$name, "' must be 'factor' or 'numeric'!"))
+				message(paste0("The node '", nodes[i], "' must be 'factor' or 'numeric'!"))
 				return (FALSE)
 		}
 
