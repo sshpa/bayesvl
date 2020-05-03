@@ -27,20 +27,6 @@ bvl2stan.nodeTemplates <- list(
         formula = "{0} ~ {f}",
         vectorized = TRUE
     ),
-    Binorm = list(
-        name = "binorm",
-        dist = "binomial",
-        stan_priors = c("uniform(0, 1)"),
-        stan_likelihood = "binomial(rate_{0})",
-        stan_yrep = "binomial_rng({0}[i], theta_{0})",
-        stan_loglik = "binomial_lpmf({0}[i] | 1, theta_{0})",
-        par_names = c("theta_{0}"),
-        par_types = c("real<lower=0,upper=1>"),
-        par_reg = "theta_{0}",
-        out_type = "int<lower=0,upper=1>",
-        formula = "{0} ~ {f}",
-        vectorized = TRUE
-    ),
     Bern = list(
         name = "bern",
         dist = "binomial",
@@ -70,7 +56,7 @@ bvl2stan.nodeTemplates <- list(
         vectorized = TRUE
     ),
 		Binomial = list(
-        name = "binorm",
+        name = "binom",
         dist = "binomial",
         stan_priors = c("beta(1, 1)"),
         stan_likelihood = "binomial_logit(1, theta_{0})",
