@@ -1228,6 +1228,9 @@ bvl_modelData <- function(net, data)
 
 bvl_modelFix <- function(dag, data)
 {
+	if (!bvl_validData(dag, data))
+		stop("Invalid data to estimate!")
+
 	for(i in 1:length(dag@nodes))
 	{
 		node = dag@nodes[[i]]

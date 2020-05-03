@@ -359,7 +359,7 @@ if (!isGeneric("bvl_validData"))
       setGeneric("bvl_validData", function(dag, data, silent = F) standardGeneric("bvl_validData"))
 
 setMethod("bvl_validData", "bayesvl", function(dag, data, silent = F) {
-	if (is.null(data))
+	if (is.empty(data))
 	{
 		if (!silent)
 			message("The data is null!")

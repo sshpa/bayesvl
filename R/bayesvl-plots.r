@@ -107,7 +107,7 @@ bvl_logLik <- function(dag)
 
 plotPPC <- function(stanfit, data, y_name, fun = "stat", stat = "mean", color_scheme = "blue")
 {
-	#require(bayesplot)
+	require(bayesplot)
 	
 	parName <- paste0("yrep_",y_name)
 
@@ -119,7 +119,7 @@ plotPPC <- function(stanfit, data, y_name, fun = "stat", stat = "mean", color_sc
 
 bvl_plotPPC <- function(dag, fun = "stat", stat = "mean", color_scheme = "blue")
 {
-	#require(bayesplot)
+	require(bayesplot)
 	
 	leaves <- bvl_getLeaves(dag)
 	
