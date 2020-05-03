@@ -383,6 +383,12 @@ setMethod("bvl_validData", "bayesvl", function(dag, data, silent = F) {
 			return (FALSE)
 		}
 
+		if (!(class(data[ ,node$name]) %in% c("factor","numeric")))
+		{
+				message(paste0("The node '", node$name, "' must be 'factor' or 'numeric'!"))
+				return (FALSE)
+		}
+
 		node = dag@nodes[[nodes[i]]]
 		if (node$dist %in% c("binom","bern"))
 		{

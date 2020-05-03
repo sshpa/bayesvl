@@ -1306,10 +1306,12 @@ bvl_modelFit <- function(dag, data, warmup = 1000, iter = 5000, chains = 2, ppc 
 
 	dag@elapsed <- as.numeric((end_time - start_time), units = "secs")
   
-  dag@stanfit <- mstan
   dag@rawdata <- data
   dag@standata <- dataList
-  dag@posterior <- as.data.frame(dag@stanfit)
+  dag@stanfit <- mstan
+  
+  if(!is.empty(mstan))
+  	dag@posterior <- as.data.frame(dag@stanfit)
 
 	return(dag)
 }
