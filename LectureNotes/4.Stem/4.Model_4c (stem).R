@@ -1,94 +1,475 @@
-data1 <- read.csv("/Users/Shared/Previously Relocated Items/Security/Statistics/network/bayesvl/LectureNotes/4.Stem/Data/5000Toan.csv", header = TRUE)
-head(data1)
+dat <- read.csv("/Users/Shared/Previously Relocated Items/Security/Statistics/STEM/New/5000Toan.csv", header = T)
+head(dat)
 
-library(tidyr)
-data1 <- data1 %>% drop_na(TimeSoc, TimeSci)
+require(dplyr)
+dat %>% count(TimeSci, TimeSoc)
 
-data1$GradeNum <- as.factor(paste0(data1$Sex, "_", data1$Gradeid))
+filtered <- dat[!is.na(dat$TimeSoc),]
+filtered <- droplevels(filtered)
 
-#data1$Sex_Grade <- factor(paste0(data1$Sex,"_",data1$Gradeid))
+filtered %>% count(TimeSci, TimeSoc)
 
-#data1$Sex <- as.numeric(data1$Sex)
-#data1$Gradeid <- as.numeric(data1$Gradeid)
+filtered <- dat[!is.na(dat$Buybook) & !is.na(dat$Readstory) & (dat$Readbook %in% c("yes", "no")),]
+filtered <- droplevels(filtered)
 
-#Gradeid2Sex <- unique(data1[c("Gradeid","Sex")])[,"Sex"]
+filtered$Readstory <- filtered$Readstory - 1
+filtered$Buybook <- filtered$Buybook - 1
+filtered$Readbook <- as.numeric(filtered$Readbook) - 1
 
-# Design the model
-model <- bayesvl()
-model <- bvl_addNode(model, "APS45ID", "norm")
-model <- bvl_addNode(model, "TimeSci", "cat")
-model <- bvl_addNode(model, "Sex", "cat")
-model <- bvl_addNode(model, "GradeNum", "cat")
+filtered %>% count(Readbook)
 
-model <- bvl_addArc(model, "TimeSci",  "APS45ID", "slope")
-model <- bvl_addArc(model, "Sex", "GradeNum", "varint")
-model <- bvl_addArc(model, "GradeNum", "APS45ID", "varint")
+filtered$Typebook <- ifelse(dat$Typebook %in% c(1,2,3,4,5), dat$Typebook, 6)
 
-model <- bvl_modelFix(model, data1)
-model_string <- bvl_model2Stan(model)
-cat(model_string)
+sr<-as.data.frame(filtered %>% count(Source))
 
-options(mc.cores = parallel::detectCores())
+############################### By APS45 #################
 
-# Fit the model
-model <- bvl_modelFit(model, data1, warmup = 5000, iter = 10000, chains = 4, cores = 4)
+filtered <- dat[!is.na(dat$Hobby),]
+filtered <- droplevels(filtered)
 
-bvl_trace(model)
+model_string <- 
+"data{
+    int<lower=1> Nobs;
+    int<lower=1> NHobby;
+    real APS45[Nobs];
+    int<lower=1,upper=NHobby> Hobby[Nobs];
+}
+parameters{
+    real theta[NHobby];
+    real sigma;
+}
+model{
+		for(k in 1:NHobby) {
+		  theta[k] ~ normal(0, 10);
+		}
+    
+    APS45 ~ normal(theta[Hobby], sigma);
+}
+"
 
-###############
-stem <- read.csv(file="/Users/Shared/Previously Relocated Items/Security/Statistics/STEM/STEM_model1.csv",header=T)
+datHobby <- with(filtered,
+            list(Nobs         = length(APS45),
+                 APS45          = as.numeric(APS45),
+                 Hobby          = as.numeric(Hobby),
+                 NHobby = length(unique(Hobby))
+                 ))
 
-stem$school_grade <- factor(paste0(stem$school,"_",stem$gradeid))
+mstanHobby <- rstan::stan(model_code = model_string, data = datHobby,
+        		warmup=2000 , iter = 4000, chains = 4)
 
-stem$schoolid <- as.numeric(stem$school)
-stem$gradenum <- as.numeric(stem$school_grade)
+exclude <- c("lp__", "sigma")
+par_names <- setdiff(dimnames(mstanHobby)[[3]], exclude)
 
-# Design the model
-model <- bayesvl()
-model <- bvl_addNode(model, "aps45id", "norm")
-model <- bvl_addNode(model, "schoolid", "cat")
-model <- bvl_addNode(model, "gradenum", "cat")
-model <- bvl_addNode(model, "sex", "cat")
+postParams <- rstan::extract(mstanHobby, pars = par_names)
+names(postParams) <- unique(filtered$Hobby)
+ref <- reshape2::melt(postParams)
+colnames(ref)[2:3] <- c("value","Hobby")
 
-model <- bvl_addArc(model, "sex",  "aps45id", "slope")
-model <- bvl_addArc(model, "schoolid", "gradenum", "varint")
-model <- bvl_addArc(model, "gradenum", "aps45id", "varint")
+library(ggplot2)
 
-model <- bvl_modelFix(model, data1)
-model_string <- bvl_model2Stan(model)
-cat(model_string)
+ggplot(data=ref,aes_string(x="value", color="Hobby"))+geom_density(size=1)+
+xlab("") + ylab("") +
+theme_bw(base_size=15) +
+theme(axis.text.x = element_text(size=15), axis.text.y = element_text(size=15), legend.title = element_blank(), legend.position = c(0.85, 0.85)) 
 
-options(mc.cores = parallel::detectCores())
 
-# Fit the model
-model <- bvl_modelFit(model, stem, warmup = 5000, iter = 10000, chains = 4, cores = 4)
+############################### By Readbook #################
 
-###############
-stem <- read.csv(file="/Users/Shared/Previously Relocated Items/Security/Statistics/STEM/STEM_model1.csv",header=T)
+filtered <- dat[(dat$Readbook %in% c("yes", "no")),]
+filtered <- droplevels(filtered)
 
-library(tidyr)
-data1 <- data1 %>% drop_na(timesoc, timesci)
+filtered$Readbook <- ordered(filtered$Readbook, levels = c("no", "yes"))
 
-stem$sex_grade <- factor(paste0(stem$sex,"_",stem$gradeid))
+ap <- as.data.frame(filtered %>% count(Readbook, APS45ID))
 
-stem$gradenum <- as.numeric(stem$sex_grade)
+model_string <- 
+"data{
+    int<lower=1> Nobs;
+    int<lower=1> NReadbook;
+    real APS45[Nobs];
+    int<lower=1,upper=NReadbook> Readbook[Nobs];
+}
+parameters{
+    real theta[NReadbook];
+    real sigma;
+}
+model{
+		for(k in 1:NReadbook) {
+		  theta[k] ~ normal(0, 10);
+		}
+    
+    APS45 ~ normal(theta[Readbook], sigma);
+}
+"
 
-# Design the model
-model <- bayesvl()
-model <- bvl_addNode(model, "aps45id", "norm")
-model <- bvl_addNode(model, "timesci", "cat")
-model <- bvl_addNode(model, "sex", "cat")
-model <- bvl_addNode(model, "gradenum", "cat")
+datASP45 <- with(filtered,
+            list(Nobs         = length(APS45),
+                 APS45          = as.numeric(APS45),
+                 Readbook          = as.numeric(Readbook),
+                 NReadbook = length(unique(Readbook))
+                 ))
 
-model <- bvl_addArc(model, "timesci",  "aps45id", "slope")
-model <- bvl_addArc(model, "sex", "gradenum", "varint")
-model <- bvl_addArc(model, "gradenum", "aps45id", "varint")
+mstanASP45 <- rstan::stan(model_code = model_string, data = datASP45,
+        		warmup=2000 , iter = 4000, chains = 4)
 
-model <- bvl_modelFix(model, data1)
-model_string <- bvl_model2Stan(model)
-cat(model_string)
+exclude <- c("lp__", "sigma")
+par_names <- setdiff(dimnames(mstanASP45)[[3]], exclude)
 
-options(mc.cores = parallel::detectCores())
+postParams <- rstan::extract(mstanASP45, pars = par_names)
+names(postParams) <- levels(filtered$Readbook)
+ref <- reshape2::melt(postParams)
+colnames(ref)[2:3] <- c("value","Readbook")
 
-# Fit the model
-model <- bvl_modelFit(model, stem, warmup = 2000, iter = 5000, chains = 4, cores = 4)
+library(ggplot2)
+
+ggplot(data=ref,aes_string(x="value", color="Readbook"))+geom_density(size=1)+
+xlab("") + ylab("") +
+theme_bw(base_size=15) +
+theme(axis.text.x = element_text(size=15), axis.text.y = element_text(size=15), legend.title = element_blank(), legend.position = "bottom") 
+
+
+############################### By MostlikedAct #################
+filtered <- filtered[!is.na(filtered$MostlikedAct),]
+filtered <- droplevels(filtered)
+
+model_string <- 
+"data{
+    int<lower=1> Nobs;
+    int<lower=1> NMostlikedAct;
+    int<lower=0,upper=1> Readbook[Nobs];
+    int<lower=1,upper=NMostlikedAct> MostlikedAct[Nobs];
+}
+parameters{
+    real<lower=0,upper=1> theta[NMostlikedAct];
+}
+model{
+		for(k in 1:NMostlikedAct) {
+		  theta[k] ~ beta(1, 1);
+		}
+    
+    Readbook ~ bernoulli(theta[MostlikedAct]);
+}
+"
+
+datReadbook <- with(filtered,
+            list(Nobs         = length(Readbook),
+                 Readbook          = as.numeric(Readbook),
+                 NMostlikedAct = length(unique(MostlikedAct)),
+                 MostlikedAct     	      = as.numeric(MostlikedAct)))
+
+mstanMostlikedAct <- rstan::stan(model_code = model_string, data = datReadbook,
+        		warmup=2000 , iter = 4000, chains = 2)
+
+exclude <- c("lp__")
+par_names <- setdiff(dimnames(mstanMostlikedAct)[[3]], exclude)
+
+postParams <- rstan::extract(mstanMostlikedAct, pars = par_names)
+names(postParams) <- unique(filtered$MostlikedAct)
+ref <- reshape2::melt(postParams)
+colnames(ref)[2:3] <- c("value","MostlikedAct")
+
+library(ggplot2)
+
+#listLabel <- c("Buybook", "Readstory")
+
+ggplot(data=ref,aes_string(x="value", color="MostlikedAct"))+geom_density(size=1)+
+xlab("") + ylab("") +
+#scale_color_discrete(labels = listLabel) +
+theme_bw(base_size=15) +
+theme(axis.text.x = element_text(size=15), axis.text.y = element_text(size=15), legend.title = element_blank(), legend.position = c(0.85, 0.85)) 
+
+############################### By Sex #################
+filtered <- filtered[!is.na(filtered$Sex),]
+filtered <- droplevels(filtered)
+
+model_string <- 
+"data{
+    int<lower=1> Nobs;
+    int<lower=1> NSex;
+    int<lower=0,upper=1> Readbook[Nobs];
+    int<lower=1,upper=NSex> Sex[Nobs];
+}
+parameters{
+    real<lower=0,upper=1> theta[NSex];
+}
+model{
+		for(k in 1:NSex) {
+		  theta[k] ~ beta(1, 1);
+		}
+    
+    Readbook ~ bernoulli(theta[Sex]);
+}
+"
+
+datReadbook <- with(filtered,
+            list(Nobs         = length(Readbook),
+                 Readbook          = as.numeric(Readbook),
+                 NSex = length(unique(Sex)),
+                 Sex     	      = as.numeric(Sex)))
+
+mstanSex <- rstan::stan(model_code = model_string, data = datReadbook,
+        		warmup=2000 , iter = 4000, chains = 2)
+
+exclude <- c("lp__")
+par_names <- setdiff(dimnames(mstanSex)[[3]], exclude)
+
+postParams <- rstan::extract(mstanSex, pars = par_names)
+names(postParams) <- unique(filtered$Sex)
+ref <- reshape2::melt(postParams)
+colnames(ref)[2:3] <- c("value","Sex")
+
+library(ggplot2)
+
+listLabel <- c("Male", "Female")
+
+ggplot(data=ref,aes_string(x="value", color="Sex"))+geom_density(size=1)+
+xlab("") + ylab("") +
+scale_color_discrete(labels = listLabel) +
+theme_bw(base_size=15) +
+theme(axis.text.x = element_text(size=15), axis.text.y = element_text(size=15), legend.title = element_blank(), legend.position = "bottom") 
+
+#######################
+
+model_string <- 
+"data{
+     // Define variables in data
+     int<lower=1> Nobs;   // Number of observations (an integer)
+     int<lower=0,upper=1> Readbook[Nobs];   // outcome variable
+     int<lower=0,upper=1> Buybook[Nobs];
+     int<lower=0,upper=1> Readstory[Nobs];
+     int NSex;
+     int<lower=1,upper=NSex> Sex[Nobs];
+}
+parameters{
+     // Define parameters to estimate
+     real b_Buybook;
+     real b_Readstory;
+     real b_Buybook_Readstory;
+     real a0_Sex;
+     real<lower=0> sigma_Sex;
+     vector[NSex] u_Sex;
+}
+transformed parameters{
+     // Transform parameters
+     real theta_Readbook[Nobs];
+     vector[NSex] a_Sex;
+     // Varying intercepts definition
+     for(k in 1:NSex) {
+        a_Sex[k] = a0_Sex + u_Sex[k];
+     }
+
+     for (i in 1:Nobs) {
+        theta_Readbook[i] = b_Buybook * Buybook[i] + b_Readstory * Readstory[i] + b_Buybook_Readstory * Buybook[i] * Readstory[i] + a_Sex[Sex[i]];
+     }
+}
+model{
+     // Priors
+     b_Buybook ~ normal( 0, 10 );
+     b_Readstory ~ normal( 0, 10 );
+     b_Buybook_Readstory ~ normal( 0, 10 );
+     a0_Sex ~ normal(0,10);
+     sigma_Sex ~ normal(0,10);
+     u_Sex ~ normal(0, sigma_Sex);
+
+     // Likelihoods
+     Readbook ~ binomial_logit(1, theta_Readbook);
+}
+generated quantities {
+     // log-likelihood posterior
+     vector[Nobs] log_lik_Readbook;
+     for (i in 1:Nobs) {
+       log_lik_Readbook[i] = bernoulli_logit_lpmf(Readbook[i] | theta_Readbook[i]);
+     }
+}"
+
+datStem <- with(filtered,
+            list(Nobs         = length(Readbook),
+                 Buybook          = as.numeric(Buybook),
+                 Readstory          = as.numeric(Readstory),
+                 Readbook          = as.numeric(Readbook),
+                 NSex = length(unique(Sex)),
+                 Sex     	      = as.numeric(Sex)))
+
+mstanReadbook <- rstan::stan(model_code = model_string, data = datStem,
+        		warmup=2000 , iter = 4000, chains = 4)
+
+exclude <- c("lp__","theta_Readbook")
+par_names <- setdiff(dimnames(mstanReadbook)[[3]], exclude)
+par_names <- c("b_Buybook", "b_Readstory", "b_Buybook_Readstory", "a0_Sex", "sigma_Sex")
+
+postParams <- rstan::extract(mstanReadbook, pars = par_names)
+bayesplot::color_scheme_set("blue")
+posterior <- as.data.frame(mstanReadbook)
+posterior <- posterior[par_names]
+pm_2 <- bayesplot::mcmc_intervals(posterior,  point_est = "mean", prob = 0.8, prob_outer = 0.95)+theme_bw(base_size=15)+xlab("b)")
+pm_2
+
+
+
+
+#######################
+
+model_string <- 
+"data{
+     // Define variables in data
+     int<lower=1> Nobs;   // Number of observations (an integer)
+     int<lower=0,upper=1> Readbook[Nobs];   // outcome variable
+     int<lower=0,upper=1> Buybook[Nobs];
+     int<lower=0,upper=1> Readstory[Nobs];
+     int NSex;
+     int<lower=1,upper=NSex> Sex[Nobs];
+}
+parameters{
+     // Define parameters to estimate
+     real b_Buybook;
+     real b_Readstory;
+     real a0_Sex;
+     real<lower=0> sigma_Sex;
+     vector[NSex] u_Sex;
+}
+transformed parameters{
+     // Transform parameters
+     real theta_Readbook[Nobs];
+     vector[NSex] a_Sex;
+     // Varying intercepts definition
+     for(k in 1:NSex) {
+        a_Sex[k] = a0_Sex + u_Sex[k];
+     }
+
+     for (i in 1:Nobs) {
+        theta_Readbook[i] = b_Buybook * Buybook[i] + b_Readstory * Readstory[i] + a_Sex[Sex[i]];
+     }
+}
+model{
+     // Priors
+     b_Buybook ~ normal( 0, 10 );
+     b_Readstory ~ normal( 0, 10 );
+     a0_Sex ~ normal(0,10);
+     sigma_Sex ~ normal(0,10);
+     u_Sex ~ normal(0, sigma_Sex);
+
+     // Likelihoods
+     Readbook ~ binomial_logit(1, theta_Readbook);
+}
+generated quantities {
+     // log-likelihood posterior
+     vector[Nobs] log_lik_Readbook;
+     for (i in 1:Nobs) {
+       log_lik_Readbook[i] = bernoulli_logit_lpmf(Readbook[i] | theta_Readbook[i]);
+     }
+}"
+
+datStem <- with(filtered,
+            list(Nobs         = length(Readbook),
+                 Buybook          = as.numeric(Buybook),
+                 Readstory          = as.numeric(Readstory),
+                 Readbook          = as.numeric(Readbook),
+                 NSex = length(unique(Sex)),
+                 Sex     	      = as.numeric(Sex)))
+
+mstanReadbook <- rstan::stan(model_code = model_string, data = datStem,
+        		warmup=2000 , iter = 4000, chains = 4)
+
+exclude <- c("lp__","theta_Readbook")
+par_names <- setdiff(dimnames(mstanReadbook)[[3]], exclude)
+par_names <- c("b_Buybook", "b_Readstory", "a0_Sex", "sigma_Sex")
+
+postParams <- rstan::extract(mstanReadbook, pars = par_names)
+bayesplot::color_scheme_set("blue")
+posterior <- as.data.frame(mstanReadbook)
+posterior <- posterior[par_names]
+pm_2 <- bayesplot::mcmc_intervals(posterior,  point_est = "mean", prob = 0.8, prob_outer = 0.95)+theme_bw(base_size=15)+xlab("b)")
+pm_2
+
+
+
+
+#######################
+
+model_string <- 
+"data{
+     // Define variables in data
+     int<lower=1> Nobs;   // Number of observations (an integer)
+     int<lower=0,upper=1> Readbook[Nobs];   // outcome variable
+     int<lower=0,upper=1> Buybook[Nobs];
+     int<lower=0,upper=1> Readstory[Nobs];
+}
+parameters{
+     // Define parameters to estimate
+     real b_Buybook;
+     real b_Readstory;
+}
+transformed parameters{
+     // Transform parameters
+     real theta_Readbook[Nobs];
+
+     for (i in 1:Nobs) {
+        theta_Readbook[i] = b_Buybook * Buybook[i] + b_Readstory * Readstory[i];
+     }
+}
+model{
+     // Priors
+     b_Buybook ~ normal( 0, 10 );
+     b_Readstory ~ normal( 0, 10 );
+
+     // Likelihoods
+     Readbook ~ binomial_logit(1, theta_Readbook);
+}
+generated quantities {
+     // log-likelihood posterior
+     vector[Nobs] log_lik_Readbook;
+     for (i in 1:Nobs) {
+       log_lik_Readbook[i] = bernoulli_logit_lpmf(Readbook[i] | theta_Readbook[i]);
+     }
+}"
+
+datStem <- with(filtered,
+            list(Nobs         = length(Readbook),
+                 Buybook          = as.numeric(Buybook),
+                 Readstory          = as.numeric(Readstory),
+                 Readbook          = as.numeric(Readbook)
+								))
+
+mstanReadbook1 <- rstan::stan(model_code = model_string, data = datStem,
+        		warmup=2000 , iter = 4000, chains = 4)
+
+exclude <- c("lp__","theta_Readbook")
+par_names <- setdiff(dimnames(mstanReadbook1)[[3]], exclude)
+par_names <- c("b_Buybook", "b_Readstory")
+
+postParams <- rstan::extract(mstanReadbook1, pars = par_names)
+bayesplot::color_scheme_set("blue")
+posterior <- as.data.frame(mstanReadbook1)
+posterior <- posterior[par_names]
+pm_2 <- bayesplot::mcmc_intervals(posterior,  point_est = "mean", prob = 0.8, prob_outer = 0.95)+theme_bw(base_size=15)+xlab("b)")
+pm_2
+
+x <- data.frame(pr1=posterior$b_Buybook,pr2=posterior$b_Readstory)
+
+library(ggplot2);
+library(reshape2)
+data<- melt(x)
+listLabel <- c("Buybook", "Readstory")
+p_3 <- ggplot(data,aes(x=value, color=variable)) + geom_density(size=1) + 
+scale_color_discrete(labels = listLabel) +
+theme_bw(base_size=15) +
+theme(axis.text.x = element_text(size=15), axis.text.y = element_text(size=15), legend.title = element_blank(), legend.position = "bottom") 
+p_3
+
+################################
+
+filtered <- dat[!is.na(dat$TimeSoc),]
+filtered <- droplevels(filtered)
+
+q1s <- unique(filtered[, "TimeSci"])
+q2s <- unique(filtered[, "TimeSoc"])
+
+x <- data.frame("TimeSci" = q1s)
+
+for(q1 in q1s)
+{	
+	for(q2 in q2s)
+	{
+	  x[x$TimeSci==q1,as.character(q2)]<-length(which(filtered[,"TimeSci"]==q1 & filtered[,"TimeSoc"]==q2))
+	}
+}
