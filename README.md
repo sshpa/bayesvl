@@ -16,7 +16,8 @@ Here is the [CHANGELOG](https://github.com/sshpa/baysvl/blob/master/CHANGELOG.md
 
 # Get started
 
-## Install
+## Installation
+### Latest Release
 
 Getting started and installing the latest snapshot type in the R console:
 
