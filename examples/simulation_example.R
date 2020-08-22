@@ -67,7 +67,6 @@ model <- bvl_addArc(model, "Int1_or_Int2", "O", "varint", priors = c("a0_ ~ norm
 bvl_bnPlot(model)
 
 # check the generated Stan model's code
-model <- bvl_modelFix(model, data1)
 model_string <- bvl_model2Stan(model)
 cat(model_string)
 
