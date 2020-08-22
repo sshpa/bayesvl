@@ -36,20 +36,17 @@ Getting started and installing the latest snapshot type in the R console:
 Creating a node for each variable in the proposed network
 
 ```r
-dag <- bayesvl()
-dag <- bvl_addNode(dag, "B")
-dag <- bvl_addNode(dag, "C")
-dag <- bvl_addNode(dag, "T")
-dag <- bvl_addNode(dag, "DC")
-dag <- bvl_addNode(dag, "MD")
+model <- bayesvl()
+model <- bvl_addNode(model, "Burden", "norm")
+model <- bvl_addNode(model, "Res", "norm")
+model <- bvl_addNode(model, "Insured", "norm")
 ```
 
 Starting to add arcs between variables (nodes) using the survey data
 
 ```r
-dag <- bvl_addArc(dag, "B", "DC")
-dag <- bvl_addArc(dag, "C", "DC")
-dag <- bvl_addArc(dag, "T", "DC")
+model <- bvl_addArc(model, "Res", "Burden", "slope")
+model <- bvl_addArc(model, "Insured", "Burden", "slope")
 ```
 
 ## Generate 'Stan' code
@@ -72,7 +69,7 @@ params
 
 ```r
 # prep data
-data( Legends345 )
+data( data1042 )
 ```
 
 ## Sample and fit the 'Stan' model
