@@ -70,7 +70,7 @@ params
 We used the ``data1042`` data set that is built-in to the package.
 
 ```r
-# prep data
+# load data
 data( data1042 )
 ```
 
