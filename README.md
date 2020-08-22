@@ -17,12 +17,15 @@ Here is the [CHANGELOG](https://github.com/sshpa/baysvl/blob/master/CHANGELOG.md
 # Get started
 
 ## Installation
+### Dependencies
+You'll need to install ``rstan`` first. Go to ``http://mc-stan.org`` and follow the instructions for your platform. The biggest challenge is getting a C++ compiler configured to work with your installation of R. The instructions at ``https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started`` are quite thorough. Obey them, and you'll likely succeed.
+
 ### Latest Release
 
 Getting started and installing the latest snapshot type in the R console:
 
 ```r
-> install.packages("devtools")
+> install.packages(c("coda","devtools","loo","ggplot2"))
 > devtools::install_github("sshpa/bayesvl")
 ```
 
