@@ -67,6 +67,8 @@ params
 
 ## Preparing the data
 
+We used the ``data1042`` data set that is built-in to the package.
+
 ```r
 # prep data
 data( data1042 )
