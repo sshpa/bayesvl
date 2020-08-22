@@ -77,7 +77,7 @@ data( data1042 )
 Sampling the predefined 'Stan' model
 
 ```r
-stan_fit <- bvl_modelFit(dag, data, iter=20000 , warmup=2000 , chains=4 , cores=4)
+stan_fit <- bvl_modelFit(dag, data1042, iter=20000 , warmup=2000 , chains=4 , cores=4)
 summary(stan_fit)
 ```
 
