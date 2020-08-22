@@ -67,6 +67,14 @@ Getting the model's parameters
 params <- bvl_stanParams(dag)
 params
 ```
+
+## Preparing the Data
+
+```r
+# prep data
+data( Legends345 )
+```
+
 ## Sample and fit the 'Stan' model
 
 Sampling the predefined 'Stan' model
