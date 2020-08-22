@@ -65,7 +65,7 @@ params <- bvl_stanParams(dag)
 params
 ```
 
-## Preparing the Data
+## Preparing the data
 
 ```r
 # prep data
