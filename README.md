@@ -25,8 +25,8 @@ You'll need to install ``rstan`` first. Stan’s website ``http://mc-stan.org`` 
 Getting started and installing the latest snapshot type in the R console:
 
 ```r
-> install.packages(c("coda","devtools","loo","ggplot2"))
-> devtools::install_github("sshpa/bayesvl")
+install.packages(c("coda","devtools","loo","ggplot2"))
+devtools::install_github("sshpa/bayesvl")
 ```
 
 # Example
