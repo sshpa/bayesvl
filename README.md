@@ -25,8 +25,8 @@ You'll need to install ``rstan`` first. Stan’s website ``http://mc-stan.org`` 
 Getting started and installing the latest snapshot type in the R console:
 
 ```r
-> install.packages(c("coda","devtools","loo","ggplot2"))
-> devtools::install_github("sshpa/bayesvl")
+install.packages(c("coda","devtools","loo","ggplot2"))
+devtools::install_github("sshpa/bayesvl")
 ```
 
 # Example
@@ -67,7 +67,7 @@ params
 
 ## Preparing the data
 
-We used the ``data1042`` data set that is built-in to the package.
+In this example, we used the ``data1042`` data set that is built-in to the package.
 
 ```r
 # load data
@@ -79,7 +79,7 @@ data( data1042 )
 Sampling the predefined 'Stan' model
 
 ```r
-stan_fit <- bvl_modelFit(dag, data1042, iter=20000 , warmup=2000 , chains=4 , cores=4)
+stan_fit <- bvl_modelFit(dag, data1042, iter=5000 , warmup=2000 , chains=4 , cores=4)
 summary(stan_fit)
 ```
 
