@@ -1,5 +1,8 @@
 data1<-read.csv("/Statistics/1042/1042data/1042data.csv", header = TRUE)
 head(data1)
+data1$SES <- ordered(data1$SES, levels = c("Lo", "Med", "Hi"))
+data1$SatIns <- ordered(data1$SatIns, levels = c("Unsat", "Aver", "Satis"))
+data1<-na.omit(data1)
 
 # Design the model
 model <- bayesvl()
