@@ -931,6 +931,13 @@ bvl_formula <- function(dag, nodeName, outcome = T, re = F)
 	cat(f)
 }
 
+bvl_stanLikelihood <- function(dag)
+{
+	f <- stan_formula(dag)
+	
+	cat(f)
+}
+
 ############ PRIOR FUNCTIONS ##############
 stan_priorString <- function(dag)
 {
@@ -1246,7 +1253,7 @@ bvl_modelFix <- function(dag, data)
 			if (isVarIntFrom(dag, node) && (node$dist != "trans"))
 			{
 					minX = min(unique(as.numeric(data[ , node$name])))
-					#print(node$name)
+					print(node$name)
 					if (minX < 1)
 						node$lower = minX			
 			}
