@@ -1,6 +1,11 @@
 BayesVL
 ==========
 
+<!-- badges: start -->
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/bayesvl?color=blue)](http://cran.r-project.org/package=bayesvl)
+[![Downloads](http://cranlogs.r-pkg.org/badges/bayesvl?color=blue)](http://cran.rstudio.com/package=bayesvl)
+<!-- badges: end -->
+
 The R package for visually learning the graphical structures of Bayesian networks, and performing Hamiltonian Markov chain Monte Carlo (MCMC) with 'Stan'.
 
 Features:
@@ -13,6 +18,12 @@ Features:
     * Compatibility with R 3.4 or newer versions
 
 Here is the [CHANGELOG](https://github.com/sshpa/baysvl/blob/master/CHANGELOG.md)
+
+# Resources
+
+* [User guide](https://osf.io/w5dx6/) (user manual, case studies, and more)
+* [Open an issue](https://github.com/sshpa/bayesvl/issues) (GitHub issues for bug reports, feature requests)
+* [Example code](https://github.com/sshpa/bayesvl/tree/master/examples) (example code snippets referenced in user manual)
 
 # Get started
 
