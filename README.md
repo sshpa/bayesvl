@@ -33,7 +33,7 @@ You'll need to install ``rstan`` first. Stan’s website ``http://mc-stan.org`` 
 
 ### Latest Release
 
-Getting started and installing the latest snapshot type in the R console:
+Getting started and installing the latest snapshot, type in the R console:
 
 ```r
 install.packages(c("coda","devtools","loo","ggplot2"))
