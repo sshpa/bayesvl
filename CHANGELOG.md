@@ -1,5 +1,9 @@
 bayesvl ChangeLog
 -------------------------
+1.0.0
+ * update lot functions
+ * add PPC
+
 0.9.0
  * add WAIC estimation functions
  * add Loo 2.0 estimation functions
