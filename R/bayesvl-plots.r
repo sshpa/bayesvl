@@ -4,7 +4,157 @@
 plotNetwork <- function(dag) {
 }
 
-bvl_plotParams <- function(dag, row = 2, col = 2, credMass = 0.89, params = NULL) {
+
+bvl_plotParam1 <- function(dag, paramName = NULL, cenTend=c("mode","median","mean")[1] , 
+                     compVal=NULL, ROPE=NULL, credMass=0.95, HDItextPlace=0.7, 
+                     xlab=NULL , xlim=NULL , yaxt=NULL , ylab=NULL , 
+                     main=NULL , cex=NULL , cex.lab=NULL ,
+                     col=NULL , border=NULL , showCurve=FALSE , breaks=NULL , 
+                     ...) {
+	
+	if (is.null(dag@posterior))
+		stop("Model is not estimated!")
+	
+	if (is.null(paramName))
+		stop("Parameter is null!")
+
+	paramSampleVec = dag@posterior[[paramName]]
+	  
+  # Override defaults of hist function, if not specified by user:
+  # (additional arguments "..." are passed to the hist function)
+  if ( is.null(xlab) ) xlab="Param. Val."
+  if ( is.null(cex.lab) ) cex.lab=1.5
+  if ( is.null(cex) ) cex=1.4
+  if ( is.null(xlim) ) xlim=range( c( compVal , ROPE , paramSampleVec ) )
+  if ( is.null(main) ) main=""
+  if ( is.null(yaxt) ) yaxt="n"
+  if ( is.null(ylab) ) ylab=""
+  if ( is.null(col) ) col="skyblue"
+  if ( is.null(border) ) border="white"
+    
+  summaryColNames = c("ESS","mean","median","mode",
+                      "hdiMass","hdiLow","hdiHigh",
+                      "compVal","pGtCompVal",
+                      "ROPElow","ROPEhigh","pLtROPE","pInROPE","pGtROPE")
+  postSummary = matrix( NA , nrow=1 , ncol=length(summaryColNames) , 
+                        dimnames=list( c( xlab ) , summaryColNames ) )
+  
+  # require(coda) # for effectiveSize function
+  postSummary[,"ESS"] = effectiveSize(paramSampleVec)
+  
+  postSummary[,"mean"] = mean(paramSampleVec)
+  postSummary[,"median"] = median(paramSampleVec)
+  mcmcDensity = density(paramSampleVec)
+  postSummary[,"mode"] = mcmcDensity$x[which.max(mcmcDensity$y)]
+  
+  HDI = bvl_getHDI( paramSampleVec , credMass )
+  postSummary[,"hdiMass"]=credMass
+  postSummary[,"hdiLow"]=HDI[1]
+  postSummary[,"hdiHigh"]=HDI[2]
+  
+  # Plot histogram.
+  cvCol = "darkgreen"
+  ropeCol = "darkred"
+
+  if ( max(paramSampleVec) > min(paramSampleVec) ) {
+    breaks = c( seq( from=min(paramSampleVec) , to=max(paramSampleVec) ,
+                     by=(HDI[2]-HDI[1])/18 ) , max(paramSampleVec) )
+  } else {
+    breaks=c(min(paramSampleVec)-1.0E-6,max(paramSampleVec)+1.0E-6)
+    border="skyblue"
+  }
+
+  par(xpd=NA)
+  histinfo = hist( paramSampleVec , xlab=xlab , yaxt=yaxt , ylab=ylab ,
+                   freq=F , border=border , col=col ,
+                   xlim=xlim , main=main , cex=cex , cex.lab=cex.lab ,
+                   breaks=breaks , ... )
+
+  cenTendHt = 0.9*max(histinfo$density)
+  cenTendHt1 = 0.85*max(histinfo$density)
+  cenTendHt2 = 0.80*max(histinfo$density)
+  cvHt = 0.7*max(histinfo$density)
+  ROPEtextHt = 0.55*max(histinfo$density)
+  # Display central tendency:
+  mn = mean(paramSampleVec)
+  med = median(paramSampleVec)
+  mcmcDensity = density(paramSampleVec)
+  mo = mcmcDensity$x[which.max(mcmcDensity$y)]
+  if ( "mode" %in% cenTend ){ 
+    text( mo , cenTendHt ,
+          bquote(mode==.(signif(mo,3))) , adj=c(.5,0) , cex=cex )
+  }
+  if ( "median" %in% cenTend ){ 
+    text( med , cenTendHt1 ,
+          bquote(median==.(signif(med,3))) , adj=c(.5,0) , cex=cex , col=cvCol )
+  }
+  if ( "mean" %in% cenTend ){ 
+    text( mn , cenTendHt2 ,
+          bquote(mean==.(signif(mn,3))) , adj=c(.5,0) , cex=cex )
+  }
+
+  # Display the HDI.
+  lines( HDI , c(0,0) , lwd=4 , lend=1 )
+  text( mean(HDI) , 0 , bquote(.(100*credMass) * "% HPDI" ) ,
+        adj=c(.5,-1.7) , cex=cex )
+  text( HDI[1] , 0 , bquote(.(signif(HDI[1],3))) ,
+        adj=c(HDItextPlace,-0.5) , cex=cex )
+  text( HDI[2] , 0 , bquote(.(signif(HDI[2],3))) ,
+        adj=c(1.0-HDItextPlace,-0.5) , cex=cex )
+  par(xpd=F)
+}
+
+bvl_plotParam <- function(dag, paramName = NULL, cenTend=c("mode","median","mean")[1] , 
+                     compVal=NULL, ROPE=NULL, credMass=0.95, HDItextPlace=0.7, 
+                     xlab=NULL , xlim=NULL , yaxt=NULL , ylab=NULL , 
+                     main=NULL , cex=NULL , cex.lab=NULL ,
+                     col=NULL , border=NULL , showCurve=FALSE , breaks=NULL , 
+                     ...) {
+	
+	if (is.null(dag@posterior))
+		stop("Model is not estimated!")
+	
+	if (is.null(paramName))
+		stop("Parameter is null!")
+
+	paramSampleVec = dag@posterior[[paramName]]
+	HDI = bvl_getHDI( paramSampleVec , credMass )
+	  
+  # Override defaults of hist function, if not specified by user:
+  # (additional arguments "..." are passed to the hist function)
+  if ( is.null(xlab) ) xlab=paramName
+  if ( is.null(xlim) ) xlim=range( c( compVal , ROPE , paramSampleVec ) )
+  if ( is.null(main) ) main=""
+  if ( is.null(ylab) ) ylab=""
+  if ( is.null(col) ) col="skyblue"
+  if ( is.null(border) ) border="white"
+      
+  # Plot histogram.
+  cvCol = "darkgreen"
+  ropeCol = "darkred"
+
+  if ( max(paramSampleVec) > min(paramSampleVec) ) {
+    breaks = c( seq( from=min(paramSampleVec) , to=max(paramSampleVec) ,
+                     by=(HDI[2]-HDI[1])/18 ) , max(paramSampleVec) )
+  } else {
+    breaks=c(min(paramSampleVec)-1.0E-6,max(paramSampleVec)+1.0E-6)
+    border="skyblue"
+  }
+  
+  histinfo = qplot( paramSampleVec , geom="histogram", xlab=xlab, ylab=ylab ,
+                    col=I(border) , fill=I(col) ,
+                   xlim=xlim , main=main , 
+                   breaks=breaks ) +
+		geom_segment(aes(x = HDI[1], y = 0, xend = HDI[2], yend = 0), color="black", size=1.5) +
+		annotate("text", x = mean(HDI) , y = 17, hjust = 0.5, vjust = -1.7, label = bquote(.(100*credMass) * "% HPDI"), size = 6) +
+		annotate("text", x = HDI[1] , y = 17, hjust = HDItextPlace, vjust = -0.5, label = bquote(.(signif(HDI[1],3))), size = 5 ) +
+		annotate("text", x = HDI[2] , y = 17, hjust = 1.0-HDItextPlace, vjust = -0.5, label = bquote(.(signif(HDI[2],3))), size = 5 )
+		
+	
+	return(histinfo)
+}
+
+bvl_plotParams <- function(dag, row = 2, col = 2, credMass = 0.95, params = NULL) {
 	par(mfrow=c(row,col))
 	
 	if (is.null(dag@posterior))
@@ -19,6 +169,7 @@ bvl_plotParams <- function(dag, row = 2, col = 2, credMass = 0.89, params = NULL
 	for ( i in 1:length(cols) ) {
 			plotPost(mcmcMat[,cols[i]],xlab=cols[i], credMass=credMass)
 	}
+	
 }
 
 #------------------------------------------------------------------------------
@@ -58,23 +209,6 @@ plotParams <- function(post, row = 2, col = 2, credMass) {
 	par(mfrow=c(row,col))
 	
 	mcmcMat = as.matrix(post,chains=TRUE)
-	
-	cols = colnames(mcmcMat)
-	for ( i in 1:length(cols) ) {
-			plotPost(mcmcMat[,cols[i]],xlab=cols[i], credMass=credMass)
-	}
-}
-
-bvl_plotParams <- function(dag, row = 2, col = 2, credMass = 0.89, params = NULL) {
-	par(mfrow=c(row,col))
-	
-	if (is.null(dag@posterior))
-		stop("Model is not estimated!")
-	
-	if (is.null(params))
-		params <- bvl_getParams(dag)
-
-	mcmcMat = as.matrix(dag@posterior[params], chains=TRUE)
 	
 	cols = colnames(mcmcMat)
 	for ( i in 1:length(cols) ) {
@@ -246,6 +380,34 @@ bvl_plotGelmans <- function( dag, params = NULL, row = 2, col = 2) {
   )  
 }
 
+bvl_plotAc <- function( dag, params = NULL) {
+  if (is.null(params))
+		params <- stan_paramNames(dag, T)
+
+	stan_ac(dag@stanfit, pars = params)
+}
+
+bvl_plotAcf_Bar <- function( dag, params = NULL, color_scheme="pink",labels=NULL) {
+	# require(bayesplot)
+	
+	if (is.null(dag@posterior))
+		stop("Model is not estimated!")
+	
+	if (is.null(params))
+		params <- bvl_getParams(dag)
+
+	bayesplot::color_scheme_set(color_scheme)
+
+	if (!is.null(labels) && length(labels) == length(params))
+	{
+		dat <- dag@posterior[params]
+		colnames(dat) <- labels
+		bayesplot::mcmc_acf_bar(dat, pars = labels)
+	}
+	else
+		bayesplot::mcmc_acf_bar(dag@posterior, pars = params)
+}
+
 bvl_plotAcf <- function( dag, params = NULL) {
   DBDAplColors = c("skyblue","black","royalblue","steelblue")
 
@@ -385,10 +547,12 @@ bvl_plotPairs <- function(dag, params = NULL, size = 1, color_scheme = "blue", l
 	{
 		dat <- dag@posterior[params]
 		colnames(dat) <- labels
-		bayesplot::mcmc_pairs(dat, pars = labels, off_diag_args = list(size = size))
+		p <- bayesplot::mcmc_pairs(dat, pars = labels, off_diag_args = list(size = size))
 	}
 	else
-		bayesplot::mcmc_pairs(dag@posterior, pars = params, off_diag_args = list(size = size))
+		p <- bayesplot::mcmc_pairs(dag@stanfit, pars = params, off_diag_args = list(size = size))
+		
+	return (p)
 }
 
 #------------------------------------------------------------------------------
@@ -413,9 +577,10 @@ bvl_plotDensity2d <- function(dag, x, y, color = NULL, color_scheme = "red", lab
 		laby = y
 	}
 	
+	p <- NULL
 	if (is.null(color))
 	{
-		ggplot2::ggplot(dag@posterior, aes(x=dag@posterior[[x]], y=dag@posterior[[y]])) +
+		p <- ggplot2::ggplot(dag@posterior, aes(x=dag@posterior[[x]], y=dag@posterior[[y]])) +
 			geom_point(alpha = 0.3, color = color_scheme)+
 			geom_density2d(color = "gray30")+
 			viridis::scale_color_viridis(option = "C")+ 
@@ -424,13 +589,15 @@ bvl_plotDensity2d <- function(dag, x, y, color = NULL, color_scheme = "red", lab
 	}
 	else
 	{
-		ggplot2::ggplot(dag@posterior, aes(x=dag@posterior[[x]], y=dag@posterior[[y]], color = dag@posterior[[color]]))+
+		p <- ggplot2::ggplot(dag@posterior, aes(x=dag@posterior[[x]], y=dag@posterior[[y]], color = dag@posterior[[color]]))+
 			geom_point(alpha = 0.3)+
 			geom_density2d(color = "gray30")+
 			viridis::scale_color_viridis(option = "C")+ 
 			geom_abline(intercept=0,slope=1) +
 			labs(x = labx, y = laby, color = color)
 	}
+	
+	return (p)
 }
 
 bvl_plotDensity <- function(dag, params = NULL, size = 1, labels = NULL)
@@ -453,7 +620,9 @@ bvl_plotDensity <- function(dag, params = NULL, size = 1, labels = NULL)
 	ref <- reshape2::melt(postParams)
 	colnames(ref)[2:3] <- c("value","Params")
 	
-	ggplot2::ggplot(data=ref,aes_string(x="value", color="Params"))+geom_density(size=size)
+	p <- ggplot2::ggplot(data=ref,aes_string(x="value", color="Params"))+geom_density(size=size)
+	
+	return(p)
 }
 
 #------------------------------------------------------------------------------
